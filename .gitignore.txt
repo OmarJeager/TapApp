@@ -1,0 +1,46 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Laravel
+/vendor/
+/node_modules/
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Laravel generated files
+/public/storage
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Build files
+/public/build/
+/public/hot
+
+# PHPUnit
+.phpunit.result.cache
+
+# Local database
+*.mysql
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
