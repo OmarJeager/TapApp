@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PpmChecklist extends Model
 {
+    protected $guarded = [];
     protected $fillable = [
         'ppm_records_id', 'start_time', 'end_time', 'total_time_minutes',
         'completed_by_matricule', 'completed_at',

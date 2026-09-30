@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PpmRecord extends Model
 {
+    protected $guarded = [];
     protected $table = 'ppm_records';
 
     protected $fillable = [
@@ -88,5 +89,9 @@ class PpmRecord extends Model
         }
 
         return sprintf('%02d/%02d', $nextWeek, $nextYear % 100);
+    }
+     public function checklist()
+    {
+        return $this->hasOne(PpmChecklist::class, 'ppm_records_id');
     }
 }

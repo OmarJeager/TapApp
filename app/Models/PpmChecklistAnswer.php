@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PpmChecklistAnswer extends Model
 {
+    protected $guarded = [];
     protected $fillable = ['ppm_checklist_id', 'checklist_question_id', 'response', 'comment', 'dpn', 'observation'];
 
     public function checklist()

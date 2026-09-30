@@ -45,6 +45,9 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
         return view('superadmin.dashboard');
     })->name('superadmin.dashboard');
     Route::get('/superadmin/verfied', [SuperAdminController::class, 'index'])->name('superadmin.index');
+    Route::get('/ppm/{ppmRecord}', [SuperAdminController::class, 'show'])->name('superadmin.show');
+    Route::patch('/checklist/{checklist}/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('superadmin.toggle');
+    Route::post('/bulk-status', [SuperAdminController::class, 'bulkStatus'])->name('superadmin.bulk');
 });
 
 Route::middleware(['auth', 'role:quality'])->group(function () {
