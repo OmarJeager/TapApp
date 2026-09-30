@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -21,7 +22,7 @@ class UserController extends Controller
 {
     $request->validate([
         'picture' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
-        
+
     ]);
 
     /** @var User $user */

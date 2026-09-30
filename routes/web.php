@@ -22,21 +22,31 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Shared routes for ALL authenticated users (any role)
 Route::middleware('auth')->group(function () {
     Route::get('/role-error', function () {
         return view('errors.role');
     })->name('role.error');
+
+    // Profile routes — accessible by all roles
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Profile picture + signature — accessible by all roles
+    Route::post('/profile/upload-picture', [UserController::class, 'uploadPicture'])
+        ->name('profile.upload-picture');
+    Route::post('/profile/signature', [SignatureController::class, 'update'])
+        ->name('profile.signature.update');
 });
+
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin', function () {
         return view('superadmin.dashboard');
     })->name('superadmin.dashboard');
     Route::get('/superadmin/verfied', [SuperAdminController::class, 'index'])->name('superadmin.index');
-
 });
+
 Route::middleware(['auth', 'role:quality'])->group(function () {
     Route::get('/quality', function () {
         return view('quality.dashboard');
@@ -72,10 +82,6 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ppm-records', [PpmRecordController::class, 'index'])->name('user.index');
     Route::get('/ppm-records/{id}', [PpmRecordController::class, 'show'])->name('user.show');
-    Route::post('/profile/upload-picture', [UserController::class, 'uploadPicture'])
-        ->name('profile.upload-picture');
-    Route::post('/profile/signature', [SignatureController::class, 'update'])
-        ->name('profile.signature.update');
 
     Route::post('/ppm-records', [PpmRecordController::class, 'store'])
         ->name('ppm-records.store');
@@ -85,7 +91,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-checklists.pnl.store');
     Route::get('/ppm-records/{ppmRecord}/form', [PpmRecordController::class, 'form'])
         ->name('ppm-records.form');
-     Route::get('/ppm-records/{ppmRecord}/tstf1-form', [TstFrequencyOneController::class, 'create'])
+    Route::get('/ppm-records/{ppmRecord}/tstf1-form', [TstFrequencyOneController::class, 'create'])
         ->name('ppm-checklists.tst.frequency1');
     Route::get('/ppm-records/{ppmRecord}/tstf4-form', [TstFrequencyFourController::class, 'create'])
         ->name('ppm-checklists.tst.frequency4');
@@ -96,8 +102,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/tickets/frequencies', [TicketController::class, 'frequencies'])
         ->name('tickets.frequencies');
     Route::get('/tickets/print', [TicketController::class, 'print'])
-    ->name('tickets.print');
+        ->name('tickets.print');
 });
 
 require __DIR__.'/auth.php';
-
