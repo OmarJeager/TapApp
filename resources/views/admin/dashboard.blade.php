@@ -1,510 +1,220 @@
 <x-app-layout>
 
+    {{-- Header --}}
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-bold text-2xl text-gray-800 dark:text-gray-200">
-                {{ __('PPM Records') }}
-            </h2>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
     </x-slot>
-@include('layouts.main')
+    <div>
+        <a href="{{route('admin.index')}}">View</a>
+    </div>
+    <div class="py-12">
 
-    <div class="py-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-        <div class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Success --}}
+            @if (session('success'))
+                <div class="mb-6 rounded-lg bg-green-100 p-4 text-green-700">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-            <!-- PAGE HEADER -->
-            <div class="mb-8 animate-fade-down">
+            {{-- Error --}}
+            @if (session('error'))
+                <div class="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
+                    {{ session('error') }}
+                </div>
+            @endif
 
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
 
-                    <div>
-                        <h1 class="text-3xl font-extrabold text-gray-800">
-                            PPM Records
-                        </h1>
+            {{-- Main Card --}}
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
 
-                        <p class="mt-2 text-gray-500">
-                            Search and manage your PPM assets
-                        </p>
+                <div class="p-8">
+
+                    {{-- Welcome --}}
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-8">
+                        Welcome, {{ auth()->user()->name }}
+                    </h3>
+
+
+                    {{-- ========================================================= --}}
+                    {{-- PROFILE --}}
+                    {{-- ========================================================= --}}
+
+                    <div class="flex flex-col items-center">
+
+                        {{-- Profile Picture --}}
+                        <div class="relative">
+
+                            @if (auth()->user()->profile_picture)
+
+                                <img
+                                    src="{{ asset('storage/' . auth()->user()->profile_picture) }}?v={{ time() }}"
+                                    alt="Profile Picture"
+                                    class="h-40 w-40 rounded-full object-cover ring-4 ring-gray-200 dark:ring-gray-600"
+                                >
+
+                            @else
+
+                                <div class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700
+                                            flex items-center justify-center
+                                            text-gray-500">
+                                    No picture
+                                </div>
+
+                            @endif
+
+                        </div>
+
+
+                        {{-- Name --}}
+                        <h4 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ auth()->user()->name }}
+                        </h4>
+
+
+                        {{-- Choose Photo Button --}}
+                        <button
+                            type="button"
+                            onclick="document.getElementById('picture').click()"
+                            class="mt-5 rounded-full bg-blue-600 px-6 py-2.5
+                                   text-sm font-semibold text-white
+                                   hover:bg-blue-700 transition"
+                        >
+                            Change profile picture
+                        </button>
+
+
+                        {{-- Hidden File Input --}}
+                        <input
+                            type="file"
+                            id="picture"
+                            accept="image/jpeg,image/png,image/webp"
+                            class="hidden"
+                        >
+
                     </div>
 
-                    <div class="flex items-center gap-3">
 
-                        <div class="px-5 py-3 rounded-2xl bg-blue-50 border border-blue-100">
+                    {{-- ========================================================= --}}
+                    {{-- SIGNATURE SECTION --}}
+                    {{-- ========================================================= --}}
 
-                            <span class="text-sm text-gray-500">
-                                Total Assets
-                            </span>
+                    <div class="mt-12 border-t border-gray-200 dark:border-gray-700 pt-10">
 
-                            <span class="ml-2 font-bold text-blue-600">
-                                {{ $ppmRecords->total() }}
-                            </span>
+                        <div class="max-w-2xl mx-auto">
+
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                My Signature
+                            </h3>
+
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                Draw your signature below and save it to your account.
+                            </p>
+
+
+                            {{-- Existing Signature --}}
+                            @if (auth()->user()->signature)
+
+                                <div class="mt-6">
+
+                                    <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Current signature
+                                    </p>
+
+                                    <div class="rounded-xl border border-gray-200
+                                                dark:border-gray-600 bg-white p-4">
+
+                                        <img
+                                            src="{{ asset('storage/' . auth()->user()->signature) }}?v={{ time() }}"
+                                            alt="Saved Signature"
+                                            class="max-h-32 max-w-full object-contain"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+                            @endif
+
+
+                            {{-- Signature Form --}}
+                            <form
+                                method="POST"
+                                action="{{ route('profile.signature.update') }}"
+                                id="signatureForm"
+                                class="mt-6"
+                            >
+
+                                @csrf
+
+                                {{-- Canvas --}}
+                                <div
+                                    class="rounded-xl border-2 border-gray-300
+                                           dark:border-gray-600 bg-white overflow-hidden"
+                                >
+
+                                    <canvas
+                                        id="signatureCanvas"
+                                        class="w-full h-52 cursor-crosshair"
+                                    ></canvas>
+
+                                </div>
+
+
+                                {{-- Hidden Signature --}}
+                                <input
+                                    type="hidden"
+                                    name="signature"
+                                    id="signatureInput"
+                                >
+
+
+                                {{-- Validation Error --}}
+                                @error('signature')
+                                    <p class="mt-2 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+
+
+                                {{-- Buttons --}}
+                                <div class="mt-4 flex items-center gap-3">
+
+                                    <button
+                                        type="button"
+                                        id="clearSignature"
+                                        class="rounded-lg bg-gray-200
+                                               px-5 py-2.5 text-sm font-semibold
+                                               text-gray-700 hover:bg-gray-300
+                                               transition"
+                                    >
+                                        Clear
+                                    </button>
+
+
+                                    <button
+                                        type="submit"
+                                        id="saveSignature"
+                                        class="rounded-lg bg-blue-600
+                                               px-6 py-2.5 text-sm font-semibold
+                                               text-white hover:bg-blue-700
+                                               transition"
+                                    >
+                                        Save Signature
+                                    </button>
+
+                                </div>
+
+                            </form>
 
                         </div>
 
                     </div>
 
                 </div>
-
-            </div>
-
-
-            <!-- SEARCH -->
-            <div class="relative max-w-3xl mb-8">
-
-                <div class="relative group">
-
-                    <!-- SEARCH ICON -->
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none">
-
-                        <svg
-                            class="w-6 h-6 text-blue-500 transition-transform duration-300 group-focus-within:scale-110"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
-
-                        </svg>
-
-                    </div>
-
-
-                    <!-- INPUT -->
-                   <input
-    type="text"
-    id="jobSearch"
-    autocomplete="off"
-    placeholder="Search by Job ID..."
-    class="
-        w-full
-        pl-14
-        pr-14
-        py-5
-        rounded-2xl
-        border
-        border-blue-100
-        bg-white
-        text-gray-800
-        placeholder-gray-400
-        shadow-sm
-        outline-none
-        transition-all
-        duration-300
-        hover:border-blue-300
-        hover:shadow-md
-        focus:border-blue-500
-        focus:ring-4
-        focus:ring-blue-100
-        focus:shadow-xl
-    "
-/>
-
-
-                    <!-- CLEAR BUTTON -->
-                    <button
-                        type="button"
-                        id="clearSearch"
-                        class="
-                            hidden
-                            absolute
-                            right-5
-                            top-1/2
-                            -translate-y-1/2
-
-                            w-8
-                            h-8
-
-                            rounded-full
-
-                            flex
-                            items-center
-                            justify-center
-
-                            text-gray-400
-                            hover:text-blue-600
-                            hover:bg-blue-50
-
-                            transition-all
-                            duration-200
-                        ">
-
-                        ✕
-
-                    </button>
-
-                </div>
-
-
-                <!-- SEARCH RESULTS -->
-                <div
-                    id="searchResults"
-                    class="
-                        hidden
-                        absolute
-                        z-50
-                        left-0
-                        right-0
-                        mt-3
-
-                        bg-white
-
-                        border
-                        border-blue-100
-
-                        rounded-2xl
-
-                        shadow-2xl
-
-                        overflow-hidden
-
-                        animate-search
-                    ">
-                </div>
-
-            </div>
-
-            <form action="{{ route('ppm-records.import') }}" method="POST" enctype="multipart/form-data" class="import-card">
-        @csrf
-        <label for="ppm-file">Import maintenance records</label>
-        <div class="file-picker">
-            <input id="ppm-file" type="file" name="file" accept=".xlsx,.xls,.csv" required>
-            <button type="submit" class="btn btn-primary">Upload & Import</button>
-        </div>
-        <small class="text-muted d-block mt-2">Accepted formats: XLSX, XLS, or CSV.</small>
-    </form>
-
-            <!-- TABLE -->
-            <div
-                class="
-                    bg-white
-                    rounded-3xl
-                    border
-                    border-blue-100
-                    shadow-xl
-                    overflow-hidden
-
-                    animate-table
-                ">
-
-                <!-- TABLE HEADER -->
-                <div
-                    class="
-                        px-7
-                        py-5
-                        bg-gradient-to-r
-                        from-blue-600
-                        to-blue-800
-                        flex
-                        flex-col
-                        md:flex-row
-                        md:items-center
-                        md:justify-between
-                        gap-3
-                    ">
-
-                    <div>
-
-                        <h3 class="text-xl font-bold text-white">
-                            PPM Assets
-                        </h3>
-
-                        <p class="text-blue-100 text-sm mt-1">
-                            All registered assets
-                        </p>
-
-                    </div>
-
-
-                    <div
-                        class="
-                            px-4
-                            py-2
-                            rounded-xl
-                            bg-white/10
-                            border
-                            border-white/20
-                            text-white
-                            text-sm
-                            backdrop-blur
-                        ">
-
-                        {{ $ppmRecords->total() }} records
-
-                    </div>
-
-                </div>
-
-
-                <!-- SCROLL -->
-                <div class="overflow-x-auto table-scroll">
-
-                    <table class="ppm-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    Asset ID
-                                </th>
-
-                                <th>
-                                    PPM ID
-                                </th>
-
-                                <th>
-                                    Week Due
-                                </th>
-
-                                <th>
-                                    Plant
-                                </th>
-
-                                <th>
-                                    Model
-                                </th>
-
-                                <th>
-                                    Status
-                                </th>
-
-                                <th>
-                                    Actions
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            @forelse($ppmRecords as $record)
-
-                                <tr class="ppm-row">
-
-                                    <!-- ASSET ID -->
-                                    <td>
-
-                                        <span
-                                            class="
-                                                inline-flex
-                                                items-center
-                                                px-4
-                                                py-2
-                                                rounded-xl
-
-                                                bg-blue-50
-                                                text-blue-700
-
-                                                font-bold
-
-                                                transition-all
-                                                duration-300
-
-                                                group-hover:bg-blue-100
-                                            ">
-
-                                            {{ $record->asset_id }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- PPM ID -->
-                                    <td>
-
-                                        {{ $record->ppm_id ?? '—' }}
-
-                                    </td>
-
-
-                                    <!-- WEEK -->
-                                    <td>
-
-                                        {{ $record->week_due ?? '—' }}
-
-                                    </td>
-
-
-                                    <!-- PLANT -->
-                                    <td>
-
-                                        {{ $record->plant_group ?? '—' }}
-
-                                    </td>
-
-
-                                    <!-- MODEL -->
-                                    <td>
-
-                                        {{ $record->model ?? '—' }}
-
-                                    </td>
-
-
-                                    <!-- STATUS -->
-                                    <td>
-
-                                        <span
-                                            class="
-                                                inline-flex
-                                                items-center
-                                                px-4
-                                                py-2
-                                                rounded-full
-
-                                                text-xs
-                                                font-bold
-
-                                                bg-green-100
-                                                text-green-700
-                                            ">
-
-                                            {{ $record->status ?? 'Active' }}
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- ACTION -->
-                                    <td>
-
-                                        <a
-                                            href="{{ route('ppm-records.show', $record->id) }}"
-                                            class="
-                                                inline-flex
-                                                items-center
-                                                gap-2
-
-                                                px-5
-                                                py-3
-
-                                                rounded-xl
-
-                                                bg-blue-600
-                                                text-white
-
-                                                font-semibold
-                                                text-sm
-
-                                                shadow-sm
-
-                                                transition-all
-                                                duration-300
-
-                                                hover:bg-blue-700
-                                                hover:-translate-y-1
-                                                hover:shadow-lg
-
-                                                active:translate-y-0
-                                            ">
-
-                                            View Details
-
-                                            <svg
-                                                class="
-                                                    w-4
-                                                    h-4
-                                                    transition-transform
-                                                    duration-300
-                                                "
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24">
-
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M9 5l7 7-7 7"/>
-
-                                            </svg>
-
-                                        </a>
-
-                                    </td>
-
-                                </tr>
-
-                            @empty
-
-                                <tr>
-
-                                    <td
-                                        colspan="7"
-                                        class="py-16 text-center">
-
-                                        <div class="flex flex-col items-center">
-
-                                            <div
-                                                class="
-                                                    w-16
-                                                    h-16
-                                                    rounded-2xl
-                                                    bg-blue-50
-                                                    flex
-                                                    items-center
-                                                    justify-center
-                                                    mb-4
-                                                ">
-
-                                                <svg
-                                                    class="w-8 h-8 text-blue-500"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M20 13V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7m16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5m16 0H4"/>
-
-                                                </svg>
-
-                                            </div>
-
-                                            <h3 class="text-lg font-bold text-gray-700">
-                                                No PPM records found
-                                            </h3>
-
-                                            <p class="text-gray-400 mt-1">
-                                                There are currently no assets available.
-                                            </p>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-
-                            @endforelse
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <!-- PAGINATION -->
-                @if($ppmRecords->hasPages())
-
-                    <div class="px-6 py-5 border-t border-gray-100">
-
-                        {{ $ppmRecords->links() }}
-
-                    </div>
-
-                @endif
 
             </div>
 
@@ -513,614 +223,685 @@
     </div>
 
 
-    <!-- STYLE -->
+    {{-- ========================================================= --}}
+    {{-- CROP MODAL --}}
+    {{-- ========================================================= --}}
+
+    <div
+        id="cropModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
+    >
+
+        <div
+            class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-800
+                   shadow-2xl overflow-hidden"
+        >
+
+            {{-- Modal Header --}}
+            <div class="flex items-center justify-between border-b
+                        border-gray-200 dark:border-gray-700 px-5 py-4">
+
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Edit profile picture
+                </h3>
+
+                <button
+                    type="button"
+                    onclick="closeCropper()"
+                    class="text-2xl text-gray-500 hover:text-gray-800"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            {{-- Image Area --}}
+            <div class="bg-black p-4">
+
+                <div class="crop-container">
+
+                    <img
+                        id="cropImage"
+                        src=""
+                        alt="Crop image"
+                    >
+
+                </div>
+
+            </div>
+
+
+            {{-- Controls --}}
+            <div class="flex items-center justify-center gap-3 px-5 py-4">
+
+                <button
+                    type="button"
+                    onclick="zoomOut()"
+                    class="h-10 w-10 rounded-full bg-gray-200
+                           hover:bg-gray-300 text-lg"
+                >
+                    −
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="zoomIn()"
+                    class="h-10 w-10 rounded-full bg-gray-200
+                           hover:bg-gray-300 text-lg"
+                >
+                    +
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="resetCropper()"
+                    class="rounded-full bg-gray-200 px-4 py-2
+                           text-sm hover:bg-gray-300"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+
+            {{-- Buttons --}}
+            <div class="flex justify-end gap-3 border-t
+                        border-gray-200 dark:border-gray-700
+                        px-5 py-4">
+
+                <button
+                    type="button"
+                    onclick="closeCropper()"
+                    class="rounded-lg px-5 py-2.5 text-sm font-semibold
+                           text-gray-700 bg-gray-200 hover:bg-gray-300"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="savePicture()"
+                    id="saveButton"
+                    class="rounded-lg bg-blue-600 px-6 py-2.5
+                           text-sm font-semibold text-white
+                           hover:bg-blue-700"
+                >
+                    Save
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- CROP CSS --}}
+    {{-- ========================================================= --}}
+
     <style>
 
-        /* =========================
-           TABLE
-        ========================= */
-
-        .ppm-table {
-
+        .crop-container {
             width: 100%;
-
-            min-width: 1500px;
-
-            border-collapse: separate;
-
-            border-spacing: 0;
-
+            height: 450px;
+            overflow: hidden;
         }
 
-
-        /* =========================
-           HEADER
-        ========================= */
-
-        .ppm-table thead th {
-
-            padding: 20px 28px;
-
-            color: white;
-
-            font-size: 13px;
-
-            font-weight: 800;
-
-            text-transform: uppercase;
-
-            letter-spacing: .06em;
-
-            white-space: nowrap;
-
-            background: linear-gradient(
-                135deg,
-                #2563eb,
-                #1e40af
-            );
-
-            border-right: 1px solid rgba(255,255,255,.12);
-
+        .crop-container img {
+            display: block;
+            max-width: 100%;
         }
 
-
-        /* =========================
-           BODY
-        ========================= */
-
-        .ppm-table tbody tr {
-
-            background: white;
-
-            transition:
-                transform .25s ease,
-                background-color .25s ease,
-                box-shadow .25s ease;
-
-            animation: ppmRow .5s ease both;
-
-        }
-
-
-        .ppm-table tbody tr:nth-child(even) {
-
-            background: #f8fbff;
-
-        }
-
-
-        .ppm-table tbody tr:hover {
-
-            background: #eff6ff;
-
-            transform: scale(1.002);
-
-            box-shadow:
-                0 8px 25px rgba(37, 99, 235, .10);
-
-        }
-
-
-        /* =========================
-           CELLS
-        ========================= */
-
-        .ppm-table tbody td {
-
-            min-width: 180px;
-
-            padding: 22px 28px;
-
-            color: #334155;
-
-            font-size: 14px;
-
-            white-space: nowrap;
-
-            vertical-align: middle;
-
-            border-bottom: 1px solid #e5edf7;
-
-            border-right: 1px solid #edf2f7;
-
-            transition:
-                color .2s ease,
-                padding-left .2s ease;
-
-        }
-
-
-        .ppm-table tbody tr:hover td {
-
-            color: #1e3a8a;
-
-        }
-
-
-        .ppm-table tbody td:first-child {
-
-            color: #2563eb;
-
-            font-weight: 800;
-
-        }
-
-
-        .ppm-table tbody tr:last-child td {
-
-            border-bottom: none;
-
-        }
-
-
-        /* =========================
-           SCROLLBAR
-        ========================= */
-
-        .table-scroll {
-
-            scrollbar-width: thin;
-
-            scrollbar-color:
-                #60a5fa
-                #eff6ff;
-
-        }
-
-
-        .table-scroll::-webkit-scrollbar {
-
-            height: 10px;
-
-        }
-
-
-        .table-scroll::-webkit-scrollbar-track {
-
-            background: #eff6ff;
-
-        }
-
-
-        .table-scroll::-webkit-scrollbar-thumb {
-
-            background: #60a5fa;
-
-            border-radius: 20px;
-
-        }
-
-
-        .table-scroll::-webkit-scrollbar-thumb:hover {
-
-            background: #2563eb;
-
-        }
-
-
-        /* =========================
-           ANIMATIONS
-        ========================= */
-
-        @keyframes ppmRow {
-
-            from {
-
-                opacity: 0;
-
-                transform: translateY(15px);
-
-            }
-
-            to {
-
-                opacity: 1;
-
-                transform: translateY(0);
-
-            }
-
-        }
-
-
-        @keyframes fadeDown {
-
-            from {
-
-                opacity: 0;
-
-                transform: translateY(-15px);
-
-            }
-
-            to {
-
-                opacity: 1;
-
-                transform: translateY(0);
-
-            }
-
-        }
-
-
-        @keyframes searchAnimation {
-
-            from {
-
-                opacity: 0;
-
-                transform: translateY(-8px);
-
-            }
-
-            to {
-
-                opacity: 1;
-
-                transform: translateY(0);
-
-            }
-
-        }
-
-
-        .animate-fade-down {
-
-            animation:
-                fadeDown
-                .6s
-                ease-out;
-
-        }
-
-
-        .animate-search {
-
-            animation:
-                searchAnimation
-                .25s
-                ease-out;
-
-        }
-
-
-        .animate-table {
-
-            animation:
-                fadeDown
-                .7s
-                ease-out;
-
-        }
-
-
-        /* =========================
-           ROW DELAYS
-        ========================= */
-
-        .ppm-row:nth-child(1) {
-            animation-delay: .05s;
-        }
-
-        .ppm-row:nth-child(2) {
-            animation-delay: .10s;
-        }
-
-        .ppm-row:nth-child(3) {
-            animation-delay: .15s;
-        }
-
-        .ppm-row:nth-child(4) {
-            animation-delay: .20s;
-        }
-
-        .ppm-row:nth-child(5) {
-            animation-delay: .25s;
-        }
-
-        .ppm-row:nth-child(6) {
-            animation-delay: .30s;
-        }
-
-        .ppm-row:nth-child(7) {
-            animation-delay: .35s;
+        #signatureCanvas {
+            display: block;
+            touch-action: none;
         }
 
     </style>
 
 
-    <!-- SEARCH JAVASCRIPT -->
-   <script>
+    {{-- ========================================================= --}}
+    {{-- CROPPER.JS --}}
+    {{-- ========================================================= --}}
 
-document.addEventListener('DOMContentLoaded', function () {
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+    >
 
-    const searchInput = document.getElementById('jobSearch');
-
-    const searchResults =
-        document.getElementById('searchResults');
-
-    const clearSearch =
-        document.getElementById('clearSearch');
-
-
-    let searchTimeout = null;
+    <script
+        src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js">
+    </script>
 
 
-    searchInput.addEventListener('input', function () {
+    {{-- ========================================================= --}}
+    {{-- JAVASCRIPT --}}
+    {{-- ========================================================= --}}
 
-        const jobId = this.value.trim();
+    <script>
 
-        clearTimeout(searchTimeout);
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE PICTURE CROPPER
+        |--------------------------------------------------------------------------
+        */
+
+        let cropper = null;
+
+        const pictureInput = document.getElementById('picture');
+        const cropModal = document.getElementById('cropModal');
+        const cropImage = document.getElementById('cropImage');
 
 
-        // Empty search
-        if (jobId.length === 0) {
+        /*
+        |--------------------------------------------------------------------------
+        | Choose Image
+        |--------------------------------------------------------------------------
+        */
 
-            searchResults.innerHTML = '';
+        pictureInput.addEventListener('change', function(event) {
 
-            searchResults.classList.add('hidden');
+            const file = event.target.files[0];
 
-            clearSearch.classList.add('hidden');
+            if (!file) {
+                return;
+            }
 
-            return;
+            if (!file.type.startsWith('image/')) {
+
+                alert('Please select an image.');
+
+                pictureInput.value = '';
+
+                return;
+            }
+
+
+            const imageURL = URL.createObjectURL(file);
+
+            cropImage.src = imageURL;
+
+
+            cropModal.classList.remove('hidden');
+            cropModal.classList.add('flex');
+
+
+            cropImage.onload = function() {
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+
+                cropper = new Cropper(cropImage, {
+
+                    aspectRatio: 1,
+
+                    viewMode: 1,
+
+                    dragMode: 'move',
+
+                    autoCropArea: 0.85,
+
+                    responsive: true,
+
+                    background: false,
+
+                    guides: false,
+
+                    center: true,
+
+                    highlight: false,
+
+                    cropBoxMovable: false,
+
+                    cropBoxResizable: false,
+
+                    toggleDragModeOnDblclick: false,
+
+                });
+
+            };
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Zoom In
+        |--------------------------------------------------------------------------
+        */
+
+        function zoomIn() {
+
+            if (cropper) {
+                cropper.zoom(0.1);
+            }
+
         }
 
 
-        clearSearch.classList.remove('hidden');
+        /*
+        |--------------------------------------------------------------------------
+        | Zoom Out
+        |--------------------------------------------------------------------------
+        */
+
+        function zoomOut() {
+
+            if (cropper) {
+                cropper.zoom(-0.1);
+            }
+
+        }
 
 
-        searchTimeout = setTimeout(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Reset
+        |--------------------------------------------------------------------------
+        */
 
-            fetch(
-                `{{ route('ppm-records.search') }}?job_id=${encodeURIComponent(jobId)}`
-            )
+        function resetCropper() {
 
-            .then(response => {
+            if (cropper) {
+                cropper.reset();
+            }
 
-                if (!response.ok) {
-                    throw new Error('Search request failed');
-                }
-
-                return response.json();
-
-            })
-
-            .then(data => {
-
-                searchResults.innerHTML = '';
+        }
 
 
-                // No results
-                if (data.length === 0) {
+        /*
+        |--------------------------------------------------------------------------
+        | Close Cropper
+        |--------------------------------------------------------------------------
+        */
 
-                    searchResults.innerHTML = `
+        function closeCropper() {
 
-                        <div class="px-6 py-6 text-center">
+            if (cropper) {
 
-                            <div class="text-gray-400 text-2xl mb-2">
-                                🔍
-                            </div>
+                cropper.destroy();
 
-                            <p class="text-gray-600 font-semibold">
-                                No job found
-                            </p>
+                cropper = null;
+            }
 
-                            <p class="text-sm text-gray-400 mt-1">
-                                No Job ID matches "${jobId}"
-                            </p>
+            cropModal.classList.add('hidden');
 
-                        </div>
+            cropModal.classList.remove('flex');
 
-                    `;
+            pictureInput.value = '';
 
-                    searchResults.classList.remove('hidden');
+        }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save Profile Picture
+        |--------------------------------------------------------------------------
+        */
+
+        function savePicture() {
+
+            if (!cropper) {
+                return;
+            }
+
+
+            const saveButton = document.getElementById('saveButton');
+
+            saveButton.disabled = true;
+
+            saveButton.innerText = 'Saving...';
+
+
+            cropper.getCroppedCanvas({
+
+                width: 500,
+
+                height: 500,
+
+                imageSmoothingEnabled: true,
+
+                imageSmoothingQuality: 'high'
+
+            }).toBlob(function(blob) {
+
+
+                const formData = new FormData();
+
+                formData.append(
+                    'picture',
+                    blob,
+                    'profile-picture.jpg'
+                );
+
+                formData.append(
+                    '_token',
+                    '{{ csrf_token() }}'
+                );
+
+
+                fetch('{{ route('profile.upload-picture') }}', {
+
+                    method: 'POST',
+
+                    body: formData,
+
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+
+                })
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    if (data.success) {
+
+                        closeCropper();
+
+                        window.location.reload();
+
+                    } else {
+
+                        alert(data.message || 'Upload failed.');
+
+                        saveButton.disabled = false;
+
+                        saveButton.innerText = 'Save';
+
+                    }
+
+                })
+
+                .catch(error => {
+
+                    console.error(error);
+
+                    alert('Something went wrong while uploading.');
+
+                    saveButton.disabled = false;
+
+                    saveButton.innerText = 'Save';
+
+                });
+
+            }, 'image/jpeg', 0.90);
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIGNATURE PAD
+        |--------------------------------------------------------------------------
+        */
+
+        const signatureCanvas =
+            document.getElementById('signatureCanvas');
+
+        const signatureInput =
+            document.getElementById('signatureInput');
+
+        const clearSignature =
+            document.getElementById('clearSignature');
+
+        const signatureForm =
+            document.getElementById('signatureForm');
+
+
+        const signatureContext =
+            signatureCanvas.getContext('2d');
+
+
+        let signatureDrawing = false;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resize Signature Canvas
+        |--------------------------------------------------------------------------
+        */
+
+        function resizeSignatureCanvas() {
+
+            const rect =
+                signatureCanvas.getBoundingClientRect();
+
+            const ratio =
+                window.devicePixelRatio || 1;
+
+
+            signatureCanvas.width =
+                rect.width * ratio;
+
+            signatureCanvas.height =
+                rect.height * ratio;
+
+
+            signatureContext.setTransform(
+                ratio,
+                0,
+                0,
+                ratio,
+                0,
+                0
+            );
+
+
+            signatureContext.lineWidth = 2;
+
+            signatureContext.lineCap = 'round';
+
+            signatureContext.lineJoin = 'round';
+
+            signatureContext.strokeStyle = '#000000';
+
+        }
+
+
+        resizeSignatureCanvas();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Mouse / Touch Position
+        |--------------------------------------------------------------------------
+        */
+
+        function getSignaturePosition(event) {
+
+            const rect =
+                signatureCanvas.getBoundingClientRect();
+
+
+            return {
+
+                x: event.clientX - rect.left,
+
+                y: event.clientY - rect.top
+
+            };
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Start Drawing
+        |--------------------------------------------------------------------------
+        */
+
+        signatureCanvas.addEventListener(
+            'pointerdown',
+            function(event) {
+
+                signatureDrawing = true;
+
+
+                const position =
+                    getSignaturePosition(event);
+
+
+                signatureContext.beginPath();
+
+                signatureContext.moveTo(
+                    position.x,
+                    position.y
+                );
+
+
+                signatureCanvas.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Draw
+        |--------------------------------------------------------------------------
+        */
+
+        signatureCanvas.addEventListener(
+            'pointermove',
+            function(event) {
+
+                if (!signatureDrawing) {
                     return;
                 }
 
 
-                // Results
-                data.forEach(function (record) {
+                const position =
+                    getSignaturePosition(event);
 
-                    const item =
-                        document.createElement('a');
 
+                signatureContext.lineTo(
+                    position.x,
+                    position.y
+                );
 
-                    item.href = record.url;
+                signatureContext.stroke();
 
+            }
+        );
 
-                    item.className = `
 
-                        flex
-                        items-center
-                        justify-between
+        /*
+        |--------------------------------------------------------------------------
+        | Stop Drawing
+        |--------------------------------------------------------------------------
+        */
 
-                        px-6
-                        py-5
+        signatureCanvas.addEventListener(
+            'pointerup',
+            function() {
 
-                        border-b
-                        border-gray-100
+                signatureDrawing = false;
 
-                        hover:bg-blue-50
+            }
+        );
 
-                        transition-all
-                        duration-200
 
-                        group
-                    `;
+        signatureCanvas.addEventListener(
+            'pointercancel',
+            function() {
 
+                signatureDrawing = false;
 
-                    item.innerHTML = `
+            }
+        );
 
-                        <div class="flex items-center gap-4">
 
-                            <div
-                                class="
-                                    w-11
-                                    h-11
-                                    rounded-xl
-                                    bg-blue-100
-                                    text-blue-600
+        /*
+        |--------------------------------------------------------------------------
+        | Clear Signature
+        |--------------------------------------------------------------------------
+        */
 
-                                    flex
-                                    items-center
-                                    justify-center
+        clearSignature.addEventListener(
+            'click',
+            function() {
 
-                                    group-hover:scale-110
+                signatureContext.clearRect(
+                    0,
+                    0,
+                    signatureCanvas.width,
+                    signatureCanvas.height
+                );
 
-                                    transition-transform
-                                    duration-200
-                                "
-                            >
 
-                                🔧
+                signatureInput.value = '';
 
-                            </div>
+            }
+        );
 
 
-                            <div>
+        /*
+        |--------------------------------------------------------------------------
+        | Save Signature
+        |--------------------------------------------------------------------------
+        */
 
-                                <div
-                                    class="
-                                        font-bold
-                                        text-blue-600
-                                    "
-                                >
-                                    Job ID:
-                                    ${record.job_id}
-                                </div>
+        signatureForm.addEventListener(
+            'submit',
+            function(event) {
 
+                /*
+                |--------------------------------------------------------------
+                | Check if canvas is empty
+                |--------------------------------------------------------------
+                */
 
-                                <div
-                                    class="
-                                        text-sm
-                                        text-gray-500
-                                        mt-1
-                                    "
-                                >
-                                    Asset ID:
-                                    ${record.asset_id ?? 'N/A'}
-                                </div>
+                const canvasData =
+                    signatureCanvas.toDataURL('image/png');
 
-                            </div>
 
-                        </div>
+                /*
+                |--------------------------------------------------------------
+                | Save canvas image in hidden input
+                |--------------------------------------------------------------
+                */
 
+                signatureInput.value = canvasData;
 
-                        <div
-                            class="
-                                flex
-                                items-center
-                                gap-2
+            }
+        );
 
-                                text-blue-600
-                                font-semibold
-                                text-sm
 
-                                opacity-60
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent Losing Signature on Resize
+        |--------------------------------------------------------------------------
+        */
 
-                                group-hover:opacity-100
-                                group-hover:translate-x-1
+        window.addEventListener(
+            'resize',
+            function() {
 
-                                transition-all
-                                duration-200
-                            "
-                        >
+                /*
+                 * Do not resize if the user has already drawn.
+                 * Resizing a canvas clears its content.
+                 */
 
-                            Details
+                if (!signatureInput.value) {
 
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
+                    resizeSignatureCanvas();
 
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 5l7 7-7 7"
-                                />
+                }
 
-                            </svg>
+            }
+        );
 
-                        </div>
-
-                    `;
-
-
-                    searchResults.appendChild(item);
-
-                });
-
-
-                searchResults.classList.remove('hidden');
-
-            })
-
-            .catch(error => {
-
-                console.error(error);
-
-                searchResults.innerHTML = `
-
-                    <div
-                        class="
-                            p-6
-                            text-center
-                            text-red-500
-                        "
-                    >
-
-                        Error while searching.
-
-                    </div>
-
-                `;
-
-                searchResults.classList.remove('hidden');
-
-            });
-
-        }, 250);
-
-    });
-
-
-    // Clear button
-    clearSearch.addEventListener('click', function () {
-
-        searchInput.value = '';
-
-        searchResults.innerHTML = '';
-
-        searchResults.classList.add('hidden');
-
-        clearSearch.classList.add('hidden');
-
-        searchInput.focus();
-
-    });
-
-
-    // Close search results
-    document.addEventListener('click', function (event) {
-
-        if (
-            !searchInput.contains(event.target) &&
-            !searchResults.contains(event.target)
-        ) {
-
-            searchResults.classList.add('hidden');
-
-        }
-
-    });
-
-});
-
-</script>
+    </script>
 
 </x-app-layout>

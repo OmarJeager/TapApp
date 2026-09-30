@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 
 class SuperAdminController extends Controller
 {
+    public function dashboard(){
+        return view('admin.dashboard');
+    }
     private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'state'];
 
     private function filteredQuery(Request $request)

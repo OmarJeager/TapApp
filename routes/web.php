@@ -57,7 +57,10 @@ Route::middleware(['auth', 'role:quality'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    Route::get('/adminhomepage', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/admin/ppm-records', [AdminController::class, 'index'])->name('ppm-records.index');
     Route::post('/admin/ppm-records/import', [AdminController::class, 'import'])
         ->name('ppm-records.import');
@@ -82,6 +85,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
+
     Route::get('/user', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ppm-records', [PpmRecordController::class, 'index'])->name('user.index');
     Route::get('/ppm-records/{id}', [PpmRecordController::class, 'show'])->name('user.show');

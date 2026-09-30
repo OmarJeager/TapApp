@@ -18,7 +18,7 @@ class AdminController extends Controller
     {
         $ppmRecords = PpmRecord::latest()->paginate(20);
 
-        return view('admin.dashboard', compact('ppmRecords'));
+        return view('admin.index', compact('ppmRecords'));
     }
 
     /**
