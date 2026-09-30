@@ -9,7 +9,16 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <div class="flex items-center">
+                <x-text-input id="email" class="block mt-1 w-full" type="text" :value="old('email') ? preg_replace('/@gmail\.com$/i', '', old('email')) : ''" required autofocus autocomplete="username"  oninput="document.getElementById('email_domain').value = this.value ? this.value + '@gmail.com' : ''" />
+                <span class="hidden" aria-hidden="true">@gmail.com</span>
+            </div>
+            <input id="email_domain" type="hidden" name="email" value="{{ old('email') ?: '' }}">
+            <script>
+                document.getElementById('email').addEventListener('input', function () {
+                    document.getElementById('email_domain').value = this.value ? this.value + '@gmail.com' : '';
+                });
+            </script>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 

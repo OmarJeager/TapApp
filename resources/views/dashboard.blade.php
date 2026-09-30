@@ -6,8 +6,9 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-
-
+    <div>
+        <a href="{{route('admin.index')}}">View</a>
+    </div>
     <div class="py-12">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -39,376 +40,175 @@
 
 
                     {{-- ========================================================= --}}
-                    {{-- ROLE BASED QUICK ACCESS --}}
+                    {{-- PROFILE --}}
                     {{-- ========================================================= --}}
 
-                    <div class="mb-12">
+                    <div class="flex flex-col items-center">
 
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                    Quick Access
-                                </h3>
+                        {{-- Profile Picture --}}
+                        <div class="relative">
 
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Available features for your account
-                                </p>
-                            </div>
+                            @if (auth()->user()->profile_picture)
 
-                            {{-- Current Role --}}
-                            <span class="px-4 py-2 rounded-full text-sm font-semibold
-                                @if(auth()->user()->role === 'superadmin')
-                                    bg-purple-100 text-purple-700
-                                @elseif(auth()->user()->role === 'admin')
-                                    bg-orange-100 text-orange-700
-                                @else
-                                    bg-blue-100 text-blue-700
-                                @endif
-                            ">
-                                {{ ucfirst(auth()->user()->role) }}
-                            </span>
-                        </div>
+                                <img
+                                    src="{{ asset('storage/' . auth()->user()->profile_picture) }}?v={{ time() }}"
+                                    alt="Profile Picture"
+                                    class="h-40 w-40 rounded-full object-cover ring-4 ring-gray-200 dark:ring-gray-600"
+                                >
 
+                            @else
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-
-                            {{-- ================================================= --}}
-                            {{-- ALL ROLES --}}
-                            {{-- ================================================= --}}
-
-                            <a href="{{ route('user.index') }}"
-                               class="group relative overflow-hidden rounded-2xl
-                                      border border-blue-200 dark:border-blue-800
-                                      bg-blue-50 dark:bg-blue-900/20
-                                      p-6 transition duration-300
-                                      hover:-translate-y-1 hover:shadow-xl">
-
-                                <div class="flex items-center gap-4">
-
-                                    <div class="flex h-14 w-14 items-center justify-center
-                                                rounded-xl bg-blue-600 text-white text-2xl
-                                                shadow-lg">
-                                        📋
-                                    </div>
-
-                                    <div>
-                                        <h4 class="text-lg font-semibold
-                                                   text-gray-900 dark:text-white">
-                                            PPM Records
-                                        </h4>
-
-                                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                            View PPM records
-                                        </p>
-                                    </div>
-
+                                <div class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700
+                                            flex items-center justify-center
+                                            text-gray-500">
+                                    No picture
                                 </div>
 
-                            </a>
-
-
-                            {{-- ================================================= --}}
-                            {{-- USER ONLY --}}
-                            {{-- ================================================= --}}
-
-                            @if(auth()->user()->role === 'user')
-
-                                <a href="{{ route('user.index') }}"
-                                   class="group relative overflow-hidden rounded-2xl
-                                          border border-green-200 dark:border-green-800
-                                          bg-green-50 dark:bg-green-900/20
-                                          p-6 transition duration-300
-                                          hover:-translate-y-1 hover:shadow-xl">
-
-                                    <div class="flex items-center gap-4">
-
-                                        <div class="flex h-14 w-14 items-center justify-center
-                                                    rounded-xl bg-green-600 text-white text-2xl
-                                                    shadow-lg">
-                                            ✓
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold
-                                                       text-gray-900 dark:text-white">
-                                                My Checklists
-                                            </h4>
-
-                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                                Access your checklists
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                </a>
-
                             @endif
-
-
-                            {{-- ================================================= --}}
-                            {{-- ADMIN + SUPERADMIN --}}
-                            {{-- ================================================= --}}
-
-                            @if(in_array(auth()->user()->role, ['admin', 'superadmin']))
-
-                                <a href="{{ route('admin.dashboard') }}"
-                                   class="group relative overflow-hidden rounded-2xl
-                                          border border-orange-200 dark:border-orange-800
-                                          bg-orange-50 dark:bg-orange-900/20
-                                          p-6 transition duration-300
-                                          hover:-translate-y-1 hover:shadow-xl">
-
-                                    <div class="flex items-center gap-4">
-
-                                        <div class="flex h-14 w-14 items-center justify-center
-                                                    rounded-xl bg-orange-500 text-white text-2xl
-                                                    shadow-lg">
-                                            ⚙
-                                        </div>
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold
-                                                       text-gray-900 dark:text-white">
-                                                Admin Management
-                                            </h4>
-
-                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                                Manage administrative tasks
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                </a>
-
-                            @endif
-
-
-                            {{-- ================================================= --}}
-                            {{-- SUPERADMIN ONLY --}}
-                            {{-- ================================================= --}}
-
-                            @if(auth()->user()->role === 'superadmin')
-
-                                <a href="{{ route('superadmin.index') }}"
-                                   class="group relative overflow-hidden rounded-2xl
-                                          border border-purple-200 dark:border-purple-800
-                                          bg-purple-50 dark:bg-purple-900/20
-                                          p-6 transition duration-300
-                                          hover:-translate-y-1 hover:shadow-xl">
-
-                                    <div class="flex items-center gap-4">
-
-
-
-                                        <div>
-                                            <h4 class="text-lg font-semibold
-                                                       text-gray-900 dark:text-white">
-                                                User Management
-                                            </h4>
-
-                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                                                Manage users and roles
-                                            </p>
-                                        </div>
-
-                                    </div>
-
-                                </a>
-
-                            @endif
-
 
                         </div>
+
+
+                        {{-- Name --}}
+                        <h4 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ auth()->user()->name }}
+                        </h4>
+
+
+                        {{-- Choose Photo Button --}}
+                        <button
+                            type="button"
+                            onclick="document.getElementById('picture').click()"
+                            class="mt-5 rounded-full bg-blue-600 px-6 py-2.5
+                                   text-sm font-semibold text-white
+                                   hover:bg-blue-700 transition"
+                        >
+                            Change profile picture
+                        </button>
+
+
+                        {{-- Hidden File Input --}}
+                        <input
+                            type="file"
+                            id="picture"
+                            accept="image/jpeg,image/png,image/webp"
+                            class="hidden"
+                        >
 
                     </div>
 
 
                     {{-- ========================================================= --}}
-                    {{-- PROFILE --}}
+                    {{-- SIGNATURE SECTION --}}
                     {{-- ========================================================= --}}
 
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-10">
+                    <div class="mt-12 border-t border-gray-200 dark:border-gray-700 pt-10">
 
-                        <div class="flex flex-col items-center">
+                        <div class="max-w-2xl mx-auto">
 
-                            {{-- Profile Picture --}}
-                            <div class="relative">
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                My Signature
+                            </h3>
 
-                                @if (auth()->user()->profile_picture)
-
-                                    <img
-                                        src="{{ asset('storage/' . auth()->user()->profile_picture) }}?v={{ time() }}"
-                                        alt="Profile Picture"
-                                        class="h-40 w-40 rounded-full object-cover
-                                               ring-4 ring-gray-200 dark:ring-gray-600"
-                                    >
-
-                                @else
-
-                                    <div class="h-40 w-40 rounded-full
-                                                bg-gray-200 dark:bg-gray-700
-                                                flex items-center justify-center
-                                                text-gray-500">
-                                        No picture
-                                    </div>
-
-                                @endif
-
-                            </div>
-
-
-                            {{-- Name --}}
-                            <h4 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ auth()->user()->name }}
-                            </h4>
-
-
-                            {{-- Role --}}
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Role: {{ ucfirst(auth()->user()->role) }}
+                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                Draw your signature below and save it to your account.
                             </p>
 
 
-                            {{-- Choose Photo Button --}}
-                            <button
-                                type="button"
-                                onclick="document.getElementById('picture').click()"
-                                class="mt-5 rounded-full bg-blue-600 px-6 py-2.5
-                                       text-sm font-semibold text-white
-                                       hover:bg-blue-700 transition"
-                            >
-                                Change profile picture
-                            </button>
+                            {{-- Existing Signature --}}
+                            @if (auth()->user()->signature)
 
+                                <div class="mt-6">
 
-                            {{-- Hidden File Input --}}
-                            <input
-                                type="file"
-                                id="picture"
-                                accept="image/jpeg,image/png,image/webp"
-                                class="hidden"
-                            >
+                                    <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Current signature
+                                    </p>
 
-                        </div>
+                                    <div class="rounded-xl border border-gray-200
+                                                dark:border-gray-600 bg-white p-4">
 
-
-                        {{-- ========================================================= --}}
-                        {{-- SIGNATURE SECTION --}}
-                        {{-- ========================================================= --}}
-
-                        <div class="mt-12 border-t border-gray-200 dark:border-gray-700 pt-10">
-
-                            <div class="max-w-2xl mx-auto">
-
-                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                    My Signature
-                                </h3>
-
-                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                    Draw your signature below and save it to your account.
-                                </p>
-
-
-                                {{-- Existing Signature --}}
-                                @if (auth()->user()->signature)
-
-                                    <div class="mt-6">
-
-                                        <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Current signature
-                                        </p>
-
-                                        <div class="rounded-xl border border-gray-200
-                                                    dark:border-gray-600 bg-white p-4">
-
-                                            <img
-                                                src="{{ asset('storage/' . auth()->user()->signature) }}?v={{ time() }}"
-                                                alt="Saved Signature"
-                                                class="max-h-32 max-w-full object-contain"
-                                            >
-
-                                        </div>
+                                        <img
+                                            src="{{ asset('storage/' . auth()->user()->signature) }}?v={{ time() }}"
+                                            alt="Saved Signature"
+                                            class="max-h-32 max-w-full object-contain"
+                                        >
 
                                     </div>
 
-                                @endif
+                                </div>
+
+                            @endif
 
 
-                                {{-- Signature Form --}}
-                                <form
-                                    method="POST"
-                                    action="{{ route('profile.signature.update') }}"
-                                    id="signatureForm"
-                                    class="mt-6"
+                            {{-- Signature Form --}}
+                            <form
+                                method="POST"
+                                action="{{ route('profile.signature.update') }}"
+                                id="signatureForm"
+                                class="mt-6"
+                            >
+
+                                @csrf
+
+                                {{-- Canvas --}}
+                                <div
+                                    class="rounded-xl border-2 border-gray-300
+                                           dark:border-gray-600 bg-white overflow-hidden"
                                 >
 
-                                    @csrf
+                                    <canvas
+                                        id="signatureCanvas"
+                                        class="w-full h-52 cursor-crosshair"
+                                    ></canvas>
+
+                                </div>
 
 
-                                    {{-- Canvas --}}
-                                    <div
-                                        class="rounded-xl border-2 border-gray-300
-                                               dark:border-gray-600 bg-white overflow-hidden"
+                                {{-- Hidden Signature --}}
+                                <input
+                                    type="hidden"
+                                    name="signature"
+                                    id="signatureInput"
+                                >
+
+
+                                {{-- Validation Error --}}
+                                @error('signature')
+                                    <p class="mt-2 text-sm text-red-600">
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+
+
+                                {{-- Buttons --}}
+                                <div class="mt-4 flex items-center gap-3">
+
+                                    <button
+                                        type="button"
+                                        id="clearSignature"
+                                        class="rounded-lg bg-gray-200
+                                               px-5 py-2.5 text-sm font-semibold
+                                               text-gray-700 hover:bg-gray-300
+                                               transition"
                                     >
-
-                                        <canvas
-                                            id="signatureCanvas"
-                                            class="w-full h-52 cursor-crosshair"
-                                        ></canvas>
-
-                                    </div>
+                                        Clear
+                                    </button>
 
 
-                                    {{-- Hidden Signature --}}
-                                    <input
-                                        type="hidden"
-                                        name="signature"
-                                        id="signatureInput"
+                                    <button
+                                        type="submit"
+                                        id="saveSignature"
+                                        class="rounded-lg bg-blue-600
+                                               px-6 py-2.5 text-sm font-semibold
+                                               text-white hover:bg-blue-700
+                                               transition"
                                     >
+                                        Save Signature
+                                    </button>
 
+                                </div>
 
-                                    {{-- Validation Error --}}
-                                    @error('signature')
-                                        <p class="mt-2 text-sm text-red-600">
-                                            {{ $message }}
-                                        </p>
-                                    @enderror
-
-
-                                    {{-- Buttons --}}
-                                    <div class="mt-4 flex items-center gap-3">
-
-                                        <button
-                                            type="button"
-                                            id="clearSignature"
-                                            class="rounded-lg bg-gray-200
-                                                   px-5 py-2.5 text-sm font-semibold
-                                                   text-gray-700 hover:bg-gray-300
-                                                   transition"
-                                        >
-                                            Clear
-                                        </button>
-
-
-                                        <button
-                                            type="submit"
-                                            id="saveSignature"
-                                            class="rounded-lg bg-blue-600
-                                                   px-6 py-2.5 text-sm font-semibold
-                                                   text-white hover:bg-blue-700
-                                                   transition"
-                                        >
-                                            Save Signature
-                                        </button>
-
-                                    </div>
-
-                                </form>
-
-                            </div>
+                            </form>
 
                         </div>
 
@@ -429,8 +229,7 @@
 
     <div
         id="cropModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center
-               bg-black/70 p-4"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
     >
 
         <div
@@ -776,13 +575,11 @@
 
                 const formData = new FormData();
 
-
                 formData.append(
                     'picture',
                     blob,
                     'profile-picture.jpg'
                 );
-
 
                 formData.append(
                     '_token',
@@ -802,9 +599,7 @@
 
                 })
 
-
                 .then(response => response.json())
-
 
                 .then(data => {
 
@@ -826,7 +621,6 @@
 
                 })
 
-
                 .catch(error => {
 
                     console.error(error);
@@ -838,7 +632,6 @@
                     saveButton.innerText = 'Save';
 
                 });
-
 
             }, 'image/jpeg', 0.90);
 
@@ -959,7 +752,6 @@
 
                 signatureContext.beginPath();
 
-
                 signatureContext.moveTo(
                     position.x,
                     position.y
@@ -997,7 +789,6 @@
                     position.x,
                     position.y
                 );
-
 
                 signatureContext.stroke();
 
@@ -1066,14 +857,20 @@
             function(event) {
 
                 /*
-                |--------------------------------------------------------------------------
-                | Save canvas image in hidden input
-                |--------------------------------------------------------------------------
+                |--------------------------------------------------------------
+                | Check if canvas is empty
+                |--------------------------------------------------------------
                 */
 
                 const canvasData =
                     signatureCanvas.toDataURL('image/png');
 
+
+                /*
+                |--------------------------------------------------------------
+                | Save canvas image in hidden input
+                |--------------------------------------------------------------
+                */
 
                 signatureInput.value = canvasData;
 
@@ -1090,6 +887,11 @@
         window.addEventListener(
             'resize',
             function() {
+
+                /*
+                 * Do not resize if the user has already drawn.
+                 * Resizing a canvas clears its content.
+                 */
 
                 if (!signatureInput.value) {
 

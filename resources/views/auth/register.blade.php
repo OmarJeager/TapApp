@@ -26,7 +26,13 @@
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="text" name="email_name" :value="old('email_name', old('email') ? str_replace('@gmail.com', '', old('email')) : '')" required autocomplete="username" />
+            <input type="hidden" id="email_full" name="email" value="{{ old('email', old('email_name') ? old('email_name').'@gmail.com' : '') }}">
+            <script>
+                document.getElementById('email').addEventListener('input', function () {
+                    document.getElementById('email_full').value = this.value.trim() + '@gmail.com';
+                });
+            </script>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
