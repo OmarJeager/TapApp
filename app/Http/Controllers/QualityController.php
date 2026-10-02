@@ -12,12 +12,16 @@ class QualityController extends Controller
     public function dashboard(){
         return view('quality.dashboard');
     }
-     private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'state'];
+      private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
 
     private function filteredQuery(Request $request)
     {
         $q = PpmRecord::query();
-
+        // Filter by year (defaults to current year) - week_due format: 202636
+        $year = trim((string) $request->input('year', now()->year));
+        if ($year !== '') {
+        $q->where('week_due', 'like', "{$year}%");
+        }
         if ($v = trim((string) $request->job_id)) {
             $q->where('job_id', 'like', "%{$v}%");
         }
@@ -41,10 +45,10 @@ class QualityController extends Controller
 }
         switch ($request->state) {
             case 'verified':
-                $q->whereHas('checklist', fn ($c) => $c->where('status_admin', 'verified'));
+                $q->whereHas('checklist', fn ($c) => $c->where('status_quality', 'verified'));
                 break;
             case 'not_verified':
-                $q->whereHas('checklist', fn ($c) => $c->where('status_admin', '!=', 'verified'));
+                $q->whereHas('checklist', fn ($c) => $c->where('status_quality', '!=', 'verified'));
                 break;
             case 'none':
                 $q->whereDoesntHave('checklist');
@@ -97,17 +101,17 @@ class QualityController extends Controller
 
     public function toggleStatus(PpmChecklist $checklist)
     {
-        if ($checklist->status_admin === 'verified') {
+        if ($checklist->status_quality === 'verified') {
             $checklist->update([
-                'status_admin'          => 'not_verified',
-                'verified_by_matricule' => null,
-                'verified_at'           => null,
+                'status_quality'          => 'not_verified',
+                'verified_by_quality_matricule' => null,
+                'verified_quality_at'           => null,
             ]);
         } else {
             $checklist->update([
-                'status_admin'          => 'verified',
-                'verified_by_matricule' => Auth::user()->matricule,
-                'verified_at'           => now()->toDateString(),
+                'status_quality'          => 'verified',
+                'verified_by_quality_matricule' => Auth::user()->matricule,
+                'verified_quality_at'           => now()->toDateString(),
             ]);
         }
 
@@ -123,18 +127,18 @@ class QualityController extends Controller
 
         $count = $request->status === 'verified'
             ? $checklists->update([
-                'status_admin'          => 'verified',
-                'verified_by_matricule' => Auth::user()->matricule,
-                'verified_at'           => now()->toDateString(),
+                'status_quality'          => 'verified',
+                'verified_by_quality_matricule' => Auth::user()->matricule,
+                'verified_quality_at'           => now()->toDateString(),
             ])
             : $checklists->update([
-                'status_admin'          => 'not_verified',
-                'verified_by_matricule' => null,
-                'verified_at'           => null,
+                'status_quality'          => 'not_verified',
+                'verified_by_quality_matricule' => null,
+                'verified_quality_at'           => null,
             ]);
 
         return redirect()
             ->route('quality.index', $request->only(self::FILTERS))
-            ->with('quality', "{$count} checklist(s) updated.");
+            ->with('success', "{$count} checklist(s) updated.");
     }
 }

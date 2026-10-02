@@ -3,7 +3,7 @@
         $c = $r->checklist;
         if (!$c) {
             $status = ['No checklist', 'badge-gray'];
-        } elseif ($c->verified_by_matricule && $c->verified_by_quality_matricule) {
+        } elseif ($c->verified_by_matricule && $c->verified_by_admin_matricule) {
             $status = ['Verified', 'badge-green'];
         } else {
             $status = ['Not verified', 'badge-orange'];
@@ -30,9 +30,9 @@
             @endif
         </td>
         <td>
-            {{ $c?->verifiedByQuality?->name ?? '—' }}
-            @if ($c?->verified_quality_at)
-                <small>{{ $c->verified_quality_at->format('d/m/Y') }}</small>
+            {{ $c?->verifiedByadmin?->name ?? '—' }}
+            @if ($c?->verified_admin_at)
+                <small>{{ $c->verified_admin_at->format('d/m/Y') }}</small>
             @endif
         </td>
         <td><span class="badge {{ $status[1] }}">{{ $status[0] }}</span></td>

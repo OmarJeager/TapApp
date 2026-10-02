@@ -26,7 +26,7 @@
                 <td class="px-4 py-3">{{ $checklist?->completedBy?->name ?? '—' }}</td>
                 <td class="px-4 py-3">
                     @if($checklist)
-                        @if($checklist->status_admin === 'verified')
+                        @if($checklist->status_quality === 'verified')
                             <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Verified</span>
                         @else
                             <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Not verified</span>
@@ -38,19 +38,19 @@
                 <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                         @if($checklist)
-                            <form method="POST" action="{{ route('superadmin.toggle', $checklist) }}">
+                            <form method="POST" action="{{ route('quality.toggle', $checklist) }}">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
                                     class="rounded border px-3 py-1 text-xs font-medium
-                                    {{ $checklist->status_admin === 'verified'
+                                    {{ $checklist->status_quality === 'verified'
                                         ? 'border-red-500 text-red-600 hover:bg-red-50'
                                         : 'border-green-500 text-green-600 hover:bg-green-50' }}">
-                                    {{ $checklist->status_admin === 'verified' ? 'Mark not verified' : 'Mark verified' }}
+                                    {{ $checklist->status_quality === 'verified' ? 'Mark not verified' : 'Mark verified' }}
                                 </button>
                             </form>
                         @endif
-                        <a href="{{ route('quality.show', $record) }}"
+                        <a href="{{ route('qualityquality.show', $record) }}"
                            class="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">Show more</a>
                     </div>
                 </td>

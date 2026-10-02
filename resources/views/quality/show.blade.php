@@ -15,7 +15,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto space-y-6 sm:px-6 lg:px-8">
 
-            <a href="{{ route('superadmin.index') }}"
+            <a href="{{ route('quality.index') }}"
                class="inline-block rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300">← Back</a>
 
             <div class="grid gap-6 md:grid-cols-2">
@@ -47,18 +47,18 @@
                                 <td class="px-4 py-2">{{ $checklist->completedBy?->name ?? '—' }} ({{ $checklist->completed_at?->format('Y-m-d') }})</td>
                             </tr>
                             <tr>
-                                <th class="bg-gray-50 px-4 py-2 text-left">Verified by (admin)</th>
-                                <td class="px-4 py-2">{{ $checklist->verifiedBy?->name ?? '—' }} ({{ $checklist->verified_at?->format('Y-m-d') }})</td>
+                                <th class="bg-gray-50 px-4 py-2 text-left">Verified by (quality)</th>
+                                <td class="px-4 py-2">{{ $checklist->verifiedBy?->name ?? '—' }} ({{ $checklist->verified_quality_at?->format('Y-m-d') }})</td>
                             </tr>
                             <tr>
                                 <th class="bg-gray-50 px-4 py-2 text-left">Verified by (quality)</th>
                                 <td class="px-4 py-2">{{ $checklist->verifiedByQuality?->name ?? '—' }} ({{ $checklist->verified_quality_at?->format('Y-m-d') }})</td>
                             </tr>
                             <tr>
-                                <th class="bg-gray-50 px-4 py-2 text-left">Admin status</th>
+                                <th class="bg-gray-50 px-4 py-2 text-left">Quaity status</th>
                                 <td class="px-4 py-2">
-                                    <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $badge($checklist->status_admin === 'verified') }}">
-                                        {{ $checklist->status_admin === 'verified' ? 'Verified' : 'Not verified' }}
+                                    <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $badge($checklist->status_quality === 'verified') }}">
+                                        {{ $checklist->status_quality === 'verified' ? 'Verified' : 'Not verified' }}
                                     </span>
                                 </td>
                             </tr>

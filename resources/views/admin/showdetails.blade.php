@@ -102,7 +102,7 @@
                         <th style="width:120px">Frequency</th>
                         <th>Completed By</th>
                         <th>Verified By</th>
-                        <th>Quality Verified By</th>
+                        <th>Admin Verified By</th>
                         <th style="width:150px">Status</th>
                     </tr>
                     <tr class="filters">
