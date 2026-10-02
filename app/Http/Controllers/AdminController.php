@@ -130,4 +130,84 @@ class AdminController extends Controller
             compact('ppmRecord')
         );
     }
+    public function showdetails(Request $request)
+    {
+        $year = $request->input('year', now()->year); // default = this year
+
+        $query = PpmRecord::query()
+            ->with(['checklist.completedBy', 'checklist.verifiedBy', 'checklist.verifiedByQuality']);
+
+        // Year filter (week_due = YYYYWW, e.g. 202640)
+        if ($year !== 'all') {
+            $year = (int) $year;
+            $query->whereBetween('week_due', [$year * 100, $year * 100 + 53]);
+        }
+
+        if ($request->filled('job_id')) {
+            $query->where('job_id', 'like', '%' . $request->job_id . '%');
+        }
+
+        if ($request->filled('asset_id')) {
+            $query->where('asset_id', 'like', '%' . $request->asset_id . '%');
+        }
+
+        if ($request->filled('week')) {
+            $query->whereRaw('week_due % 100 = ?', [(int) $request->week]);
+        }
+
+        if ($request->filled('frequency')) {
+            $query->where('frequency', $request->frequency);
+        }
+
+        if ($request->filled('completed_by')) {
+            $term = $request->completed_by;
+            $query->whereHas('checklist.completedBy', fn ($q) => $q->where('name', 'like', "%{$term}%"));
+        }
+
+        // Status: verified | not_verified | no_checklist
+        switch ($request->status) {
+            case 'no_checklist':
+                $query->whereDoesntHave('checklist');
+                break;
+            case 'verified':
+                $query->whereHas('checklist', fn ($q) => $q
+                    ->whereNotNull('verified_by_matricule')
+                    ->whereNotNull('verified_by_quality_matricule'));
+                break;
+            case 'not_verified':
+                $query->whereHas('checklist', fn ($q) => $q->where(fn ($w) => $w
+                    ->whereNull('verified_by_matricule')
+                    ->orWhereNull('verified_by_quality_matricule')));
+                break;
+        }
+
+        $records = $query->orderByDesc('week_due')->orderBy('job_id')->paginate(25)->withQueryString();
+
+        // AJAX request -> return only rows + pagination meta
+        if ($request->ajax()) {
+            return response()->json([
+                'html'  => view('admin.partials.ppm-rows', compact('records'))->render(),
+                'total' => $records->total(),
+                'page'  => $records->currentPage(),
+                'last'  => $records->lastPage(),
+            ]);
+        }
+
+        $years = PpmRecord::query()
+            ->selectRaw('DISTINCT FLOOR(week_due / 100) as y')
+            ->pluck('y')
+            ->map(fn ($y) => (int) $y)
+            ->push((int) now()->year)
+            ->unique()->sortDesc()->values();
+
+        $frequencies = PpmRecord::query()->whereNotNull('frequency')
+            ->distinct()->orderBy('frequency')->pluck('frequency');
+
+        return view('admin.showdetails', [
+            'records'     => $records,
+            'years'       => $years,
+            'frequencies' => $frequencies,
+            'year'        => $year,
+        ]);
+    }
 }

@@ -63,6 +63,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+    Route::get('/admin/ppm-records/export/{format}', [AdminController::class, 'export'])
+    ->name('ppm-records.export');
     Route::get('/adminhomepage', [AdminController::class, 'index'])->name('admin.index');
     Route::get('/admin/ppm-records', [AdminController::class, 'index'])->name('ppm-records.index');
     Route::post('/admin/ppm-records/import', [AdminController::class, 'import'])
@@ -85,6 +87,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/admin/ppm-records/{ppmRecord}', [AdminController::class, 'show'])
         ->name('ppm-records.show');
+    Route::get('/adminshowdetails', [AdminController::class, 'showdetails'])
+        ->name('admin.showdetails');
+          Route::get('/ppm-recordsshowdeatils/{ppmRecord}', [AdminController::class, 'show'])->name('ppm-records.show');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
