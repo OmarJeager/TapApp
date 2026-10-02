@@ -12,6 +12,24 @@ use Carbon\Carbon;
 
 class PpmRecordsImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading
 {
+     protected ?string $delimiter;
+
+    public function __construct(?string $delimiter = null)
+    {
+        $this->delimiter = $delimiter;
+    }
+
+    /**
+     * CSV settings.
+     */
+    public function getCsvSettings(): array
+    {
+        return [
+            'delimiter' => $this->delimiter ?? ',',
+            'enclosure' => '"',
+            'input_encoding' => 'UTF-8',
+        ];
+    }
     /**
      * WithHeadingRow turns "PPM ID" into 'ppm_id', "Week Due" into
      * 'week_due', etc. automatically (lowercase, spaces -> underscores).
