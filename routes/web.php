@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PnlChecklistController;
 use App\Http\Controllers\PpmRecordController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QualityController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TicketController;
@@ -51,9 +52,11 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:quality'])->group(function () {
-    Route::get('/quality', function () {
-        return view('quality.dashboard');
-    })->name('quality.dashboard');
+    Route::get('/qualitydashboard', [QualityController::class, 'dashboard'])->name('quality.dashboard');
+    Route::get('/quality/index', [QualityController::class, 'index'])->name('quality.index');
+    Route::get('/ppm/quality/{ppmRecord}', [QualityController::class, 'show'])->name('quality.show');
+    Route::patch('/checklistquality/{checklist}/toggle-status', [QualityController::class, 'toggleStatus'])->name('quality.toggle');
+    Route::post('/bulk-statusquality', [QualityController::class, 'bulkStatus'])->name('quality.bulk');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

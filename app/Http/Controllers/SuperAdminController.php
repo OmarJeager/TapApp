@@ -12,12 +12,16 @@ class SuperAdminController extends Controller
     public function dashboard(){
         return view('admin.dashboard');
     }
-    private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'state'];
+    private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
 
     private function filteredQuery(Request $request)
     {
         $q = PpmRecord::query();
-
+        // Filter by year (defaults to current year) - week_due format: 202636
+        $year = trim((string) $request->input('year', now()->year));
+        if ($year !== '') {
+        $q->where('week_due', 'like', "{$year}%");
+        }
         if ($v = trim((string) $request->job_id)) {
             $q->where('job_id', 'like', "%{$v}%");
         }

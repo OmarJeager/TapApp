@@ -2,10 +2,6 @@
     @php $checklist = $record->checklist; @endphp
     <tr class="hover:bg-gray-50">
         <td class="px-4 py-3">{{ $record->id }}</td>
-
-        {{-- Year column (first 4 chars of week_due, e.g. 202636 → 2026) --}}
-        <td class="px-4 py-3">{{ \Illuminate\Support\Str::substr($record->week_due, 0, 4) }}</td>
-
         <td class="px-4 py-3">{{ $record->job_id }}</td>
         <td class="px-4 py-3">{{ $record->asset_id }}</td>
         <td class="px-4 py-3">{{ $record->week_due }}</td>
@@ -37,11 +33,11 @@
                         </button>
                     </form>
                 @endif
-                <a href="{{ route('superadmin.show', $record) }}"
+                <a href="{{ route('quality.show', $record) }}"
                    class="whitespace-nowrap rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">Show more</a>
             </div>
         </td>
     </tr>
 @empty
-    <tr><td colspan="9" class="px-4 py-6 text-center text-gray-500">No records.</td></tr>
+    <tr><td colspan="8" class="px-4 py-6 text-center text-gray-500">No records.</td></tr>
 @endforelse

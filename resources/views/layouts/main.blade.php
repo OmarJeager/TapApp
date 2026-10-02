@@ -2,30 +2,43 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>
         @yield('title', 'TapApp')
     </title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([
+        'resources/css/app.css',
+        'resources/js/app.js'
+    ])
 
 
     <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
 
         * {
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
+
             margin: 0;
 
             min-height: 100vh;
-
-            background: #f8fafc;
 
             font-family:
                 Arial,
@@ -33,199 +46,424 @@
                 sans-serif;
 
             color: #1f2937;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f8fafc 0%,
+                    #fffaf5 50%,
+                    #f8fafc 100%
+                );
+
+            overflow-x: hidden;
         }
 
 
-        /* =========================================
-           COMPANY LOGO
-        ========================================= */
+        /* =====================================================
+           ANIMATED BACKGROUND
+        ===================================================== */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            width: 400px;
+            height: 400px;
+
+            top: -180px;
+            right: -150px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(249,115,22,0.10),
+                    transparent 70%
+                );
+
+            animation:
+                backgroundFloat 10s ease-in-out infinite;
+
+            pointer-events: none;
+
+            z-index: -1;
+        }
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            width: 300px;
+            height: 300px;
+
+            bottom: -150px;
+            left: -120px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(234,88,12,0.07),
+                    transparent 70%
+                );
+
+            animation:
+                backgroundFloatReverse 12s ease-in-out infinite;
+
+            pointer-events: none;
+
+            z-index: -1;
+        }
+
+
+        /* =====================================================
+           TOP HEADER
+        ===================================================== */
+
+        .top-header {
+
+            position: relative;
+
+            width: 100%;
+
+            min-height: 125px;
+
+            padding:
+                18px
+                25px;
+
+            display: flex;
+
+            align-items: flex-start;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            z-index: 50;
+        }
+
+
+        /* =====================================================
+           LOGO LEFT
+        ===================================================== */
 
         .top-logo {
 
             position: relative;
 
-            padding: 20px 30px;
+            display: flex;
 
-            animation: logoFade 0.8s ease;
+            align-items: center;
 
-            width: 100%;
+            justify-content: flex-start;
+
+            padding:
+                4px
+                8px;
+
+            animation:
+                logoEntrance
+                0.9s
+                cubic-bezier(.17,.67,.35,1.25)
+                both;
+        }
+
+
+        .top-logo::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 100px;
+            height: 100px;
+
+            left: -15px;
+            top: -25px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(249,115,22,0.15),
+                    transparent 70%
+                );
+
+            animation:
+                logoGlow 3s ease-in-out infinite;
+
+            pointer-events: none;
         }
 
 
         .top-logo img {
 
-            width: 125px;
+            position: relative;
+
+            width: 135px;
 
             height: auto;
 
             display: block;
 
+            filter:
+                drop-shadow(
+                    0 7px 14px
+                    rgba(0,0,0,0.12)
+                );
+
             transition:
-                transform 0.3s ease;
+                transform 0.45s ease,
+                filter 0.45s ease;
         }
 
 
         .top-logo img:hover {
 
-            transform: scale(1.05);
+            transform:
+                scale(1.07)
+                rotate(-2deg);
+
+            filter:
+                drop-shadow(
+                    0 12px 22px
+                    rgba(234,88,12,0.25)
+                );
         }
 
 
-        @keyframes logoFade {
+        /* =====================================================
+           LITTLE DECORATIVE LINE UNDER LOGO
+        ===================================================== */
 
-            from {
+        .logo-line {
 
-                opacity: 0;
+            position: absolute;
 
-                transform:
-                    translateY(-15px);
-            }
+            left: 10px;
+            bottom: -5px;
 
-            to {
+            width: 55px;
+            height: 3px;
 
-                opacity: 1;
+            border-radius: 20px;
 
-                transform:
-                    translateY(0);
-            }
+            background:
+                linear-gradient(
+                    90deg,
+                    #ea580c,
+                    #fb923c,
+                    transparent
+                );
+
+            animation:
+                logoLine 1.2s ease
+                0.5s
+                both;
         }
 
 
-        /* =========================================
-           PROFILE WRAPPER
-        ========================================= */
+        /* =====================================================
+           PROFILE AREA
+        ===================================================== */
 
         .profile-wrapper {
 
-            width: 100%;
+            position: relative;
+
+            width: auto;
 
             display: flex;
 
-            justify-content: center;
+            justify-content: flex-end;
 
-            padding:
-                5px
-                20px
-                30px;
+            align-items: flex-start;
+
+            padding: 0;
+
+            margin: 0;
+
+            animation:
+                cardEntrance
+                0.8s
+                cubic-bezier(.17,.67,.35,1.25)
+                both;
         }
 
 
-        /* =========================================
-           PROFILE CARD
-        ========================================= */
+        /* =====================================================
+           COMPACT BUSINESS CARD
+        ===================================================== */
 
         .profile-card {
 
             position: relative;
 
-            width: min(680px, 100%);
+            width: 330px;
 
-            min-height: 270px;
+            min-height: 185px;
+
+            padding:
+                20px
+                20px;
 
             display: flex;
 
             align-items: center;
 
-            gap: 25px;
-
-            padding:
-                28px
-                30px;
+            gap: 16px;
 
             background:
                 linear-gradient(
                     135deg,
-                    #fff7ed 0%,
-                    #ffffff 48%,
-                    #fffaf5 100%
+                    rgba(255,255,255,0.98),
+                    rgba(255,247,237,0.96)
                 );
 
-            border-radius: 20px;
-
             border:
-                1px solid #fed7aa;
+                1px solid
+                rgba(249,115,22,0.20);
+
+            border-radius: 22px;
 
             box-shadow:
-                0 15px 35px
-                rgba(234, 88, 12, 0.12),
 
-                0 5px 12px
-                rgba(0, 0, 0, 0.06);
+                0 18px 40px
+                rgba(15,23,42,0.10),
+
+                0 5px 15px
+                rgba(234,88,12,0.08),
+
+                inset 0 1px 0
+                rgba(255,255,255,0.90);
 
             overflow: hidden;
 
-            animation:
-                cardAppear 0.8s ease;
+            isolation: isolate;
 
             transition:
-                transform 0.3s ease,
-                box-shadow 0.3s ease;
+                transform 0.4s ease,
+                box-shadow 0.4s ease;
         }
 
 
         .profile-card:hover {
 
             transform:
-                translateY(-5px);
+                translateY(-6px)
+                scale(1.015);
 
             box-shadow:
-                0 22px 45px
-                rgba(234, 88, 12, 0.20),
 
-                0 8px 18px
-                rgba(0, 0, 0, 0.08);
+                0 25px 55px
+                rgba(15,23,42,0.14),
+
+                0 10px 25px
+                rgba(234,88,12,0.12);
         }
 
 
-        /* =========================================
-           ORANGE DECORATION
-        ========================================= */
+        /* =====================================================
+           CARD ORANGE TOP CORNER
+        ===================================================== */
 
-        .orange-decoration {
+        .card-decoration {
 
             position: absolute;
 
-            top: -80px;
+            width: 150px;
+            height: 150px;
 
-            right: -80px;
-
-            width: 230px;
-
-            height: 230px;
-
-            background: #f97316;
+            top: -85px;
+            right: -75px;
 
             border-radius: 50%;
 
-            opacity: 0.08;
+            background:
+                linear-gradient(
+                    135deg,
+                    #ea580c,
+                    #fb923c
+                );
+
+            opacity: 0.14;
+
+            animation:
+                decorationFloat 6s ease-in-out infinite;
+
+            z-index: -1;
         }
 
 
-        .orange-decoration::after {
+        .card-decoration::after {
 
             content: "";
 
             position: absolute;
 
-            width: 150px;
+            width: 75px;
+            height: 75px;
 
-            height: 150px;
-
-            top: 80px;
-
-            left: -50px;
-
-            background: #ea580c;
+            left: -20px;
+            bottom: -30px;
 
             border-radius: 50%;
 
-            opacity: 0.5;
+            background:
+                rgba(234,88,12,0.15);
         }
 
 
-        /* =========================================
+        /* =====================================================
+           CARD SHINE
+        ===================================================== */
+
+        .profile-card::before {
+
+            content: "";
+
+            position: absolute;
+
+            top: -100%;
+
+            left: -80%;
+
+            width: 55%;
+
+            height: 300%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255,255,255,0.55),
+                    transparent
+                );
+
+            transform:
+                rotate(25deg);
+
+            animation:
+                cardShine 6s ease-in-out infinite;
+
+            pointer-events: none;
+
+            z-index: 10;
+        }
+
+
+        /* =====================================================
            PROFILE IMAGE
-        ========================================= */
+        ===================================================== */
 
         .profile-image-container {
 
@@ -233,61 +471,101 @@
 
             flex-shrink: 0;
 
-            z-index: 2;
+            z-index: 5;
+
+            animation:
+                imageEntrance
+                0.8s
+                0.25s
+                both;
+        }
+
+
+        .profile-image-ring {
+
+            width: 92px;
+            height: 92px;
+
+            padding: 4px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #fed7aa,
+                    #f97316
+                );
+
+            box-shadow:
+                0 8px 22px
+                rgba(234,88,12,0.20);
+
+            animation:
+                ringPulse
+                4s
+                ease-in-out
+                infinite;
         }
 
 
         .profile-image {
 
-            width: 110px;
-
-            height: 110px;
+            width: 84px;
+            height: 84px;
 
             object-fit: cover;
 
             border-radius: 50%;
 
             border:
-                5px solid white;
+                4px solid white;
 
-            box-shadow:
-                0 8px 22px
-                rgba(234, 88, 12, 0.22);
+            background: white;
+
+            display: block;
 
             transition:
-                transform 0.3s ease,
-                box-shadow 0.3s ease;
+                transform 0.4s ease,
+                box-shadow 0.4s ease;
         }
 
 
-        .profile-image:hover {
+        .profile-image-container:hover
+        .profile-image {
 
             transform:
-                scale(1.06);
+                scale(1.08);
 
             box-shadow:
-                0 12px 30px
-                rgba(234, 88, 12, 0.30);
+                0 10px 25px
+                rgba(234,88,12,0.25);
         }
 
 
-        /* =========================================
-           STATUS
-        ========================================= */
+        /* =====================================================
+           ONLINE STATUS
+        ===================================================== */
 
         .profile-status {
 
             position: absolute;
 
             width: 17px;
-
             height: 17px;
 
-            right: 5px;
+            right: 3px;
+            bottom: 5px;
 
-            bottom: 8px;
-
-            background: #22c55e;
+            background:
+                #22c55e;
 
             border:
                 3px solid white;
@@ -295,193 +573,440 @@
             border-radius: 50%;
 
             animation:
-                statusPulse 2s infinite;
+                statusPulse
+                2s infinite;
         }
 
 
-        /* =========================================
+        /* =====================================================
            PROFILE INFORMATION
-        ========================================= */
+        ===================================================== */
 
         .profile-info {
 
-            position: relative;
-
-            z-index: 2;
+            min-width: 0;
 
             flex: 1;
+
+            position: relative;
+
+            z-index: 5;
         }
 
 
         .profile-name {
 
             margin:
-                0 0 8px;
+                0 0 5px;
 
-            font-size: 25px;
+            font-size:
+                21px;
 
-            font-weight: 700;
+            line-height:
+                1.15;
 
-            color: #1f2937;
+            font-weight:
+                800;
+
+            color:
+                #1f2937;
+
+            overflow-wrap:
+                anywhere;
+
+            animation:
+                fadeUp
+                0.7s
+                0.3s
+                both;
         }
 
 
-        /* =========================================
+        /* =====================================================
+           ROLE
+        ===================================================== */
+
+        .profile-role {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            margin-bottom: 9px;
+
+            padding:
+                4px
+                9px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(249,115,22,0.09);
+
+            color:
+                #c2410c;
+
+            font-size:
+                8px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1px;
+
+            text-transform:
+                uppercase;
+
+            animation:
+                fadeUp
+                0.7s
+                0.4s
+                both;
+        }
+
+
+        .profile-role span {
+
+            color:
+                #22c55e;
+
+            animation:
+                statusDot
+                2s
+                infinite;
+        }
+
+
+        /* =====================================================
            PROFILE LINES
-        ========================================= */
+        ===================================================== */
+
+        .profile-details {
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                5px;
+        }
+
 
         .profile-line {
 
-            display: flex;
+            display:
+                flex;
 
-            gap: 7px;
+            align-items:
+                center;
 
-            margin:
-                6px 0;
+            gap:
+                6px;
 
-            font-size: 13px;
+            min-width:
+                0;
 
-            color: #64748b;
+            color:
+                #64748b;
 
-            min-width: 0;
+            font-size:
+                10px;
 
-            overflow-wrap: anywhere;
+            animation:
+                fadeUp
+                0.7s
+                0.5s
+                both;
         }
 
 
         .profile-line strong {
 
-            color: #374151;
+            color:
+                #374151;
+
+            font-size:
+                9px;
         }
 
 
-        /* =========================================
+        .profile-line span {
+
+            min-width:
+                0;
+
+            overflow-wrap:
+                anywhere;
+        }
+
+
+        /* =====================================================
            COMPANY
-        ========================================= */
+        ===================================================== */
 
         .profile-company {
 
-            margin-top: 10px;
+            margin-top:
+                9px;
 
-            color: #ea580c;
+            padding-top:
+                8px;
 
-            font-size: 14px;
+            border-top:
+                1px dashed
+                #fed7aa;
 
-            font-weight: 700;
+            color:
+                #ea580c;
 
-            letter-spacing: 0.5px;
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                0.8px;
+
+            animation:
+                fadeUp
+                0.7s
+                0.6s
+                both;
         }
 
 
-        /* =========================================
-           JOB ID
-        ========================================= */
+        .profile-company-sub {
+
+            margin-top:
+                2px;
+
+            color:
+                #94a3b8;
+
+            font-size:
+                7px;
+
+            letter-spacing:
+                1.5px;
+
+            font-weight:
+                600;
+        }
+
+
+        /* =====================================================
+           JOB SECTION
+        ===================================================== */
 
         .job-section {
 
-            margin-top: 13px;
+            margin-top:
+                9px;
 
-            padding-top: 11px;
+            padding-top:
+                8px;
 
             border-top:
-                1px solid #fed7aa;
+                1px solid
+                #fed7aa;
+
+            animation:
+                fadeUp
+                0.7s
+                0.7s
+                both;
         }
 
 
         .job-title {
 
-            color: #9a3412;
+            color:
+                #9a3412;
 
-            font-size: 9px;
+            font-size:
+                7px;
 
-            font-weight: 700;
+            font-weight:
+                800;
 
-            letter-spacing: 1.5px;
+            letter-spacing:
+                1.4px;
 
-            margin-bottom: 2px;
+            margin-bottom:
+                2px;
         }
 
 
         .job-id {
 
-            color: #ea580c;
+            color:
+                #ea580c;
 
-            font-size: 19px;
+            font-size:
+                13px;
 
-            font-weight: 800;
+            font-weight:
+                900;
 
-            letter-spacing: 1px;
+            letter-spacing:
+                0.8px;
 
-            margin-bottom: 4px;
+            margin-bottom:
+                4px;
+
+            font-family:
+                monospace;
+
+            overflow-wrap:
+                anywhere;
         }
 
 
-        /* =========================================
+        /* =====================================================
            BARCODE
-        ========================================= */
+        ===================================================== */
+
+        .barcode-wrapper {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            padding:
+                4px
+                7px;
+
+            background:
+                rgba(255,255,255,0.75);
+
+            border-radius:
+                7px;
+
+            border:
+                1px solid
+                #f1f5f9;
+        }
+
 
         .barcode {
 
-            display: block;
+            display:
+                block;
 
-            width: 155px;
+            width:
+                105px;
 
-            height: 38px;
+            height:
+                25px;
 
-            object-fit: contain;
-
-            object-position: left;
-
-            margin: 0;
+            object-fit:
+                contain;
         }
 
 
         .barcode-number {
 
-            margin-top: 2px;
+            color:
+                #6b7280;
 
-            color: #6b7280;
+            font-family:
+                monospace;
 
-            font-family: monospace;
+            font-size:
+                7px;
 
-            font-size: 10px;
+            letter-spacing:
+                1px;
 
-            letter-spacing: 2px;
+            overflow-wrap:
+                anywhere;
         }
 
 
-        /* =========================================
+        /* =====================================================
+           CARD FOOTER
+        ===================================================== */
+
+        .card-footer {
+
+            position:
+                absolute;
+
+            bottom:
+                7px;
+
+            right:
+                15px;
+
+            color:
+                #cbd5e1;
+
+            font-size:
+                6px;
+
+            letter-spacing:
+                1px;
+
+            text-transform:
+                uppercase;
+        }
+
+
+        /* =====================================================
            PAGE CONTENT
-        ========================================= */
+        ===================================================== */
 
         .page-content {
 
-            width: 100%;
+            width:
+                100%;
 
-            max-width: 1200px;
+            max-width:
+                1400px;
 
-            margin: auto;
+            margin:
+                0 auto;
 
             padding:
-                20px;
+                10px
+                25px
+                35px;
 
-            overflow-x: hidden;
+            overflow-x:
+                hidden;
+
+            animation:
+                contentAppear
+                0.7s
+                0.25s
+                both;
         }
 
 
-        /* =========================================
+        /* =====================================================
            ANIMATIONS
-        ========================================= */
+        ===================================================== */
 
-        @keyframes cardAppear {
+        @keyframes logoEntrance {
 
             from {
 
                 opacity: 0;
 
                 transform:
-                    translateY(25px)
-                    scale(0.97);
+                    translateX(-40px)
+                    scale(0.85);
             }
 
             to {
@@ -489,8 +1014,142 @@
                 opacity: 1;
 
                 transform:
+                    translateX(0)
+                    scale(1);
+            }
+        }
+
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+
+                transform:
+                    scale(0.9);
+
+                opacity:
+                    0.6;
+            }
+
+            50% {
+
+                transform:
+                    scale(1.15);
+
+                opacity:
+                    1;
+            }
+        }
+
+
+        @keyframes logoLine {
+
+            from {
+
+                width:
+                    0;
+
+                opacity:
+                    0;
+            }
+
+            to {
+
+                width:
+                    55px;
+
+                opacity:
+                    1;
+            }
+        }
+
+
+        @keyframes cardEntrance {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateX(45px)
+                    translateY(-15px)
+                    scale(0.9);
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateX(0)
                     translateY(0)
                     scale(1);
+            }
+        }
+
+
+        @keyframes imageEntrance {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    scale(0.5)
+                    rotate(-15deg);
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    scale(1)
+                    rotate(0);
+            }
+        }
+
+
+        @keyframes fadeUp {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(10px);
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        @keyframes ringPulse {
+
+            0%,
+            100% {
+
+                transform:
+                    scale(1);
+            }
+
+            50% {
+
+                transform:
+                    scale(1.04);
             }
         }
 
@@ -501,159 +1160,386 @@
 
                 box-shadow:
                     0 0 0 0
-                    rgba(34, 197, 94, 0.5);
+                    rgba(34,197,94,0.55);
             }
 
             70% {
 
                 box-shadow:
-                    0 0 0 8px
-                    rgba(34, 197, 94, 0);
+                    0 0 0 7px
+                    rgba(34,197,94,0);
             }
 
             100% {
 
                 box-shadow:
                     0 0 0 0
-                    rgba(34, 197, 94, 0);
+                    rgba(34,197,94,0);
             }
         }
 
 
-        /* =========================================
-           MOBILE
-        ========================================= */
+        @keyframes statusDot {
 
-        @media (max-width: 700px) {
+            0%,
+            100% {
 
-            body {
-                overflow-x: hidden;
+                opacity:
+                    1;
             }
 
-            .top-logo {
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: 5;
-                width: auto;
-                padding: 12px 15px;
+            50% {
+
+                opacity:
+                    0.35;
+            }
+        }
+
+
+        @keyframes cardShine {
+
+            0% {
+
+                left:
+                    -80%;
+            }
+
+            45%,
+            100% {
+
+                left:
+                    150%;
+            }
+        }
+
+
+        @keyframes decorationFloat {
+
+            0%,
+            100% {
+
+                transform:
+                    translate(0,0)
+                    rotate(0deg);
+            }
+
+            50% {
+
+                transform:
+                    translate(-10px,10px)
+                    rotate(15deg);
+            }
+        }
+
+
+        @keyframes backgroundFloat {
+
+            0%,
+            100% {
+
+                transform:
+                    translate(0,0);
+            }
+
+            50% {
+
+                transform:
+                    translate(-30px,30px);
+            }
+        }
+
+
+        @keyframes backgroundFloatReverse {
+
+            0%,
+            100% {
+
+                transform:
+                    translate(0,0);
+            }
+
+            50% {
+
+                transform:
+                    translate(30px,-20px);
+            }
+        }
+
+
+        @keyframes contentAppear {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(15px);
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        /* =====================================================
+           TABLET
+        ===================================================== */
+
+        @media (max-width: 800px) {
+
+            .top-header {
+
+                min-height:
+                    115px;
+
+                padding:
+                    15px
+                    18px;
             }
 
 
             .top-logo img {
 
-                width: clamp(72px, 20vw, 100px);
-            }
-
-            .profile-wrapper {
-                justify-content: flex-end;
-                padding: 12px 14px 20px;
-                margin-top: 74px;
+                width:
+                    115px;
             }
 
 
             .profile-card {
 
-                width: min(100%, 420px);
+                width:
+                    300px;
 
-                flex-direction: column;
-
-                text-align: center;
+                min-height:
+                    175px;
 
                 padding:
-                    25px
-                    20px;
-
-                gap: 15px;
+                    17px;
             }
 
 
-            .profile-line {
+            .profile-image-ring {
 
-                justify-content: center;
+                width:
+                    80px;
+
+                height:
+                    80px;
             }
 
 
-            .profile-company {
+            .profile-image {
 
-                margin-top: 12px;
+                width:
+                    72px;
+
+                height:
+                    72px;
             }
 
 
-            .job-section {
+            .profile-name {
 
-                text-align: center;
-
-                width: 100%;
-            }
-
-
-            .barcode {
-
-                margin:
-                    0 auto;
+                font-size:
+                    18px;
             }
 
 
             .page-content {
 
                 padding:
-                    10px;
-            }
-
-            .profile-name {
-
-                font-size: 22px;
-
-                overflow-wrap: anywhere;
-            }
-
-            .profile-line {
-
-                flex-wrap: wrap;
-
-                gap: 3px 7px;
-            }
-
-            .profile-company {
-
-                overflow-wrap: anywhere;
+                    8px
+                    18px
+                    30px;
             }
         }
 
 
-        @media (max-width: 380px) {
+        /* =====================================================
+           MOBILE
+        ===================================================== */
 
-            .top-logo {
+        @media (max-width: 600px) {
 
-                padding: 10px 12px;
-            }
+            .top-header {
 
-            .profile-wrapper {
-
-                padding: 8px 10px 18px;
-                margin-top: 64px;
-            }
-
-            .profile-card {
+                min-height:
+                    auto;
 
                 padding:
-                    20px
+                    12px;
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+
+                gap:
                     12px;
             }
 
+
+            .top-logo {
+
+                width:
+                    100%;
+
+                justify-content:
+                    flex-start;
+
+                padding:
+                    0
+                    5px;
+            }
+
+
+            .top-logo img {
+
+                width:
+                    105px;
+            }
+
+
+            .profile-wrapper {
+
+                width:
+                    100%;
+
+                justify-content:
+                    center;
+            }
+
+
+            .profile-card {
+
+                width:
+                    min(
+                        390px,
+                        100%
+                    );
+
+                min-height:
+                    175px;
+            }
+
+
+            .page-content {
+
+                padding:
+                    8px
+                    12px
+                    25px;
+            }
+        }
+
+
+        /* =====================================================
+           SMALL MOBILE
+        ===================================================== */
+
+        @media (max-width: 390px) {
+
+            .profile-card {
+
+                gap:
+                    12px;
+
+                padding:
+                    15px;
+
+                border-radius:
+                    18px;
+            }
+
+
+            .profile-image-ring {
+
+                width:
+                    72px;
+
+                height:
+                    72px;
+            }
+
+
             .profile-image {
 
-                width: 90px;
+                width:
+                    64px;
 
-                height: 90px;
+                height:
+                    64px;
             }
+
+
+            .profile-name {
+
+                font-size:
+                    16px;
+            }
+
+
+            .profile-line {
+
+                font-size:
+                    9px;
+            }
+
+
+            .profile-company {
+
+                font-size:
+                    8px;
+            }
+
 
             .job-id {
 
-                font-size: 17px;
+                font-size:
+                    11px;
+            }
 
-                overflow-wrap: anywhere;
+
+            .barcode {
+
+                width:
+                    90px;
+
+                height:
+                    22px;
+            }
+        }
+
+
+        /* =====================================================
+           REDUCED MOTION
+        ===================================================== */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.01ms !important;
             }
         }
 
@@ -665,194 +1551,235 @@
 <body>
 
 
-    {{-- =========================================
-         COMPANY LOGO
-    ========================================= --}}
+    {{-- =====================================================
+         TOP HEADER
+    ===================================================== --}}
 
-    <div class="top-logo">
-
-        <img
-            src="{{ asset('pictures/logo.png') }}"
-            alt="Company Logo"
-        >
-
-    </div>
+    <header class="top-header">
 
 
-    {{-- =========================================
-         PROFILE CARD
-    ========================================= --}}
+        {{-- =================================================
+             LOGO LEFT
+        ================================================= --}}
 
-    @auth
+        <div class="top-logo">
 
-        <div class="profile-wrapper">
+            <img
+                src="{{ asset('pictures/logo.png') }}"
+                alt="Company Logo"
+            >
 
-            <div class="profile-card">
+            <div class="logo-line"></div>
 
-
-                {{-- ORANGE DECORATION --}}
-
-                <div class="orange-decoration"></div>
-
-
-                {{-- =================================
-                     PROFILE IMAGE
-                ================================= --}}
-
-                <div class="profile-image-container">
-
-                    @if(auth()->user()->profile_picture)
-
-                        <img
-                            src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
-                            alt="Profile"
-                            class="profile-image"
-                        >
-
-                    @else
-
-                        <img
-                            src="{{ asset('images/default-profile.png') }}"
-                            alt="Profile"
-                            class="profile-image"
-                        >
-
-                    @endif
+        </div>
 
 
-                    <span class="profile-status"></span>
+        {{-- =================================================
+             PROFILE CARD RIGHT
+        ================================================= --}}
 
-                </div>
+        @auth
 
+            <div class="profile-wrapper">
 
-                {{-- =================================
-                     USER INFORMATION
-                ================================= --}}
-
-                <div class="profile-info">
-
-
-                    {{-- NAME --}}
-
-                    <h2 class="profile-name">
-
-                        {{ auth()->user()->name }}
-
-                    </h2>
+                <div class="profile-card">
 
 
-                    {{-- MATRICULE --}}
+                    {{-- DECORATION --}}
 
-                    <div class="profile-line">
+                    <div class="card-decoration"></div>
 
-                        <strong>
-                            Matricule:
-                        </strong>
 
-                        <span>
-                            {{ auth()->user()->matricule }}
-                        </span>
+                    {{-- =================================================
+                         PROFILE IMAGE
+                    ================================================= --}}
+
+                    <div class="profile-image-container">
+
+                        <div class="profile-image-ring">
+
+                            @if(auth()->user()->profile_picture)
+
+                                <img
+                                    src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
+                                    alt="Profile"
+                                    class="profile-image"
+                                >
+
+                            @else
+
+                                <img
+                                    src="{{ asset('images/default-profile.png') }}"
+                                    alt="Profile"
+                                    class="profile-image"
+                                >
+
+                            @endif
+
+                        </div>
+
+
+                        <span class="profile-status"></span>
 
                     </div>
 
 
-                    {{-- EMAIL --}}
+                    {{-- =================================================
+                         PROFILE INFORMATION
+                    ================================================= --}}
 
-                    <div class="profile-line">
-
-                        <strong>
-                            Email:
-                        </strong>
-
-                        <span>
-                            {{ auth()->user()->email }}
-                        </span>
-
-                    </div>
+                    <div class="profile-info">
 
 
-                    {{-- =================================
-                         COMPANY
-                    ================================= --}}
+                        {{-- NAME --}}
 
-                    <div class="profile-company">
+                        <h2 class="profile-name">
 
-                        VERSIGENT / Morocco III
+                            {{ auth()->user()->name }}
 
-                    </div>
+                        </h2>
 
 
-                    {{-- =================================
-                         JOB ID + BARCODE
-                    ================================= --}}
+                        {{-- ROLE --}}
 
-                    @if(isset($ppmRecord) && $ppmRecord->job_id)
+                        <div class="profile-role">
 
-                        <div class="job-section">
+                            <span>●</span>
+
+                            {{ ucfirst(auth()->user()->role ?? 'User') }}
+
+                        </div>
 
 
-                            {{-- JOB LABEL --}}
+                        {{-- DETAILS --}}
 
-                            <div class="job-title">
+                        <div class="profile-details">
 
-                                JOB ID
+
+                            {{-- MATRICULE --}}
+
+                            <div class="profile-line">
+
+                                <strong>
+                                    ID:
+                                </strong>
+
+                                <span>
+                                    {{ auth()->user()->matricule }}
+                                </span>
 
                             </div>
 
 
-                            {{-- JOB NUMBER --}}
+                            {{-- EMAIL --}}
 
-                            <div class="job-id">
+                            <div class="profile-line">
 
-                                {{ $ppmRecord->job_id }}
+                                <strong>
+                                    Email:
+                                </strong>
 
-                            </div>
-
-
-                            {{-- BARCODE --}}
-
-                            <img
-                                class="barcode"
-
-                                src="data:image/png;base64,{{
-                                    DNS1D::getBarcodePNG(
-                                        $ppmRecord->job_id,
-                                        'C128',
-                                        2,
-                                        40
-                                    )
-                                }}"
-
-                                alt="Job ID Barcode"
-                            >
-
-
-                            {{-- BARCODE NUMBER --}}
-
-                            <div class="barcode-number">
-
-                                {{ $ppmRecord->job_id }}
+                                <span>
+                                    {{ auth()->user()->email }}
+                                </span>
 
                             </div>
 
 
                         </div>
 
-                    @endif
 
+                        {{-- COMPANY --}}
+
+                        <div class="profile-company">
+
+                            VERSIGENT / Morocco III
+
+                            <div class="profile-company-sub">
+
+                                TAP APPLICATION
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- =================================================
+                             JOB ID
+                        ================================================= --}}
+
+                        @if(isset($ppmRecord) && $ppmRecord->job_id)
+
+                            <div class="job-section">
+
+
+                                <div class="job-title">
+
+                                    JOB ID
+
+                                </div>
+
+
+                                <div class="job-id">
+
+                                    {{ $ppmRecord->job_id }}
+
+                                </div>
+
+
+                                <div class="barcode-wrapper">
+
+                                    <img
+                                        class="barcode"
+
+                                        src="data:image/png;base64,{{
+                                            DNS1D::getBarcodePNG(
+                                                $ppmRecord->job_id,
+                                                'C128',
+                                                2,
+                                                40
+                                            )
+                                        }}"
+
+                                        alt="Job ID Barcode"
+                                    >
+
+
+                                    <div class="barcode-number">
+
+                                        {{ $ppmRecord->job_id }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+
+                    {{-- FOOTER --}}
+
+                    <div class="card-footer">
+
+                        TAPAPP • VERSIGENT
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </div>
+        @endauth
 
-    @endauth
+    </header>
 
 
-    {{-- =========================================
-         CHILD PAGE CONTENT
-    ========================================= --}}
+    {{-- =====================================================
+         MAIN PAGE CONTENT
+    ===================================================== --}}
 
     <main class="page-content">
 
@@ -864,3 +1791,4 @@
 </body>
 
 </html>
+
