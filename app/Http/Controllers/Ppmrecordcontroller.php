@@ -50,26 +50,39 @@ class PpmRecordController extends Controller
             );
         }
 
-        // =========================
-    // TST
-    // =========================
-    if (str_starts_with($assetId, 'tst')) {
+   // =========================
+// TST
+// =========================
+if (str_starts_with($assetId, 'tst')) {
 
-        // TST Frequency 1
-        if ($frequency === 1) {
+    // TST Frequency 1
+    if ($frequency === 1) {
+        return redirect()->route(
+            'ppm-checklists.tst.frequency1',
+            $ppmRecord
+        );
+    }
+
+    // TST Frequency 4
+    if ($frequency === 4) {
+
+        // Get asset description
+        $description = strtolower(trim($ppmRecord->asset_description ?? ''));
+
+        // If description contains HV anywhere
+        if (str_contains($description, 'hv')) {
             return redirect()->route(
-                'ppm-checklists.tst.frequency1',
+                'ppm-checklists.tst.frequency4hv',
                 $ppmRecord
             );
         }
 
-        // TST Frequency 4
-        if ($frequency === 4) {
-            return redirect()->route(
-                'ppm-checklists.tst.frequency4',
-                $ppmRecord
-            );
-        }
+        // Normal Frequency 4
+        return redirect()->route(
+            'ppm-checklists.tst.frequency4',
+            $ppmRecord
+        );
+    }
 
         abort(
             404,

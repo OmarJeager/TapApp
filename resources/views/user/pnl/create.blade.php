@@ -1,3 +1,16 @@
+ <div class="back-btn-container"> <a href="{{ route('user.index') }}" class="back-btn"> <span class="back-arrow">←</span> <span>Back</span> </a> </div>
+<button type="button" class="logout-trigger" onclick="document.getElementById('logoutDialog').classList.add('is-open')" aria-label="Log out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3m9-8h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/></svg> Log out</button>
+<div class="logout-overlay" id="logoutDialog" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" onclick="if(event.target === this) this.classList.remove('is-open')">
+    <div class="logout-dialog">
+        <div class="logout-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3m9-8h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/></svg></div>
+        <h2 id="logoutTitle">Log out?</h2>
+        <p>Are you sure you want to log out?</p>
+        <div class="logout-actions">
+            <button type="button" class="logout-cancel" onclick="document.getElementById('logoutDialog').classList.remove('is-open')">Stay here</button>
+            <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="logout-confirm">Yes, log out</button></form>
+        </div>
+    </div>
+</div>
 @include('layouts.main')
 
 @section('title', 'PNL Checklist')
@@ -24,7 +37,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PPM Details</title>
 <style>
-
+.logout-trigger { position: fixed; top: 24px; right: 28px; z-index: 1100; display: inline-flex; align-items: center; gap: 9px; padding: 11px 18px; border: 0; border-radius: 12px; color: #fff; background: linear-gradient(135deg, #ef5350, #c62828); box-shadow: 0 7px 18px rgba(198,40,40,.3); font: 700 15px Arial,sans-serif; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+.logout-trigger:hover { transform: translateY(-3px); box-shadow: 0 11px 24px rgba(198,40,40,.4); }
+.logout-trigger svg, .logout-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.logout-overlay { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(18,24,32,.58); opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s; }
+.logout-overlay.is-open { opacity: 1; visibility: visible; }
+.logout-dialog { width: min(100%, 390px); padding: 30px; border-radius: 18px; background: #fff; box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center; font-family: Arial,sans-serif; transform: translateY(18px) scale(.96); transition: transform .25s; }
+.logout-overlay.is-open .logout-dialog { transform: translateY(0) scale(1); }
+.logout-icon { display: grid; width: 58px; height: 58px; margin: 0 auto 16px; place-items: center; border-radius: 50%; color: #c62828; background: #ffebee; }
+.logout-icon svg { width: 26px; height: 26px; }
+.logout-dialog h2 { margin: 0 0 9px; color: #222; font-size: 23px; }
+.logout-dialog p { margin: 0 0 24px; color: #666; font-size: 15px; }
+.logout-actions { display: flex; justify-content: center; gap: 10px; }
+.logout-actions button { padding: 11px 16px; border: 0; border-radius: 8px; font: 700 14px Arial,sans-serif; cursor: pointer; transition: transform .2s, background .2s; }
+.logout-actions button:hover { transform: translateY(-2px); }
+.logout-cancel { color: #333; background: #eee; }
+.logout-confirm { color: #fff; background: #c62828; }
+@media (max-width: 600px) { .logout-trigger { top: 14px; right: 14px; padding: 10px 13px; } }
+.back-btn-c ontainer { display: flex; justify-content: flex-start; margin: 25px 0; } .back-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 180px; padding: 15px 28px; background: linear-gradient(135deg, #ff9800, #f4511e); color: white; font-size: 18px; font-weight: 700; text-decoration: none; border-radius: 13px; box-shadow: 0 8px 20px rgba(255, 111, 0, 0.35); overflow: hidden; transition: all 0.3s ease; } /* Shine effect */ .back-btn::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: rgba(255, 255, 255, 0.25); transform: skewX(-25deg); transition: left 0.6s ease; } .back-btn:hover::before { left: 140%; } /* Hover animation */ .back-btn:hover { transform: translateY(-4px) scale(1.03); background: linear-gradient(135deg, #ffab00, #ff5722); box-shadow: 0 14px 30px rgba(255, 111, 0, 0.5); } /* Arrow animation */ .back-arrow { position: relative; z-index: 1; font-size: 27px; line-height: 1; transition: transform 0.3s ease; } .back-btn:hover .back-arrow { transform: translateX(-6px); } .back-btn span:last-child { position: relative; z-index: 1; } /* Click animation */ .back-btn:active { transform: scale(0.96); }
     .submit-row {
     margin-top: 30px;
     text-align: right;
@@ -589,7 +619,7 @@
 
             @php
                 $adminVerified = strtolower(trim((string) ($checklist->status_admin ?? ''))) === 'verified';
-                $qualityVerified = strtolower(trim((string) ($checklist->quality_status ?? ''))) === 'verified';
+                $qualityVerified = strtolower(trim((string) ($checklist->status_quality ?? ''))) === 'verified';
                 $adminVerifier = trim((string) ($checklist->verified_by_matricule ?? ''));
                 $qualityVerifier = trim((string) ($checklist->verified_by_quality_matricule ?? ''));
             @endphp

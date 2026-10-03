@@ -8,6 +8,7 @@ use App\Http\Controllers\QualityController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TstFreauencyFourHvController;
 use App\Http\Controllers\TstFrequencyFourController;
 use App\Http\Controllers\TstFrequencyOneController;
 use App\Http\Controllers\UserController;
@@ -110,6 +111,9 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-checklists.tst.frequency1');
     Route::get('/ppm-records/{ppmRecord}/tstf4-form', [TstFrequencyFourController::class, 'create'])
         ->name('ppm-checklists.tst.frequency4');
+    Route::get(
+    '/ppm-records/{ppmRecord}/tst-frequency4-hv',[TstFreauencyFourHvController::class, 'frequency4Hv'])
+        ->name('ppm-checklists.tst.frequency4hv');
     Route::get('/tickets', [TicketController::class, 'index'])
         ->name('tickets.index');
     Route::get('/tickets/weeks', [TicketController::class, 'weeks'])

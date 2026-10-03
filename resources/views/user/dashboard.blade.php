@@ -1,3 +1,4 @@
+<style> .home-btn-container { display: flex; justify-content: flex-start; margin: 25px 0; } .home-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 12px; width: 200px; padding: 16px 25px; background: linear-gradient(135deg, #ff9800, #f4511e); color: #fff; font-size: 19px; font-weight: bold; text-decoration: none; border-radius: 14px; box-shadow: 0 8px 20px rgba(255, 111, 0, 0.35); overflow: hidden; transition: all 0.3s ease; } /* Shine animation */ .home-btn::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: rgba(255, 255, 255, 0.25); transform: skewX(-25deg); transition: left 0.6s ease; } .home-btn:hover::before { left: 140%; } /* Hover animation */ .home-btn:hover { transform: translateY(-5px) scale(1.03); background: linear-gradient(135deg, #ffab00, #ff5722); box-shadow: 0 14px 30px rgba(255, 111, 0, 0.5); } /* Click animation */ .home-btn:active { transform: scale(0.96); } /* Home icon */ .home-icon { font-size: 27px; line-height: 1; transition: transform 0.3s ease; } .home-btn:hover .home-icon { transform: scale(1.2) rotate(-5deg); } /* Arrow */ .home-arrow { font-size: 25px; transition: transform 0.3s ease; } .home-btn:hover .home-arrow { transform: translateX(7px); } </style>
 <x-app-layout>
 
     {{-- Header --}}
@@ -6,11 +7,7 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-<div>
-    <h1>
-        <a href="{{route('user.index')}}">View</a>
-    </h1>
-</div>
+    <div class="home-btn-container"> <a href="{{ route('user.index') }}" class="home-btn"> <span class="home-icon">⌂</span> <span>Home</span> <span class="home-arrow">→</span> </a> </div>
 
     <div class="py-12">
 

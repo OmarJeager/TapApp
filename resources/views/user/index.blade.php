@@ -199,9 +199,10 @@
         .page-title h1 { font-size: 23px; }
         .table-header { align-items: flex-start; flex-direction: column; }
     }
+ .back-btn-c ontainer { display: flex; justify-content: flex-start; margin: 25px 0; } .back-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 180px; padding: 15px 28px; background: linear-gradient(135deg, #ff9800, #f4511e); color: white; font-size: 18px; font-weight: 700; text-decoration: none; border-radius: 13px; box-shadow: 0 8px 20px rgba(255, 111, 0, 0.35); overflow: hidden; transition: all 0.3s ease; } /* Shine effect */ .back-btn::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: rgba(255, 255, 255, 0.25); transform: skewX(-25deg); transition: left 0.6s ease; } .back-btn:hover::before { left: 140%; } /* Hover animation */ .back-btn:hover { transform: translateY(-4px) scale(1.03); background: linear-gradient(135deg, #ffab00, #ff5722); box-shadow: 0 14px 30px rgba(255, 111, 0, 0.5); } /* Arrow animation */ .back-arrow { position: relative; z-index: 1; font-size: 27px; line-height: 1; transition: transform 0.3s ease; } .back-btn:hover .back-arrow { transform: translateX(-6px); } .back-btn span:last-child { position: relative; z-index: 1; } /* Click animation */ .back-btn:active { transform: scale(0.96); }
 </style>
 
-
+<div class="back-btn-container"> <a href="{{ route('user.dashboard') }}" class="back-btn"> <span class="back-arrow">←</span> <span>Back</span> </a> </div>
 <div class="ppm-page">
 
     <div class="page-header">
