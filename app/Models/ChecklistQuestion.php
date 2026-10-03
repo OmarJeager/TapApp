@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChecklistQuestion extends Model
 {
-    protected $fillable = ['type', 'frequency', 'question_text', 'order', 'is_active'];
+    protected $fillable = [
+        'type',
+        'frequency',
+        'question_text',
+        'order',
+        'is_active',
+        'variant',
+    ];
 
     public function answers()
     {
@@ -15,16 +22,32 @@ class ChecklistQuestion extends Model
 
     /**
      * $type = 'PNL' | 'TRQ' | 'TST'
-     * $frequency only matters when $type is 'TST' (e.g. 1 or 4)
+     *
+     * For TST:
+     * - frequency 1 + normal
+     * - frequency 4 + normal
+     * - frequency 4 + HV
      */
-    public static function forAsset(string $type, ?int $frequency = null)
-    {
+    public static function forAsset(
+        string $type,
+        ?int $frequency = null,
+        ?string $variant = null
+    ) {
         return static::query()
             ->where('type', $type)
-            ->when($type === 'TST', fn ($q) => $q->where('frequency', $frequency))
+
+            ->when(
+                $type === 'TST',
+                fn ($q) => $q->where('frequency', $frequency)
+            )
+
+            ->when(
+                $type === 'TST' && $variant !== null,
+                fn ($q) => $q->where('variant', $variant)
+            )
+
             ->where('is_active', true)
             ->orderBy('order')
             ->get();
     }
-    
 }

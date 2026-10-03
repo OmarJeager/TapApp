@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->unsignedInteger('order')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->string('variant')->nullable();
             $table->timestamps();
         });
     }
