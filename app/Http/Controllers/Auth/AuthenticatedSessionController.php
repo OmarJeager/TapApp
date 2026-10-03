@@ -39,6 +39,7 @@ class AuthenticatedSessionController extends Controller
         'user' => redirect()->route('user.dashboard'),
 
         'quality'=>redirect()->route('quality.dashboard'),
+        'ceo'=>redirect()->route('ceo.dashboard'),
 
         default => redirect()->route('role.error'),
     };

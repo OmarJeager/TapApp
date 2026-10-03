@@ -12,6 +12,7 @@ use App\Http\Controllers\TstFreauencyFourHvController;
 use App\Http\Controllers\TstFrequencyFourController;
 use App\Http\Controllers\TstFrequencyOneController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CeoController;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/signature', [SignatureController::class, 'update'])
         ->name('profile.signature.update');
 });
-
+Route::middleware(['auth', 'role:ceo'])->group(function () {
+    Route::get('/ceodashboard', [CeoController::class, 'index'])->name('ceo.dashboard');
+});
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin', function () {
         return view('superadmin.dashboard');
