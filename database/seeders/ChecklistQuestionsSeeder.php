@@ -90,7 +90,7 @@ class ChecklistQuestionsSeeder extends Seeder
 
             // Control
             'Test with Golden and dummy harness after all controls X',
-        ]);
+        ],null);
 
         /*
         |--------------------------------------------------------------------------
@@ -168,7 +168,41 @@ class ChecklistQuestionsSeeder extends Seeder
             'Perform surveillance routine (dummy harness test) X',
             // Printer and scanner
             'Perform maintenance routine according to Packaging and WH Traceability requirements',
-        ]);
+              // Maintenance Plan for WEETECH WK205 - Electrical System
+            'Clean tester cover with clean, dry cloth',
+            'Clean cards (interface cards and test point cards in matrix box)',
+            'Check if flat cables are properly fitted to tester',
+            'Tighten all connection points',
+            'Clean power supply and verify overheating',
+            'Perform matrix diagnostics',
+            // Operation
+            'Check proper functionality of peripherals (screens, keyboards, etc.)',
+            'Verify test selection by barcode reader',
+            'Check correct functionality of LED visual aids (when applicable)',
+            'Verify pin-table vs. electrification (only if repair of holder was done) X',
+            'Perform surveillance routine (dummy harness test) X',
+            // Printer and scanner
+            'Perform maintenance routine according to Packaging and WH Traceability requirements',
+
+            // Label Printer - Equipment
+            'Print and check the test label',
+            'Remove labels and tonner/ribbon',
+            'Clean equipment',
+            // Print area
+            'Clean rollers',
+            'Clean label photocell',
+            'Clean printhead',
+            // Mechanization area
+            'Check motors',
+            'Check belts',
+            'Check battery (if is applicable, change every 2 years)',
+            'Check foil keyboard',
+            // Cutter Device
+            'Clean and check cutter device',
+            // Test
+            'Reload labels and tonner/ribbon',
+            'Print and check the test label and paste the label (check legibility according to VPS C-8)',
+        ],null);
 
         /*
         |--------------------------------------------------------------------------
@@ -213,7 +247,7 @@ class ChecklistQuestionsSeeder extends Seeder
             // PC
             'Backup the software to the APTIV server',
             'Check the socket , if it is loosen fix it. ',
-        ]);
+        ],'HV');
     }
 
     /**
@@ -222,16 +256,19 @@ class ChecklistQuestionsSeeder extends Seeder
      * @param string $type
      * @param int|null $frequency
      * @param string[] $questions
+     * @param string|null $variant
      */
     private function seedSet(
         string $type,
         ?int $frequency,
-        array $questions
+        array $questions,
+        ?string $variant = null
     ): void {
         foreach ($questions as $order => $text) {
             ChecklistQuestion::create([
                 'type' => $type,
                 'frequency' => $frequency,
+                'variant'       => $variant,
                 'question_text' => $text,
                 'order' => $order + 1,
                 'is_active' => true,
