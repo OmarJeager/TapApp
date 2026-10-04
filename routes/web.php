@@ -100,13 +100,19 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/checklist-questions/{question}',          [ChecklistQuestionController::class, 'update'])->name('admin.checklist-questions.update');
         Route::patch('/checklist-questions/{question}/toggle', [ChecklistQuestionController::class, 'toggle'])->name('admin.checklist-questions.toggle');
         Route::delete('/checklist-questions/{question}',       [ChecklistQuestionController::class, 'destroy'])->name('admin.checklist-questions.destroy');
+        Route::get('/admin/ppm-weeks', [AdminController::class, 'weeks'])
+        ->name('admin.ppm-weeks');
+
+        Route::patch(
+        '/admin/ppm-weeks/{week}/toggle',[AdminController::class, 'toggleWeekPublication'])
+        ->name('admin.ppm-weeks.toggle');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
 
     Route::get('/user', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ppm-records', [PpmRecordController::class, 'index'])->name('user.index');
-    Route::get('/ppm-records/{id}', [PpmRecordController::class, 'show'])->name('user.show');
+    //Route::get('/ppm-records/{id}', [PpmRecordController::class, 'show'])->name('user.show');
 
     Route::post('/ppm-records', [PpmRecordController::class, 'store'])
         ->name('ppm-records.store');

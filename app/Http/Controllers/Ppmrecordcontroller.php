@@ -6,23 +6,71 @@ use App\Models\PpmRecord;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\PpmWeekControl;
 
 class PpmRecordController extends Controller
 {
      /**
      * Display all PPM records.
      */
-    public function index(Request $request)
+ public function index(Request $request)
 {
-    $query = PpmRecord::query();
+    /*
+    |--------------------------------------------------------------------------
+    | Get weeks published by admin
+    |--------------------------------------------------------------------------
+    */
 
-    foreach (['week_due', 'job_id', 'frequency', 'asset_description', 'asset_id'] as $field) {
+    $publishedWeeks = PpmWeekControl::where('is_published', true)
+        ->pluck('week_due');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Only show PPM records belonging to published weeks
+    |--------------------------------------------------------------------------
+    */
+
+    $query = PpmRecord::query()
+        ->whereIn('week_due', $publishedWeeks);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Filters
+    |--------------------------------------------------------------------------
+    */
+
+    foreach ([
+        'week_due',
+        'job_id',
+        'frequency',
+        'asset_description',
+        'asset_id'
+    ] as $field) {
+
         if ($request->filled($field)) {
-            $query->where($field, 'like', '%' . trim($request->input($field)) . '%');
+
+            $query->where(
+                $field,
+                'like',
+                '%' . trim($request->input($field)) . '%'
+            );
         }
     }
 
-    $records = $query->latest()->paginate(20)->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    */
+
+    $records = $query
+        ->latest()
+        ->paginate(20)
+        ->withQueryString();
+
 
     return view('user.index', compact('records'));
 }
@@ -107,7 +155,8 @@ if (str_starts_with($assetId, 'tst')) {
     /**
      * Show the upload form and the currently stored records.
      */
-    public function show($id)
+    /*
+public function show($id)
 {
     $user = Auth::user();
 
@@ -155,5 +204,6 @@ if (str_starts_with($assetId, 'tst')) {
     // Unknown asset
     abort(404, 'Unknown asset type: ' . $record->asset_id);
 }
+*/
 
 }

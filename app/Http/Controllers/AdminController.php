@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 use App\Imports\PpmRecordsImport;
 use App\Models\PpmRecord;
+use App\Models\PpmWeekControl;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
@@ -193,4 +194,59 @@ class AdminController extends Controller
             compact('ppmRecord')
         );
     }
+    public function weeks()
+{
+    $weeks = PpmRecord::query()
+        ->select('week_due')
+        ->whereNotNull('week_due')
+        ->distinct()
+        ->orderBy('week_due')
+        ->get()
+        ->map(function ($record) {
+            $control = PpmWeekControl::where(
+                'week_due',
+                $record->week_due
+            )->first();
+
+            return [
+                'week_due' => $record->week_due,
+                'is_published' => $control?->is_published ?? false,
+                'published_at' => $control?->published_at,
+                'record_count' => PpmRecord::where(
+                    'week_due',
+                    $record->week_due
+                )->count(),
+            ];
+        });
+
+    return view('admin.weeks.weeks', compact('weeks'));
+}
+public function toggleWeekPublication($week)
+{
+    $control = PpmWeekControl::firstOrCreate(
+        [
+            'week_due' => $week,
+        ],
+        [
+            'is_published' => false,
+        ]
+    );
+
+    $control->is_published = !$control->is_published;
+
+    if ($control->is_published) {
+        $control->published_at = now();
+    } else {
+        $control->published_at = null;
+    }
+
+    $control->save();
+
+    return back()->with(
+        'success',
+        $control->is_published
+            ? "Week {$week} is now visible to users."
+            : "Week {$week} is now hidden from users."
+    );
+}
 }
