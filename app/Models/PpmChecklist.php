@@ -33,7 +33,13 @@ class PpmChecklist extends Model
     {
         return $this->hasMany(PpmChecklistAnswer::class);
     }
-
+    public function questions()
+{
+    return $this->hasMany(
+        PpmChecklistQuestion::class,
+        'ppm_checklist_id'
+    );
+}
     public function completedBy()
     {
         return $this->belongsTo(User::class, 'completed_by_matricule', 'matricule');

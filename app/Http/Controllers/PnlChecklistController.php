@@ -6,6 +6,7 @@ use App\Models\PpmChecklist;
 use App\Models\PpmChecklistAnswer;
 use App\Models\PpmRecord;
 use App\Models\ChecklistQuestion;
+use App\Models\PpmChecklistQuestion;    
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -310,7 +311,33 @@ class PnlChecklistController extends Controller
                     $validated['verified_quality_at'] ?? null,
             ]
         );
+        /*
+|--------------------------------------------------------------------------
+| Create PNL question snapshots
+|--------------------------------------------------------------------------
+*/
 
+if ($checklist->wasRecentlyCreated) {
+
+    $pnlQuestions = ChecklistQuestion::where('type', 'PNL')
+        ->where('is_active', true)
+        ->orderBy('order')
+        ->get();
+
+    foreach ($pnlQuestions as $question) {
+
+        PpmChecklistQuestion::create([
+            'ppm_checklist_id' => $checklist->id,
+            'checklist_question_id' => $question->id,
+
+            'type' => $question->type,
+            'frequency' => $question->frequency,
+            'question_text' => $question->question_text,
+            'order' => $question->order,
+            'variant' => $question->variant,
+        ]);
+    }
+}
         /*
         |--------------------------------------------------------------------------
         | Save answers

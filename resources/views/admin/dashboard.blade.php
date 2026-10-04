@@ -6,12 +6,29 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-    <div>
-        <a href="{{route('admin.index')}}">View</a>
-    </div>
-    <div class="py-12">
-<div>
-        <a href="{{route('admin.showdetails')}}">View</a>
+    <div class="admin-actions">
+
+        <!-- View PPM Records -->
+        <a href="{{ route('admin.index') }}" class="admin-btn">
+            <span class="btn-icon">📋</span>
+            <span class="btn-text">View PPM Records</span>
+            <span class="btn-arrow">→</span>
+        </a>
+
+        <!-- View Details -->
+        <a href="{{ route('admin.showdetails') }}" class="admin-btn">
+            <span class="btn-icon">🔍</span>
+            <span class="btn-text">View Details</span>
+            <span class="btn-arrow">→</span>
+        </a>
+
+        <!-- PPM Questions -->
+        <a href="{{ route('admin.checklist-questions.index') }}" class="admin-btn">
+            <span class="btn-icon">❓</span>
+            <span class="btn-text">PPM Questions</span>
+            <span class="btn-arrow">→</span>
+        </a>
+
     </div>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -52,21 +69,16 @@
                         <div class="relative">
 
                             @if (auth()->user()->profile_picture)
-
-                                <img
-                                    src="{{ asset('storage/' . auth()->user()->profile_picture) }}?v={{ time() }}"
+                                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}?v={{ time() }}"
                                     alt="Profile Picture"
-                                    class="h-40 w-40 rounded-full object-cover ring-4 ring-gray-200 dark:ring-gray-600"
-                                >
-
+                                    class="h-40 w-40 rounded-full object-cover ring-4 ring-gray-200 dark:ring-gray-600">
                             @else
-
-                                <div class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700
+                                <div
+                                    class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700
                                             flex items-center justify-center
                                             text-gray-500">
                                     No picture
                                 </div>
-
                             @endif
 
                         </div>
@@ -79,24 +91,16 @@
 
 
                         {{-- Choose Photo Button --}}
-                        <button
-                            type="button"
-                            onclick="document.getElementById('picture').click()"
+                        <button type="button" onclick="document.getElementById('picture').click()"
                             class="mt-5 rounded-full bg-blue-600 px-6 py-2.5
                                    text-sm font-semibold text-white
-                                   hover:bg-blue-700 transition"
-                        >
+                                   hover:bg-blue-700 transition">
                             Change profile picture
                         </button>
 
 
                         {{-- Hidden File Input --}}
-                        <input
-                            type="file"
-                            id="picture"
-                            accept="image/jpeg,image/png,image/webp"
-                            class="hidden"
-                        >
+                        <input type="file" id="picture" accept="image/jpeg,image/png,image/webp" class="hidden">
 
                     </div>
 
@@ -120,59 +124,43 @@
 
                             {{-- Existing Signature --}}
                             @if (auth()->user()->signature)
-
                                 <div class="mt-6">
 
                                     <p class="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Current signature
                                     </p>
 
-                                    <div class="rounded-xl border border-gray-200
+                                    <div
+                                        class="rounded-xl border border-gray-200
                                                 dark:border-gray-600 bg-white p-4">
 
-                                        <img
-                                            src="{{ asset('storage/' . auth()->user()->signature) }}?v={{ time() }}"
-                                            alt="Saved Signature"
-                                            class="max-h-32 max-w-full object-contain"
-                                        >
+                                        <img src="{{ asset('storage/' . auth()->user()->signature) }}?v={{ time() }}"
+                                            alt="Saved Signature" class="max-h-32 max-w-full object-contain">
 
                                     </div>
 
                                 </div>
-
                             @endif
 
 
                             {{-- Signature Form --}}
-                            <form
-                                method="POST"
-                                action="{{ route('profile.signature.update') }}"
-                                id="signatureForm"
-                                class="mt-6"
-                            >
+                            <form method="POST" action="{{ route('profile.signature.update') }}" id="signatureForm"
+                                class="mt-6">
 
                                 @csrf
 
                                 {{-- Canvas --}}
                                 <div
                                     class="rounded-xl border-2 border-gray-300
-                                           dark:border-gray-600 bg-white overflow-hidden"
-                                >
+                                           dark:border-gray-600 bg-white overflow-hidden">
 
-                                    <canvas
-                                        id="signatureCanvas"
-                                        class="w-full h-52 cursor-crosshair"
-                                    ></canvas>
+                                    <canvas id="signatureCanvas" class="w-full h-52 cursor-crosshair"></canvas>
 
                                 </div>
 
 
                                 {{-- Hidden Signature --}}
-                                <input
-                                    type="hidden"
-                                    name="signature"
-                                    id="signatureInput"
-                                >
+                                <input type="hidden" name="signature" id="signatureInput">
 
 
                                 {{-- Validation Error --}}
@@ -186,26 +174,20 @@
                                 {{-- Buttons --}}
                                 <div class="mt-4 flex items-center gap-3">
 
-                                    <button
-                                        type="button"
-                                        id="clearSignature"
+                                    <button type="button" id="clearSignature"
                                         class="rounded-lg bg-gray-200
                                                px-5 py-2.5 text-sm font-semibold
                                                text-gray-700 hover:bg-gray-300
-                                               transition"
-                                    >
+                                               transition">
                                         Clear
                                     </button>
 
 
-                                    <button
-                                        type="submit"
-                                        id="saveSignature"
+                                    <button type="submit" id="saveSignature"
                                         class="rounded-lg bg-blue-600
                                                px-6 py-2.5 text-sm font-semibold
                                                text-white hover:bg-blue-700
-                                               transition"
-                                    >
+                                               transition">
                                         Save Signature
                                     </button>
 
@@ -230,29 +212,22 @@
     {{-- CROP MODAL --}}
     {{-- ========================================================= --}}
 
-    <div
-        id="cropModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4"
-    >
+    <div id="cropModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4">
 
         <div
             class="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-800
-                   shadow-2xl overflow-hidden"
-        >
+                   shadow-2xl overflow-hidden">
 
             {{-- Modal Header --}}
-            <div class="flex items-center justify-between border-b
+            <div
+                class="flex items-center justify-between border-b
                         border-gray-200 dark:border-gray-700 px-5 py-4">
 
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     Edit profile picture
                 </h3>
 
-                <button
-                    type="button"
-                    onclick="closeCropper()"
-                    class="text-2xl text-gray-500 hover:text-gray-800"
-                >
+                <button type="button" onclick="closeCropper()" class="text-2xl text-gray-500 hover:text-gray-800">
                     &times;
                 </button>
 
@@ -264,11 +239,7 @@
 
                 <div class="crop-container">
 
-                    <img
-                        id="cropImage"
-                        src=""
-                        alt="Crop image"
-                    >
+                    <img id="cropImage" src="" alt="Crop image">
 
                 </div>
 
@@ -278,32 +249,23 @@
             {{-- Controls --}}
             <div class="flex items-center justify-center gap-3 px-5 py-4">
 
-                <button
-                    type="button"
-                    onclick="zoomOut()"
+                <button type="button" onclick="zoomOut()"
                     class="h-10 w-10 rounded-full bg-gray-200
-                           hover:bg-gray-300 text-lg"
-                >
+                           hover:bg-gray-300 text-lg">
                     −
                 </button>
 
 
-                <button
-                    type="button"
-                    onclick="zoomIn()"
+                <button type="button" onclick="zoomIn()"
                     class="h-10 w-10 rounded-full bg-gray-200
-                           hover:bg-gray-300 text-lg"
-                >
+                           hover:bg-gray-300 text-lg">
                     +
                 </button>
 
 
-                <button
-                    type="button"
-                    onclick="resetCropper()"
+                <button type="button" onclick="resetCropper()"
                     class="rounded-full bg-gray-200 px-4 py-2
-                           text-sm hover:bg-gray-300"
-                >
+                           text-sm hover:bg-gray-300">
                     Reset
                 </button>
 
@@ -311,28 +273,22 @@
 
 
             {{-- Buttons --}}
-            <div class="flex justify-end gap-3 border-t
+            <div
+                class="flex justify-end gap-3 border-t
                         border-gray-200 dark:border-gray-700
                         px-5 py-4">
 
-                <button
-                    type="button"
-                    onclick="closeCropper()"
+                <button type="button" onclick="closeCropper()"
                     class="rounded-lg px-5 py-2.5 text-sm font-semibold
-                           text-gray-700 bg-gray-200 hover:bg-gray-300"
-                >
+                           text-gray-700 bg-gray-200 hover:bg-gray-300">
                     Cancel
                 </button>
 
 
-                <button
-                    type="button"
-                    onclick="savePicture()"
-                    id="saveButton"
+                <button type="button" onclick="savePicture()" id="saveButton"
                     class="rounded-lg bg-blue-600 px-6 py-2.5
                            text-sm font-semibold text-white
-                           hover:bg-blue-700"
-                >
+                           hover:bg-blue-700">
                     Save
                 </button>
 
@@ -348,7 +304,113 @@
     {{-- ========================================================= --}}
 
     <style>
+        .admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0;
+}
 
+/* Small buttons */
+.admin-btn {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    min-width: 160px;
+    padding: 10px 14px;
+
+    background: linear-gradient(135deg, #ff8c00, #ff6a00);
+    color: white;
+
+    border-radius: 9px;
+    text-decoration: none;
+
+    font-weight: 600;
+    font-size: 14px;
+
+    box-shadow: 0 5px 12px rgba(255, 106, 0, 0.22);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+/* Hover */
+.admin-btn:hover {
+    transform: translateY(-3px);
+
+    background: linear-gradient(135deg, #ff9d1a, #ff7300);
+
+    box-shadow: 0 9px 18px rgba(255, 106, 0, 0.35);
+}
+
+/* Click */
+.admin-btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+/* Icon */
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+
+    background: rgba(255, 255, 255, 0.18);
+
+    border-radius: 7px;
+
+    font-size: 16px;
+
+    transition: transform 0.25s ease;
+}
+
+.admin-btn:hover .btn-icon {
+    transform: scale(1.12) rotate(-5deg);
+}
+
+/* Text */
+.btn-text {
+    white-space: nowrap;
+}
+
+/* Arrow */
+.btn-arrow {
+    font-size: 18px;
+
+    transition: transform 0.25s ease;
+}
+
+.admin-btn:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .admin-actions {
+        gap: 10px;
+    }
+
+    .admin-btn {
+        min-width: 140px;
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+    .btn-icon {
+        width: 27px;
+        height: 27px;
+        font-size: 14px;
+    }
+}
         .crop-container {
             width: 100%;
             height: 450px;
@@ -364,7 +426,6 @@
             display: block;
             touch-action: none;
         }
-
     </style>
 
 
@@ -372,14 +433,9 @@
     {{-- CROPPER.JS --}}
     {{-- ========================================================= --}}
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
-    >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
 
     {{-- ========================================================= --}}
@@ -387,12 +443,11 @@
     {{-- ========================================================= --}}
 
     <script>
-
         /*
-        |--------------------------------------------------------------------------
-        | PROFILE PICTURE CROPPER
-        |--------------------------------------------------------------------------
-        */
+            |--------------------------------------------------------------------------
+            | PROFILE PICTURE CROPPER
+            |--------------------------------------------------------------------------
+            */
 
         let cropper = null;
 
@@ -592,49 +647,49 @@
 
                 fetch('{{ route('profile.upload-picture') }}', {
 
-                    method: 'POST',
+                        method: 'POST',
 
-                    body: formData,
+                        body: formData,
 
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                        headers: {
+                            'Accept': 'application/json'
+                        }
 
-                })
+                    })
 
-                .then(response => response.json())
+                    .then(response => response.json())
 
-                .then(data => {
+                    .then(data => {
 
-                    if (data.success) {
+                        if (data.success) {
 
-                        closeCropper();
+                            closeCropper();
 
-                        window.location.reload();
+                            window.location.reload();
 
-                    } else {
+                        } else {
 
-                        alert(data.message || 'Upload failed.');
+                            alert(data.message || 'Upload failed.');
+
+                            saveButton.disabled = false;
+
+                            saveButton.innerText = 'Save';
+
+                        }
+
+                    })
+
+                    .catch(error => {
+
+                        console.error(error);
+
+                        alert('Something went wrong while uploading.');
 
                         saveButton.disabled = false;
 
                         saveButton.innerText = 'Save';
 
-                    }
-
-                })
-
-                .catch(error => {
-
-                    console.error(error);
-
-                    alert('Something went wrong while uploading.');
-
-                    saveButton.disabled = false;
-
-                    saveButton.innerText = 'Save';
-
-                });
+                    });
 
             }, 'image/jpeg', 0.90);
 
@@ -904,7 +959,6 @@
 
             }
         );
-
     </script>
 
 </x-app-layout>

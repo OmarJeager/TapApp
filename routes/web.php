@@ -13,6 +13,7 @@ use App\Http\Controllers\TstFrequencyFourController;
 use App\Http\Controllers\TstFrequencyOneController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CeoController;
+use App\Http\Controllers\ChecklistQuestionController;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +95,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/adminshowdetails', [AdminController::class, 'showdetails'])
         ->name('admin.showdetails');
           Route::get('/ppm-recordsshowdeatils/{ppmRecord}', [AdminController::class, 'show'])->name('ppm-records.show');
+                  Route::get('/checklist-questions',                    [ChecklistQuestionController::class, 'showQuestions'])->name('admin.checklist-questions.index');
+        Route::post('/checklist-questions',                   [ChecklistQuestionController::class, 'store'])->name('admin.checklist-questions.store');
+        Route::put('/checklist-questions/{question}',          [ChecklistQuestionController::class, 'update'])->name('admin.checklist-questions.update');
+        Route::patch('/checklist-questions/{question}/toggle', [ChecklistQuestionController::class, 'toggle'])->name('admin.checklist-questions.toggle');
+        Route::delete('/checklist-questions/{question}',       [ChecklistQuestionController::class, 'destroy'])->name('admin.checklist-questions.destroy');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
