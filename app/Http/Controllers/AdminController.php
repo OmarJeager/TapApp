@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 use App\Imports\PpmRecordsImport;
 use App\Models\PpmRecord;
@@ -23,6 +22,9 @@ class AdminController extends Controller
 
     /**
      * Import PPM records from Excel or CSV.
+     *
+     * Existing Job IDs are skipped.
+     * New Job IDs are imported normally.
      */
     public function import(Request $request)
     {
@@ -32,66 +34,134 @@ class AdminController extends Controller
 
         try {
 
-            DB::transaction(function () use ($request) {
+            $file = $request->file('file');
 
-                $file = $request->file('file');
+            /*
+             * Create the importer instance first.
+             *
+             * We keep the same instance so we can get:
+             * - importedCount
+             * - duplicateJobIds
+             */
+            $import = new PpmRecordsImport();
+
+            /*
+             * CSV delimiter detection.
+             */
+            if (strtolower($file->getClientOriginalExtension()) === 'csv') {
+
+                $handle = fopen($file->getRealPath(), 'r');
+
+                if ($handle === false) {
+                    throw new \Exception('Unable to open CSV file.');
+                }
 
                 /*
-                 * CSV files exported by Excel can use:
-                 *     ,  comma
-                 *     ;  semicolon
-                 *
-                 * Detect the delimiter automatically.
+                 * Read the first line to detect delimiter.
                  */
-                if ($file->getClientOriginalExtension() === 'csv') {
+                $firstLine = fgets($handle);
 
-                    $handle = fopen($file->getRealPath(), 'r');
+                fclose($handle);
 
-                    if ($handle === false) {
-                        throw new \Exception('Unable to open CSV file.');
-                    }
+                if ($firstLine === false) {
+                    throw new \Exception('CSV file is empty.');
+                }
 
-                    // Read first line
-                    $firstLine = fgets($handle);
+                /*
+                 * Detect delimiter:
+                 *
+                 * ,
+                 * ;
+                 * TAB
+                 */
+                $commaCount = substr_count($firstLine, ',');
+                $semicolonCount = substr_count($firstLine, ';');
+                $tabCount = substr_count($firstLine, "\t");
 
-                    fclose($handle);
+                if (
+                    $semicolonCount > $commaCount &&
+                    $semicolonCount >= $tabCount
+                ) {
 
-                    if ($firstLine === false) {
-                        throw new \Exception('CSV file is empty.');
-                    }
+                    $delimiter = ';';
 
-                    // Detect delimiter
-                    $commaCount = substr_count($firstLine, ',');
-                    $semicolonCount = substr_count($firstLine, ';');
-                    $tabCount = substr_count($firstLine, "\t");
+                } elseif ($tabCount > $commaCount) {
 
-                    if ($semicolonCount > $commaCount && $semicolonCount >= $tabCount) {
-                        $delimiter = ';';
-                    } elseif ($tabCount > $commaCount) {
-                        $delimiter = "\t";
-                    } else {
-                        $delimiter = ',';
-                    }
-
-                    /*
-                     * Import CSV using detected delimiter.
-                     */
-                    Excel::import(
-                        new PpmRecordsImport($delimiter),
-                        $file
-                    );
+                    $delimiter = "\t";
 
                 } else {
 
-                    /*
-                     * Normal XLSX / XLS import.
-                     */
-                    Excel::import(
-                        new PpmRecordsImport(),
-                        $file
-                    );
+                    $delimiter = ',';
                 }
-            });
+
+                /*
+                 * Create importer with detected delimiter.
+                 */
+                $import = new PpmRecordsImport($delimiter);
+            }
+
+            /*
+             * Import the file.
+             *
+             * Existing Job IDs will be skipped
+             * by PpmRecordsImport.
+             */
+            Excel::import($import, $file);
+
+            /*
+             * Get imported records count.
+             */
+            $importedCount = $import->importedCount;
+
+            /*
+             * Get duplicate Job IDs.
+             */
+            $duplicateJobIds = array_unique(
+                $import->duplicateJobIds
+            );
+
+            /*
+             * Remove empty values just in case.
+             */
+            $duplicateJobIds = array_filter(
+                $duplicateJobIds,
+                function ($jobId) {
+                    return !empty($jobId);
+                }
+            );
+
+            /*
+             * If duplicate Job IDs were found.
+             */
+            if (count($duplicateJobIds) > 0) {
+
+                $duplicateList = implode(
+                    ', ',
+                    $duplicateJobIds
+                );
+
+                return redirect()
+                    ->route('ppm-records.index')
+                    ->with(
+                        'warning',
+                        $importedCount .
+                        ' record(s) imported successfully. ' .
+                        count($duplicateJobIds) .
+                        ' Job ID(s) already exist and were skipped: ' .
+                        $duplicateList
+                    );
+            }
+
+            /*
+             * No duplicates.
+             */
+            return redirect()
+                ->route('ppm-records.index')
+                ->with(
+                    'success',
+                    $importedCount .
+                    ' record(s) imported successfully.'
+                );
 
         } catch (ExcelValidationException $e) {
 
@@ -111,13 +181,6 @@ class AdminController extends Controller
                     'Import failed: ' . $e->getMessage()
                 );
         }
-
-        return redirect()
-            ->route('ppm-records.index')
-            ->with(
-                'success',
-                'File imported successfully.'
-            );
     }
 
     /**
@@ -129,85 +192,5 @@ class AdminController extends Controller
             'admin.ppm-details',
             compact('ppmRecord')
         );
-    }
-    public function showdetails(Request $request)
-    {
-        $year = $request->input('year', now()->year); // default = this year
-
-        $query = PpmRecord::query()
-            ->with(['checklist.completedBy', 'checklist.verifiedBy', 'checklist.verifiedByQuality']);
-
-        // Year filter (week_due = YYYYWW, e.g. 202640)
-        if ($year !== 'all') {
-            $year = (int) $year;
-            $query->whereBetween('week_due', [$year * 100, $year * 100 + 53]);
-        }
-
-        if ($request->filled('job_id')) {
-            $query->where('job_id', 'like', '%' . $request->job_id . '%');
-        }
-
-        if ($request->filled('asset_id')) {
-            $query->where('asset_id', 'like', '%' . $request->asset_id . '%');
-        }
-
-        if ($request->filled('week')) {
-            $query->whereRaw('week_due % 100 = ?', [(int) $request->week]);
-        }
-
-        if ($request->filled('frequency')) {
-            $query->where('frequency', $request->frequency);
-        }
-
-        if ($request->filled('completed_by')) {
-            $term = $request->completed_by;
-            $query->whereHas('checklist.completedBy', fn ($q) => $q->where('name', 'like', "%{$term}%"));
-        }
-
-        // Status: verified | not_verified | no_checklist
-        switch ($request->status) {
-            case 'no_checklist':
-                $query->whereDoesntHave('checklist');
-                break;
-            case 'verified':
-                $query->whereHas('checklist', fn ($q) => $q
-                    ->whereNotNull('verified_by_matricule')
-                    ->whereNotNull('verified_by_quality_matricule'));
-                break;
-            case 'not_verified':
-                $query->whereHas('checklist', fn ($q) => $q->where(fn ($w) => $w
-                    ->whereNull('verified_by_matricule')
-                    ->orWhereNull('verified_by_quality_matricule')));
-                break;
-        }
-
-        $records = $query->orderByDesc('week_due')->orderBy('job_id')->paginate(25)->withQueryString();
-
-        // AJAX request -> return only rows + pagination meta
-        if ($request->ajax()) {
-            return response()->json([
-                'html'  => view('admin.partials.ppm-rows', compact('records'))->render(),
-                'total' => $records->total(),
-                'page'  => $records->currentPage(),
-                'last'  => $records->lastPage(),
-            ]);
-        }
-
-        $years = PpmRecord::query()
-            ->selectRaw('DISTINCT FLOOR(week_due / 100) as y')
-            ->pluck('y')
-            ->map(fn ($y) => (int) $y)
-            ->push((int) now()->year)
-            ->unique()->sortDesc()->values();
-
-        $frequencies = PpmRecord::query()->whereNotNull('frequency')
-            ->distinct()->orderBy('frequency')->pluck('frequency');
-
-        return view('admin.showdetails', [
-            'records'     => $records,
-            'years'       => $years,
-            'frequencies' => $frequencies,
-            'year'        => $year,
-        ]);
     }
 }

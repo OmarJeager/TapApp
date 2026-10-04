@@ -1,3 +1,681 @@
+<style>
+
+/* ==========================================
+   MAIN ALERT
+========================================== */
+
+.tap-import-alert {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 92px;
+
+    margin: 0 0 25px 0;
+
+    padding: 18px 22px 22px 22px;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    border: 1px solid transparent;
+
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.08),
+        0 5px 12px rgba(0, 0, 0, 0.04);
+
+    animation:
+        tapAlertEnter .65s cubic-bezier(.16,1,.3,1),
+        tapAlertFloat 4s ease-in-out infinite;
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+}
+
+/* Hover */
+
+.tap-import-alert:hover {
+    transform: translateY(-4px) scale(1.005);
+
+    box-shadow:
+        0 22px 45px rgba(0, 0, 0, 0.12),
+        0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+/* ==========================================
+   LEFT ACCENT
+========================================== */
+
+.tap-import-alert::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 6px;
+    height: 100%;
+}
+
+
+/* ==========================================
+   GLOW
+========================================== */
+
+.tap-alert-glow {
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -70px;
+    top: -80px;
+
+    border-radius: 50%;
+
+    opacity: .18;
+
+    filter: blur(25px);
+
+    animation: tapGlow 3s ease-in-out infinite;
+
+    pointer-events: none;
+}
+
+
+/* ==========================================
+   ICON
+========================================== */
+
+.tap-alert-icon-wrapper {
+    position: relative;
+
+    flex-shrink: 0;
+
+    margin-right: 18px;
+}
+
+.tap-alert-icon {
+    position: relative;
+
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 16px;
+
+    color: white;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,.15);
+
+    animation:
+        tapIconPop .7s cubic-bezier(.16,1,.3,1) .15s both,
+        tapIconPulse 2.5s ease-in-out 1s infinite;
+}
+
+.tap-alert-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+
+/* ==========================================
+   CONTENT
+========================================== */
+
+.tap-alert-content {
+    flex: 1;
+
+    min-width: 0;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+.tap-alert-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    font-size: 17px;
+    font-weight: 800;
+
+    margin-bottom: 5px;
+}
+
+.tap-alert-message {
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    font-weight: 500;
+
+    word-break: break-word;
+}
+
+
+/* ==========================================
+   BADGE
+========================================== */
+
+.tap-alert-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    animation: badgeAppear .6s ease .35s both;
+}
+
+
+/* ==========================================
+   WARNING EXTRA INFO
+========================================== */
+
+.tap-alert-info {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 10px;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.tap-info-icon {
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+
+/* ==========================================
+   CLOSE BUTTON
+========================================== */
+
+.tap-alert-close {
+    position: relative;
+
+    z-index: 5;
+
+    flex-shrink: 0;
+
+    width: 38px;
+    height: 38px;
+
+    margin-left: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.55);
+
+    cursor: pointer;
+
+    transition:
+        transform .3s ease,
+        background .3s ease,
+        color .3s ease;
+}
+
+.tap-alert-close svg {
+    width: 19px;
+    height: 19px;
+}
+
+.tap-alert-close:hover {
+    transform: rotate(90deg) scale(1.1);
+
+    background: rgba(255,255,255,.9);
+}
+
+
+/* ==========================================
+   PROGRESS BAR
+========================================== */
+
+.tap-alert-progress {
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    height: 4px;
+
+    width: 100%;
+
+    transform-origin: left;
+
+    animation: tapProgress 7s linear forwards;
+}
+
+
+/* ==========================================
+   SUCCESS
+========================================== */
+
+.tap-alert-success {
+    background:
+        linear-gradient(
+            135deg,
+            #ecfdf5,
+            #f0fdf9
+        );
+
+    border-color: #a7f3d0;
+
+    color: #065f46;
+}
+
+.tap-alert-success::before {
+    background: #10b981;
+}
+
+.tap-alert-success .tap-alert-glow {
+    background: #10b981;
+}
+
+.tap-alert-success .tap-alert-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #10b981,
+            #059669
+        );
+}
+
+.tap-alert-success .tap-alert-badge {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.tap-alert-success .tap-alert-progress {
+    background:
+        linear-gradient(
+            90deg,
+            #10b981,
+            #34d399
+        );
+}
+
+
+/* ==========================================
+   WARNING
+========================================== */
+
+.tap-alert-warning {
+    background:
+        linear-gradient(
+            135deg,
+            #fff7ed,
+            #fffaf5
+        );
+
+    border-color: #fed7aa;
+
+    color: #9a3412;
+}
+
+.tap-alert-warning::before {
+    background: #f97316;
+}
+
+.tap-alert-warning .tap-alert-glow {
+    background: #f97316;
+}
+
+.tap-alert-warning .tap-alert-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #fb923c,
+            #ea580c
+        );
+}
+
+.tap-alert-warning .tap-alert-badge {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.tap-alert-warning .tap-alert-info {
+    background: rgba(249,115,22,.1);
+}
+
+.tap-alert-warning .tap-info-icon {
+    background: #f97316;
+    color: white;
+}
+
+.tap-alert-warning .tap-alert-progress {
+    background:
+        linear-gradient(
+            90deg,
+            #f97316,
+            #fb923c
+        );
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+.tap-alert-error {
+    background:
+        linear-gradient(
+            135deg,
+            #fef2f2,
+            #fff7f7
+        );
+
+    border-color: #fecaca;
+
+    color: #991b1b;
+}
+
+.tap-alert-error::before {
+    background: #ef4444;
+}
+
+.tap-alert-error .tap-alert-glow {
+    background: #ef4444;
+}
+
+.tap-alert-error .tap-alert-icon {
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #b91c1c
+        );
+}
+
+.tap-alert-error .tap-alert-badge {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.tap-alert-error .tap-alert-progress {
+    background:
+        linear-gradient(
+            90deg,
+            #ef4444,
+            #f87171
+        );
+}
+
+
+/* ==========================================
+   ANIMATIONS
+========================================== */
+
+@keyframes tapAlertEnter {
+
+    0% {
+        opacity: 0;
+        transform:
+            translateY(-30px)
+            scale(.94);
+    }
+
+    60% {
+        opacity: 1;
+        transform:
+            translateY(5px)
+            scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+@keyframes tapAlertFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes tapIconPop {
+
+    0% {
+        opacity: 0;
+        transform: scale(.3) rotate(-20deg);
+    }
+
+    70% {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+@keyframes tapIconPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 8px 20px rgba(0,0,0,.15);
+    }
+
+    50% {
+        box-shadow:
+            0 8px 28px rgba(0,0,0,.25);
+    }
+}
+
+@keyframes tapGlow {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: .15;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: .25;
+    }
+}
+
+@keyframes badgeAppear {
+
+    from {
+        opacity: 0;
+        transform: scale(.7);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes tapProgress {
+
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+
+/* ==========================================
+   CLOSING ANIMATION
+========================================== */
+
+.tap-alert-closing {
+    animation: tapAlertClose .45s ease forwards !important;
+}
+
+@keyframes tapAlertClose {
+
+    to {
+        opacity: 0;
+        transform:
+            translateY(-20px)
+            scale(.95);
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 640px) {
+
+    .tap-import-alert {
+        align-items: flex-start;
+
+        padding: 15px 14px 19px;
+
+        border-radius: 15px;
+    }
+
+    .tap-alert-icon-wrapper {
+        margin-right: 12px;
+    }
+
+    .tap-alert-icon {
+        width: 44px;
+        height: 44px;
+
+        border-radius: 13px;
+    }
+
+    .tap-alert-icon svg {
+        width: 23px;
+        height: 23px;
+    }
+
+    .tap-alert-title {
+        font-size: 14px;
+    }
+
+    .tap-alert-message {
+        font-size: 12px;
+    }
+
+    .tap-alert-close {
+        width: 32px;
+        height: 32px;
+
+        margin-left: 8px;
+    }
+
+    .tap-alert-info {
+        font-size: 10px;
+    }
+}
+
+</style>
+
+
+<script>
+function closeTapAlert(button) {
+
+    const alert = button.closest('.tap-import-alert');
+
+    if (!alert) return;
+
+    alert.classList.add('tap-alert-closing');
+
+    setTimeout(() => {
+        alert.remove();
+    }, 450);
+}
+
+
+/*
+ * Automatically remove the notification
+ * after 7 seconds.
+ */
+document.addEventListener('DOMContentLoaded', function () {
+
+    const alert = document.getElementById('tapImportAlert');
+
+    if (!alert) return;
+
+    setTimeout(() => {
+
+        if (!alert.classList.contains('tap-alert-closing')) {
+
+            alert.classList.add('tap-alert-closing');
+
+            setTimeout(() => {
+                alert.remove();
+            }, 450);
+        }
+
+    }, 7000);
+
+});
+</script>
 <x-app-layout>
 
     <x-slot name="header">
@@ -9,6 +687,197 @@
     </x-slot>
 
     @include('layouts.main')
+    {{-- ==========================================
+     IMPORT NOTIFICATIONS
+========================================== --}}
+
+@if (session('success'))
+    <div class="tap-import-alert tap-alert-success" id="tapImportAlert">
+
+        <div class="tap-alert-glow"></div>
+
+        <div class="tap-alert-icon-wrapper">
+            <div class="tap-alert-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M5 13L9 17L19 7"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </div>
+        </div>
+
+        <div class="tap-alert-content">
+            <div class="tap-alert-title">
+                Import Successful
+                <span class="tap-alert-badge">SUCCESS</span>
+            </div>
+
+            <div class="tap-alert-message">
+                {{ session('success') }}
+            </div>
+        </div>
+
+        <button
+            type="button"
+            class="tap-alert-close"
+            onclick="closeTapAlert(this)"
+            aria-label="Close"
+        >
+            <svg viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M6 6L18 18M18 6L6 18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+            </svg>
+        </button>
+
+        <div class="tap-alert-progress"></div>
+    </div>
+@endif
+
+
+@if (session('warning'))
+    <div class="tap-import-alert tap-alert-warning" id="tapImportAlert">
+
+        <div class="tap-alert-glow"></div>
+
+        <div class="tap-alert-icon-wrapper">
+            <div class="tap-alert-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M12 9V13"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                    />
+
+                    <path
+                        d="M12 17.2V17.3"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                    />
+
+                    <path
+                        d="M10.3 4.8L2.7 18C2 19.3 2.9 20.8 4.4 20.8H19.6C21.1 20.8 22 19.3 21.3 18L13.7 4.8C13 3.5 11 3.5 10.3 4.8Z"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+            </div>
+        </div>
+
+        <div class="tap-alert-content">
+
+            <div class="tap-alert-title">
+                Import Completed
+                <span class="tap-alert-badge">WARNING</span>
+            </div>
+
+            <div class="tap-alert-message">
+                {{ session('warning') }}
+            </div>
+
+            <div class="tap-alert-info">
+                <span class="tap-info-icon">!</span>
+                Existing Job IDs were protected and skipped.
+            </div>
+
+        </div>
+
+        <button
+            type="button"
+            class="tap-alert-close"
+            onclick="closeTapAlert(this)"
+            aria-label="Close"
+        >
+            <svg viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M6 6L18 18M18 6L6 18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+            </svg>
+        </button>
+
+        <div class="tap-alert-progress"></div>
+    </div>
+@endif
+
+
+@if (session('error'))
+    <div class="tap-import-alert tap-alert-error" id="tapImportAlert">
+
+        <div class="tap-alert-glow"></div>
+
+        <div class="tap-alert-icon-wrapper">
+            <div class="tap-alert-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M12 8V13"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                    />
+
+                    <path
+                        d="M12 16.8V16.9"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                    />
+
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    />
+                </svg>
+            </div>
+        </div>
+
+        <div class="tap-alert-content">
+
+            <div class="tap-alert-title">
+                Import Failed
+                <span class="tap-alert-badge">ERROR</span>
+            </div>
+
+            <div class="tap-alert-message">
+                {{ session('error') }}
+            </div>
+
+        </div>
+
+        <button
+            type="button"
+            class="tap-alert-close"
+            onclick="closeTapAlert(this)"
+            aria-label="Close"
+        >
+            <svg viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M6 6L18 18M18 6L6 18"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+            </svg>
+        </button>
+
+        <div class="tap-alert-progress"></div>
+    </div>
+@endif
 
     <div class="py-10">
 
