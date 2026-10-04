@@ -2,47 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\PpmRecord;
 use App\Models\PpmChecklist;
+use App\Models\PpmRecord;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class QualityController extends Controller
 {
-    public function dashboard(){
+    public function dashboard()
+    {
         return view('quality.dashboard');
     }
-      private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
+
+    private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
 
     private function filteredQuery(Request $request)
     {
         $q = PpmRecord::query();
+
         // Filter by year (defaults to current year) - week_due format: 202636
         $year = trim((string) $request->input('year', now()->year));
         if ($year !== '') {
-        $q->where('week_due', 'like', "{$year}%");
+            $q->where('week_due', 'like', "{$year}%");
         }
+
         if ($v = trim((string) $request->job_id)) {
             $q->where('job_id', 'like', "%{$v}%");
         }
+
         if ($v = trim((string) $request->week_due)) {
             $q->where('week_due', 'like', "%{$v}%");
         }
+
         if ($v = trim((string) $request->type)) {        // PNL / TRQ / TST
             $q->where('asset_id', 'like', "{$v}%");
         }
+
         if ($v = trim((string) $request->asset_id)) {    // starts with
             $q->where('asset_id', 'like', "{$v}%");
         }
+
         if ($v = trim((string) $request->frequency)) {
             $q->where('frequency', $v);
         }
+
         if ($v = trim((string) $request->completed_by)) {
             $q->whereHas('checklist.completedBy', function ($u) use ($v) {
-            $u->where('name', 'like', "%{$v}%")
-             ->orWhere('matricule', 'like', "%{$v}%");
-    });
-}
+                $u->where('name', 'like', "%{$v}%")
+                  ->orWhere('matricule', 'like', "%{$v}%");
+            });
+        }
+
         switch ($request->state) {
             case 'verified':
                 $q->whereHas('checklist', fn ($c) => $c->where('status_quality', 'verified'));
@@ -87,15 +97,36 @@ class QualityController extends Controller
             'checklist.completedBy',
             'checklist.verifiedBy',
             'checklist.verifiedByQuality',
-            'checklist.answers.question',
+            'checklist.answers.question',   // original question: only used as a fallback for old data
+            'checklist.questions',          // snapshot questions saved with this checklist
         ]);
 
-        $answers = optional($ppmRecord->checklist)->answers
-            ?->sortBy(fn ($a) => $a->question->order ?? 0);
+        $checklist = $ppmRecord->checklist;
+        $answers   = collect();
+
+        if ($checklist) {
+            // Snapshots of this checklist, keyed by the original question id
+            $snapshots = $checklist->questions->keyBy('checklist_question_id');
+
+            $answers = $checklist->answers
+                ->map(function ($answer) use ($snapshots) {
+                    // Use the snapshot when it exists, so hidden / edited / removed
+                    // questions never change an old checklist.
+                    // Snapshot has the same fields the view reads:
+                    // question_text, type, frequency, variant, order.
+                    if ($snap = $snapshots->get($answer->checklist_question_id)) {
+                        $answer->setRelation('question', $snap);
+                    }
+
+                    return $answer;
+                })
+                ->sortBy(fn ($a) => $a->question->order ?? 0)
+                ->values();
+        }
 
         return view('quality.show', [
             'record'  => $ppmRecord,
-            'answers' => $answers ?? collect(),
+            'answers' => $answers,
         ]);
     }
 

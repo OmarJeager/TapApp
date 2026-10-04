@@ -11,7 +11,7 @@ class SuperAdminController extends Controller
 {
     public function dashboard()
     {
-        return view('admin.dashboard');
+        return view('superadmin.dashboard');
     }
 
     private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
