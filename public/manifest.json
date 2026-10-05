@@ -1,0 +1,56 @@
+{
+    "name": "TapApp",
+    "short_name": "TapApp",
+    "description": "TapApp Preventive Maintenance Management System",
+    "id": "/",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone"
+    ],
+    "orientation": "any",
+    "background_color": "#ffffff",
+    "theme_color": "#f97316",
+    "lang": "en",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+
+    "icons": [
+        {
+            "src": "/pictures/pwa-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/pictures/pwa-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/pictures/pwa-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+
+    "shortcuts": [
+        {
+            "name": "PPM Records",
+            "short_name": "PPM",
+            "description": "Open PPM records",
+            "url": "/ppm-records",
+            "icons": [
+                {
+                    "src": "/pictures/pwa-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ]
+}

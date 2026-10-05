@@ -445,6 +445,9 @@
 </style>
 </head>
 <body>
+    @if (session('error'))
+    <div class="errors">{{ session('error') }}</div>
+@endif
 <div class="sheet">
 
     <h1 class="title">PPM Details</h1>
@@ -471,9 +474,12 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('ppm-checklists.pnl.store') }}">
+        <form method="POST" action="{{ route('ppm-checklists.pnl.store') }}">
         @csrf
         <input type="hidden" name="ppm_records_id" value="{{ $ppmRecord->id }}">
+
+        <fieldset {{ $isLocked ? 'disabled' : '' }}
+                  style="border:0;padding:0;margin:0;min-width:0;">
 
         @php
             $sectionHeaders = [
@@ -631,15 +637,44 @@
             </div>
         </div>
 
-        <div class="submit-row">
+              @unless ($isLocked)
+            <div class="submit-row">
+                <button type="submit" class="save-next-btn">Save & Next</button>
+            </div>
+        @endunless
 
-    <button type="submit" class="save-next-btn">
-        Save & Next
-    </button>
-
-</div>
+        </fieldset>
     </form>
+    @if ($isLocked)
+    <div class="admin-verification-status verified">
+        🔒 Verified by quality — this checklist is read-only.
+    </div>
 
+    @if ($editRequest?->status === 'pending')
+        <div class="admin-verification-status pending">
+            ⏳ Edit request sent. Waiting for admin decision.
+        </div>
+    @else
+        @if ($editRequest?->status === 'rejected')
+            <div class="errors">
+                ❌ Admin did not accept your edit request.<br>
+                <strong>Reason:</strong> {{ $editRequest->admin_note }}
+            </div>
+        @endif
+
+        {{-- Separate form, NOT inside the main form --}}
+        <form method="POST" action="{{ route('ppm-checklists.pnl.edit-request', $ppmRecord) }}" style="margin-bottom:20px;">
+            @csrf
+            <input type="text" name="request_reason" placeholder="Why do you need to edit? (optional)"
+                   style="width:70%;padding:8px;">
+            <button type="submit" class="save-next-btn">Request edit</button>
+        </form>
+    @endif
+@elseif ($editRequest?->status === 'approved')
+    <div class="admin-verification-status verified">
+        ✅ Admin accepted your request. You can edit now.
+    </div>
+@endif
     <div class="page-footer">DPEO MEN-MEC 00.39-07.005 F1</div>
 </div>
 

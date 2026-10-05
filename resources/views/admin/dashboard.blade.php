@@ -16,7 +16,7 @@
         </a>
 
         <!-- View Details -->
-        <a href="{{ route('admin.showdetails') }}" class="admin-btn">
+        <a href="{{ route('admin.ppm-weeks') }}" class="admin-btn">
             <span class="btn-icon">🔍</span>
             <span class="btn-text">View Details</span>
             <span class="btn-arrow">→</span>

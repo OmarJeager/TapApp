@@ -14,6 +14,8 @@ use App\Http\Controllers\TstFrequencyOneController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CeoController;
 use App\Http\Controllers\ChecklistQuestionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EditRequestController;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +23,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
+Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -31,7 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/role-error', function () {
         return view('errors.role');
     })->name('role.error');
-
+    Route::get('/dashboardd', [DashboardController::class, 'index'])->name('dashboard');
     // Profile routes — accessible by all roles
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -90,12 +93,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         }));
     })->name('ppm-records.search');
 
-    Route::get('/admin/ppm-records/{ppmRecord}', [AdminController::class, 'show'])
+        Route::get('/admin/ppm-records/{ppmRecord}', [AdminController::class, 'show'])
         ->name('ppm-records.show');
-    Route::get('/adminshowdetails', [AdminController::class, 'showdetails'])
-        ->name('admin.showdetails');
-          Route::get('/ppm-recordsshowdeatils/{ppmRecord}', [AdminController::class, 'show'])->name('ppm-records.show');
-                  Route::get('/checklist-questions',                    [ChecklistQuestionController::class, 'showQuestions'])->name('admin.checklist-questions.index');
+        Route::get('/ppm-recordsshowdeatils/{ppmRecord}', [AdminController::class, 'show'])->name('ppm-records.show');
+        Route::get('/checklist-questions',                    [ChecklistQuestionController::class, 'showQuestions'])->name('admin.checklist-questions.index');
         Route::post('/checklist-questions',                   [ChecklistQuestionController::class, 'store'])->name('admin.checklist-questions.store');
         Route::put('/checklist-questions/{question}',          [ChecklistQuestionController::class, 'update'])->name('admin.checklist-questions.update');
         Route::patch('/checklist-questions/{question}/toggle', [ChecklistQuestionController::class, 'toggle'])->name('admin.checklist-questions.toggle');
@@ -103,9 +104,40 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/admin/ppm-weeks', [AdminController::class, 'weeks'])
         ->name('admin.ppm-weeks');
 
-        Route::patch(
-        '/admin/ppm-weeks/{week}/toggle',[AdminController::class, 'toggleWeekPublication'])
+        Route::patch('/admin/ppm-weeks/{week}/toggle',[AdminController::class, 'toggleWeekPublication'])
         ->name('admin.ppm-weeks.toggle');
+         // Publish draft week
+        Route::patch('/admin/ppm-weeks/{week}/publish',
+        [AdminController::class, 'publishWeek'])
+        ->name('admin.ppm-weeks.publish');
+
+
+         // Push already published week again
+        Route::patch('/admin/ppm-weeks/{week}/push',[AdminController::class, 'pushWeek'])
+        ->name('admin.ppm-weeks.push');
+
+
+        // Hide week
+         Route::patch('/admin/ppm-weeks/{week}/hide',[AdminController::class, 'hideWeek'])
+         ->name('admin.ppm-weeks.hide');
+
+
+        // Complete week
+         Route::patch('/admin/ppm-weeks/{week}/complete',[AdminController::class, 'completeWeek'])
+         ->name('admin.ppm-weeks.complete');
+
+
+        // Archive week
+         Route::patch('/admin/ppm-weeks/{week}/archive',[AdminController::class, 'archiveWeek'])
+         ->name('admin.ppm-weeks.archive');
+
+
+        // Reopen week
+        Route::patch('/admin/ppm-weeks/{week}/reopen',[AdminController::class, 'reopenWeek'])
+        ->name('admin.ppm-weeks.reopen');
+    Route::get('/admin/edit-requests', [EditRequestController::class, 'index'])->name('admin.edit-requests.index');
+Route::post('/admin/edit-requests/{editRequest}/approve', [EditRequestController::class, 'approve'])->name('admin.edit-requests.approve');
+Route::post('/admin/edit-requests/{editRequest}/reject', [EditRequestController::class, 'reject'])->name('admin.edit-requests.reject');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
@@ -129,6 +161,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get(
     '/ppm-records/{ppmRecord}/tst-frequency4-hv',[TstFreauencyFourHvController::class, 'frequency4Hv'])
         ->name('ppm-checklists.tst.frequency4hv');
+    Route::post('/ppm-records/{ppmRecord}/pnl-edit-request', [PnlChecklistController::class, 'requestEdit'])
+    ->name('ppm-checklists.pnl.edit-request');
     Route::get('/tickets', [TicketController::class, 'index'])
         ->name('tickets.index');
     Route::get('/tickets/weeks', [TicketController::class, 'weeks'])

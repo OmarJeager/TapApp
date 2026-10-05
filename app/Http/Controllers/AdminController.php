@@ -185,68 +185,292 @@ class AdminController extends Controller
     }
 
     /**
-     * Display one PPM record.
+     * Show all PPM weeks.
      */
-    public function show(PpmRecord $ppmRecord)
-    {
-        return view(
-            'admin.ppm-details',
-            compact('ppmRecord')
-        );
-    }
-    public function weeks()
+    public function weeks(Request $request)
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Default year = current year
+    |--------------------------------------------------------------------------
+    */
+
+    $year = $request->input('year', now()->year);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Get PPM weeks
+    |--------------------------------------------------------------------------
+    */
+
     $weeks = PpmRecord::query()
         ->select('week_due')
         ->whereNotNull('week_due')
         ->distinct()
         ->orderBy('week_due')
         ->get()
-        ->map(function ($record) {
-            $control = PpmWeekControl::where(
+        ->map(function ($record) use ($year) {
+
+            /*
+             * Get/create control for this YEAR + WEEK
+             */
+            $year = (int) substr((string) $record->week_due, 0, 4);
+            $control = PpmWeekControl::firstOrCreate(
+                [
+                    'year' => $year,
+                    'week_due' => $record->week_due,
+                ],
+                [
+                    'status' => 'draft',
+                    'is_published' => false,
+                ]
+            );
+
+
+            /*
+             * Get records for this week
+             */
+            $recordsQuery = PpmRecord::where(
                 'week_due',
                 $record->week_due
-            )->first();
+            );
+
+
+            /*
+             * Total records
+             */
+            $totalRecords = (clone $recordsQuery)->count();
+
+
+            /*
+             * Progress
+             *
+             * Keep your existing checklist relationship here.
+             */
+            $completedRecords = (clone $recordsQuery)
+                ->whereHas('checklist', function ($query) {
+                    $query->whereNotNull('completed_at');
+                })
+                ->count();
+
+
+            $progress = $totalRecords > 0
+                ? round(($completedRecords / $totalRecords) * 100)
+                : 0;
+
 
             return [
+                'year' => $year,
+
                 'week_due' => $record->week_due,
-                'is_published' => $control?->is_published ?? false,
-                'published_at' => $control?->published_at,
-                'record_count' => PpmRecord::where(
-                    'week_due',
-                    $record->week_due
-                )->count(),
+
+                'status' => $control->status,
+
+                'is_published' => $control->is_published,
+
+                'published_at' => $control->published_at,
+
+                'last_pushed_at' => $control->last_pushed_at,
+
+                'completed_at' => $control->completed_at,
+
+                'archived_at' => $control->archived_at,
+
+                'record_count' => $totalRecords,
+
+                'completed_count' => $completedRecords,
+
+                'progress' => $progress,
             ];
         });
 
-    return view('admin.weeks.weeks', compact('weeks'));
-}
-public function toggleWeekPublication($week)
-{
-    $control = PpmWeekControl::firstOrCreate(
-        [
-            'week_due' => $week,
-        ],
-        [
-            'is_published' => false,
-        ]
-    );
 
-    $control->is_published = !$control->is_published;
+    /*
+    |--------------------------------------------------------------------------
+    | Years for filter
+    |--------------------------------------------------------------------------
+    */
 
-    if ($control->is_published) {
-        $control->published_at = now();
-    } else {
-        $control->published_at = null;
+    $years = PpmWeekControl::query()
+        ->select('year')
+        ->distinct()
+        ->orderByDesc('year')
+        ->pluck('year');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Always make current year available
+    |--------------------------------------------------------------------------
+    */
+
+    if (!$years->contains(now()->year)) {
+        $years->prepend(now()->year);
     }
 
-    $control->save();
 
-    return back()->with(
-        'success',
-        $control->is_published
-            ? "Week {$week} is now visible to users."
-            : "Week {$week} is now hidden from users."
-    );
+    return view('admin.weeks.weeks', compact(
+        'weeks',
+        'years',
+        'year'
+    ));
 }
+
+
+    /**
+     * Publish a week for users.
+     */
+    public function publishWeek($week)
+    {
+        $control = PpmWeekControl::firstOrCreate(
+            [
+                'week_due' => $week,
+            ],
+            [
+                'status' => 'draft',
+                'is_published' => false,
+            ]
+        );
+
+        $control->update([
+            'status' => 'published',
+
+            'is_published' => true,
+
+            'published_at' =>
+                $control->published_at ?? now(),
+
+            'last_pushed_at' => now(),
+
+            'archived_at' => null,
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} has been published successfully."
+        );
+    }
+
+
+    /**
+     * Push an already published week again.
+     *
+     * This updates only last_pushed_at.
+     */
+    public function pushWeek($week)
+    {
+        $control = PpmWeekControl::where(
+            'week_due',
+            $week
+        )->firstOrFail();
+
+        if (!$control->is_published) {
+            return back()->with(
+                'error',
+                "Week {$week} must be published before it can be pushed."
+            );
+        }
+
+        $control->update([
+            'last_pushed_at' => now(),
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} has been pushed again successfully."
+        );
+    }
+
+
+    /**
+     * Hide a published week from users.
+     */
+    public function hideWeek($week)
+    {
+        $control = PpmWeekControl::where(
+            'week_due',
+            $week
+        )->firstOrFail();
+
+        $control->update([
+            'status' => 'draft',
+            'is_published' => false,
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} is now hidden from users."
+        );
+    }
+
+
+    /**
+     * Mark week as completed.
+     */
+    public function completeWeek($week)
+    {
+        $control = PpmWeekControl::where(
+            'week_due',
+            $week
+        )->firstOrFail();
+
+        $control->update([
+            'status' => 'completed',
+            'is_published' => true,
+            'completed_at' => now(),
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} has been marked as completed."
+        );
+    }
+
+
+    /**
+     * Archive a week.
+     */
+    public function archiveWeek($week)
+    {
+        $control = PpmWeekControl::where(
+            'week_due',
+            $week
+        )->firstOrFail();
+
+        $control->update([
+            'status' => 'archived',
+            'is_published' => false,
+            'archived_at' => now(),
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} has been archived."
+        );
+    }
+
+
+    /**
+     * Reopen an archived/completed week.
+     */
+    public function reopenWeek($week)
+    {
+        $control = PpmWeekControl::where(
+            'week_due',
+            $week
+        )->firstOrFail();
+
+        $control->update([
+            'status' => 'published',
+            'is_published' => true,
+            'archived_at' => null,
+        ]);
+
+        return back()->with(
+            'success',
+            "Week {$week} has been reopened."
+        );
+    }
+    
 }

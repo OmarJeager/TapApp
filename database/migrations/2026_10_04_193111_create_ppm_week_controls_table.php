@@ -19,8 +19,13 @@ return new class extends Migration
             // false = hidden from users
             // true  = visible to users
             $table->boolean('is_published')->default(false);
-
             $table->timestamp('published_at')->nullable();
+             $table->string('status')->default('draft');
+             $table->timestamp('last_pushed_at')->nullable();
+             $table->timestamp('completed_at')->nullable();
+            $table->timestamp('archived_at')->nullable();
+            $table->unsignedSmallInteger('year')->default(now()->year);
+             $table->index(['year', 'week_due']);
              // One control record per week
             $table->unique('week_due');
 

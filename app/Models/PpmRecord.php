@@ -30,6 +30,7 @@ class PpmRecord extends Model
         'risk_id',
         'plant_group',
         'position',
+        'year',
 
     ];
     public function ppmChecklists()

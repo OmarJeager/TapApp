@@ -34,6 +34,8 @@ return new class extends Migration
             $table->integer('risk_id')->nullable();
             $table->string('plant_group')->nullable();
             $table->string('position')->nullable();
+            $table->unsignedSmallInteger('year')->default(now()->year);
+            $table->index(['year', 'week_due']);
             $table->timestamps();
         });
     }

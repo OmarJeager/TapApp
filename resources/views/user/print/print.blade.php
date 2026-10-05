@@ -5,6 +5,10 @@
     <title>PPM Tickets - {{ $category }} / {{ $week }}</title>
 
     <style>
+        @page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
 
         * {
             box-sizing: border-box;
@@ -18,7 +22,7 @@
         }
 
         .sheet-toolbar {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto 16px auto;
             display: flex;
             justify-content: space-between;
@@ -41,84 +45,87 @@
             margin: 0;
         }
 
+        /* ===== 4 tickets per row ===== */
         .ticket-grid {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3mm;
         }
 
         .ticket {
-            width: calc((100% - 14px) / 2);
-            border: 1.5px solid #000;
-            padding: 16px 20px;
+            border: 1px solid #000;
+            padding: 2mm 2.5mm;
             background: #fff;
-            font-size: 15px;
+            font-size: 8.5px;
+            line-height: 1.25;
+            min-height: 62mm;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
 
+        /* no separator lines, like the original ticket */
         .ticket-row {
             display: flex;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 6px 0;
-        }
-
-        .ticket-row:last-child {
-            border-bottom: none;
+            padding: 1.5px 0;
         }
 
         .ticket-row .t-label {
             font-weight: 700;
-            min-width: 200px;
+            width: 22mm;
+            flex-shrink: 0;
         }
 
         .ticket-row .t-value {
             flex: 1;
+            word-break: break-word;
         }
 
         .ticket-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
         }
 
-        .ticket-header .jobid-label {
+        .ticket-header .jobid-label,
+        .ticket-header .jobid-value {
             font-weight: 700;
-            font-size: 16px;
+            font-size: 9px;
         }
 
         .ticket-header .jobid-value {
-            font-weight: 700;
-            font-size: 16px;
-            margin-left: 6px;
+            margin-left: 4px;
         }
 
         .ticket-header .date-block {
             font-weight: 700;
-            font-size: 15px;
+            font-size: 8.5px;
             text-align: right;
         }
 
         .ticket-header .date-block .date-line {
             font-weight: 400;
-            margin-top: 4px;
+            margin-top: 1px;
+            white-space: nowrap;
         }
 
         .barcode-row {
-            margin: 4px 0 10px 0;
+            margin: 2px 0 4px 0;
+            overflow: hidden;
         }
 
         .barcode-row svg {
-            height: 44px;
+            height: 26px;
+            max-width: 100%;
         }
 
-        .blank-line {
-            display: inline-block;
-            min-width: 70px;
-            border-bottom: 1px solid #999;
+        .sig-img {
+            height: 28px;
+            max-width: 60px;
+            object-fit: contain;
+            filter: brightness(0) saturate(100%);
         }
 
         @media print {
@@ -132,7 +139,8 @@
             }
 
             .ticket-grid {
-                gap: 10px;
+                max-width: none;
+                margin: 0;
             }
         }
     </style>
@@ -166,7 +174,7 @@
 
                 <div class="barcode-row">
                     @if($record->job_id)
-                        {!! DNS1D::getBarcodeSVG($record->job_id, 'C128', 2, 44) !!}
+                        {!! DNS1D::getBarcodeSVG($record->job_id, 'C128', 1, 26) !!}
                     @endif
                 </div>
 
@@ -197,24 +205,16 @@
 
                 <div class="ticket-row">
                     <span class="t-label">Signature / ID n&deg;</span>
-                    <span class="t-value" style="display:flex; align-items:center; gap:10px;">
-
+                    <span class="t-value" style="display:flex; align-items:center; gap:4px;">
                         @if(auth()->user()->signature)
-                            <img
-                                src="{{ asset('storage/' . auth()->user()->signature) }}"
-                                style="height:60px; max-width:180px; object-fit:contain; filter: brightness(0) saturate(100%);"
-                            >
+                            <img class="sig-img" src="{{ asset('storage/' . auth()->user()->signature) }}">
                         @endif
-
-                        <span style="font-weight:700;">
-                            {{ auth()->user()->matricule ?? '—' }}
-                        </span>
-
+                        <span style="font-weight:700;">{{ auth()->user()->matricule ?? '—' }}</span>
                     </span>
                 </div>
 
                 <div class="ticket-row">
-                    <span class="t-label">Next Preventative<br>Maintenance Week</span>
+                    <span class="t-label">Next Preventative Maintenance Week</span>
                     <span class="t-value">{{ $record->next_pm_week ?? '—' }}</span>
                 </div>
 

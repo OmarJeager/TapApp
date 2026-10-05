@@ -62,4 +62,13 @@ class PpmChecklist extends Model
             $this->total_time_minutes = $this->start_time->diffInMinutes($this->end_time);
         }
     }
+    public function editRequests()
+{
+    return $this->hasMany(PpmChecklistEditRequest::class);
+}
+
+public function isQualityVerified(): bool
+{
+    return strtolower(trim((string) $this->status_quality)) === 'verified';
+}
 }

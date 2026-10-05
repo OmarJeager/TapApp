@@ -6,8 +6,9 @@ use App\Models\PpmChecklist;
 use App\Models\PpmChecklistAnswer;
 use App\Models\PpmRecord;
 use App\Models\ChecklistQuestion;
-use App\Models\PpmChecklistQuestion;    
+use App\Models\PpmChecklistQuestion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -92,7 +93,22 @@ class PnlChecklistController extends Controller
                 ->get()
                 ->keyBy('checklist_question_id');
         }
+        $editRequest = $checklist
+    ? $checklist->editRequests()->latest('id')->first()
+    : null;
 
+$isLocked = $checklist
+    && $checklist->isQualityVerified()
+    && ($editRequest?->status !== 'approved');
+
+return view('user.pnl.create', [
+    'ppmRecord'   => $ppmRecord,
+    'questions'   => $questions,
+    'checklist'   => $checklist,
+    'answers'     => $answers,
+    'editRequest' => $editRequest,
+    'isLocked'    => $isLocked,
+]);
         /*
          * IMPORTANT:
          *
@@ -195,8 +211,19 @@ class PnlChecklistController extends Controller
             'string'
         ],
     ]);
+$existingChecklist = PpmChecklist::where('ppm_records_id', $validated['ppm_records_id'])->first();
+$approvedRequest = null;
 
-    /*
+if ($existingChecklist && $existingChecklist->isQualityVerified()) {
+    $approvedRequest = $existingChecklist->editRequests()
+        ->where('status', 'approved')
+        ->latest('id')
+        ->first();
+
+    if (!$approvedRequest) {
+        return back()->with('error', 'This checklist is verified by quality and locked. Request edit access from admin.');
+    }
+}    /*
     |--------------------------------------------------------------------------
     | Get PNL question IDs
     |--------------------------------------------------------------------------
@@ -311,6 +338,7 @@ class PnlChecklistController extends Controller
                     $validated['verified_quality_at'] ?? null,
             ]
         );
+
         /*
 |--------------------------------------------------------------------------
 | Create PNL question snapshots
@@ -388,6 +416,11 @@ if ($checklist->wasRecentlyCreated) {
         return $checklist;
     });
 
+
+    // ✅ PASTE THE "USED" UPDATE HERE
+    if ($approvedRequest) {
+        $approvedRequest->update(['status' => 'used']);
+    }
     /*
     |--------------------------------------------------------------------------
     | JSON response
@@ -456,5 +489,24 @@ if ($checklist->wasRecentlyCreated) {
             'status',
             'All PNL checklists for this week have been completed.'
         );
+}
+public function requestEdit(Request $request, PpmRecord $ppmRecord)
+{
+    $data = $request->validate(['request_reason' => ['nullable', 'string', 'max:1000']]);
+
+    $checklist = PpmChecklist::where('ppm_records_id', $ppmRecord->id)->firstOrFail();
+
+    $hasPending = $checklist->editRequests()->where('status', 'pending')->exists();
+    if ($hasPending) {
+        return back()->with('error', 'You already have a pending request.');
+    }
+
+    $checklist->editRequests()->create([
+        'requested_by_matricule' => Auth::user()->matricule,
+        'request_reason'         => $data['request_reason'] ?? null,
+        'status'                 => 'pending',
+    ]);
+
+    return back()->with('status', 'Edit request sent to admin.');
 }
 }
