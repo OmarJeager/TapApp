@@ -24,6 +24,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
+Route::middleware('auth')->get('/dashboardall/stats', [DashboardController::class, 'stats'])->name('lang.switch');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {
     return view('dashboard');

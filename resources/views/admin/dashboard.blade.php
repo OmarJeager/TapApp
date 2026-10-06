@@ -29,6 +29,13 @@
             <span class="btn-arrow">→</span>
         </a>
 
+        <!-- Edit Requests -->
+        <a href="{{ url('/admin/edit-requests') }}" class="admin-btn">
+            <span class="btn-icon">📝</span>
+            <span class="btn-text">Edit Requests</span>
+            <span class="btn-arrow">→</span>
+        </a>
+
     </div>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
