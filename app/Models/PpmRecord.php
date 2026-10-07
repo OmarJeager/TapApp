@@ -95,4 +95,31 @@ class PpmRecord extends Model
     {
         return $this->hasOne(PpmChecklist::class, 'ppm_records_id');
     }
+    /** Last completed preventive for the same asset (other records). */
+public function lastDoneChecklist()
+{
+    return PpmChecklist::with(['ppmRecord', 'completedBy'])
+        ->whereNotNull('completed_at')
+        ->whereHas('ppmRecord', fn ($q) => $q
+            ->where('asset_id', $this->asset_id)
+            ->where('id', '!=', $this->id))
+        ->orderByDesc('completed_at')
+        ->orderByDesc('id')
+        ->first();
+}
+
+/** 4 -> Monthly, 1 -> Weekly ... */
+public function getFrequencyLabelAttribute(): ?string
+{
+    return match ((int) $this->frequency) {
+        0       => null,
+        1       => 'Weekly',
+        2       => 'Bi-weekly',
+        4       => 'Monthly',
+        13      => 'Quarterly',
+        26      => 'Semi-annual',
+        52      => 'Annual',
+        default => $this->frequency . ' weeks',
+    };
+}
 }

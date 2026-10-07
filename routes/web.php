@@ -16,6 +16,8 @@ use App\Http\Controllers\CeoController;
 use App\Http\Controllers\ChecklistQuestionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditRequestController;
+use App\Http\Controllers\AssetScanController;
+use App\Http\Controllers\ActivityController;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +26,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
-Route::middleware('auth')->get('/dashboardall/stats', [DashboardController::class, 'stats'])->name('lang.switch');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -48,7 +49,60 @@ Route::middleware('auth')->group(function () {
         ->name('profile.signature.update');
 });
 Route::middleware(['auth', 'role:ceo'])->group(function () {
-    Route::get('/ceodashboard', [CeoController::class, 'index'])->name('ceo.dashboard');
+    Route::get('/ceodashboard', [CeoController::class, 'dashboard'])->name('ceo.dashboard');
+    
+        /*
+        |--------------------------------------------------------------------------
+        | User Management
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/users', [
+            CeoController::class,
+            'index'
+        ])->name('ceo.users.index');
+
+
+        Route::get('/users/create', [
+            CeoController::class,
+            'create'
+        ])->name('ceo.users.create');
+
+
+        Route::post('/users', [
+            CeoController::class,
+            'store'
+        ])->name('ceo.users.store');
+
+
+        Route::get('/users/{user}/edit', [
+            CeoController::class,
+            'edit'
+        ])->name('ceo.users.edit');
+
+
+        Route::put('/users/{user}', [
+            CeoController::class,
+            'update'
+        ])->name('ceo.users.update');
+
+
+        Route::delete('/users/{user}', [
+            CeoController::class,
+            'destroy'
+        ])->name('ceo.users.destroy');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete profile picture
+        |--------------------------------------------------------------------------
+        */
+
+        Route::delete('/users/{user}/picture', [
+            CeoController::class,
+            'deletePicture'
+        ])->name('ceo.users.picture.destroy');
 });
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin', function () {
@@ -153,6 +207,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-checklists.pnl.create');
     Route::post('/ppm-checklists/pnl', [PnlChecklistController::class, 'storePnl'])
         ->name('ppm-checklists.pnl.store');
+    Route::post('/ppm-records/scan', [PnlChecklistController::class, 'scan'])
+        ->name('ppm-records.scan');
     Route::get('/ppm-records/{ppmRecord}/form', [PpmRecordController::class, 'form'])
         ->name('ppm-records.form');
     Route::get('/ppm-records/{ppmRecord}/tstf1-form', [TstFrequencyOneController::class, 'create'])
@@ -164,6 +220,10 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-checklists.tst.frequency4hv');
     Route::post('/ppm-records/{ppmRecord}/pnl-edit-request', [PnlChecklistController::class, 'requestEdit'])
     ->name('ppm-checklists.pnl.edit-request');
+    Route::get('/scanasset', [AssetScanController::class, 'index'])
+    ->name('scan.index');
+    //Route::get('/scan', [AssetScanController::class, 'index'])->name('scan.index');
+    Route::post('/scan/lookup', [AssetScanController::class, 'lookup'])->name('asset-scan.lookup');
     Route::get('/tickets', [TicketController::class, 'index'])
         ->name('tickets.index');
     Route::get('/tickets/weeks', [TicketController::class, 'weeks'])

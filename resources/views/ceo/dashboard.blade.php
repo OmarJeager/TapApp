@@ -6,9 +6,8 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-    <h1>ceo</h1>
-<h1>{{ auth()->user()->name }}</h1>
-<h1>{{ auth()->user()->role }}</h1>
+    <div class="py-12">
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             {{-- Success --}}

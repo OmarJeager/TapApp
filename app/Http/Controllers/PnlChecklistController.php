@@ -509,4 +509,39 @@ public function requestEdit(Request $request, PpmRecord $ppmRecord)
 
     return back()->with('status', 'Edit request sent to admin.');
 }
+public function scan(Request $request)
+{
+    $data = $request->validate([
+        'asset_id' => ['required', 'string', 'max:50'],
+    ]);
+
+    $assetId = strtoupper(trim($data['asset_id']));
+
+    // ISO year + week, e.g. 202641 (same format as week_due)
+    $currentWeek = (int) now()->format('oW');
+
+    $base = PpmRecord::whereRaw('UPPER(TRIM(asset_id)) = ?', [$assetId]);
+
+    $record =
+        // 1) oldest pending (no checklist yet) record that is due now or overdue
+        (clone $base)->doesntHave('checklist')
+            ->where('week_due', '<=', $currentWeek)
+            ->orderBy('week_due')
+            ->first()
+        // 2) otherwise the next upcoming pending record
+        ?? (clone $base)->doesntHave('checklist')
+            ->orderBy('week_due')
+            ->first()
+        // 3) otherwise the most recent one (already done, opens for viewing)
+        ?? (clone $base)->orderByDesc('week_due')->first();
+
+    if (!$record) {
+        return back()->with('error', "Asset {$assetId} not found.");
+    }
+
+    // PNL assets go to the PNL create page, others to the generic form
+    return $record->asset_prefix === 'pnl'
+        ? redirect()->route('ppm-checklists.pnl.create', $record)
+        : redirect()->route('ppm-records.form', $record);
+}
 }

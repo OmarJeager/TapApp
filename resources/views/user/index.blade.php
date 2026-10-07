@@ -204,7 +204,71 @@
 
 <div class="back-btn-container"> <a href="{{ route('user.dashboard') }}" class="back-btn"> <span class="back-arrow">←</span> <span>Back</span> </a> </div>
 <div class="ppm-page">
+<form method="POST" action="{{ route('ppm-records.scan') }}" id="scanForm" class="scan-box">
+    @csrf
+    <input type="text" name="asset_id" id="scanInput"
+           placeholder="📷 Scan Asset ID (e.g. PNL00001)..."
+           autocomplete="off" autofocus required>
+    <button type="submit">Go</button>
+</form>
 
+<style>
+    .scan-box { margin-bottom:20px; }
+    .scan-box input {
+        width:100%; height:48px; padding:0 14px; font-size:16px;
+        border:2px solid #f28c28; border-radius:8px; outline:none;
+    }
+</style>
+
+<script>
+(function () {
+    const form  = document.getElementById('scanForm');
+    const input = document.getElementById('scanInput');
+    let buffer = '';
+    let lastKey = 0;
+    let submitted = false;
+
+    function go(code) {
+        code = code.trim();
+        if (submitted || code.length < 4) return;
+        submitted = true;
+        input.value = code;
+        form.submit();               // goes straight to the create page
+    }
+
+    // 1) Scanner presses Enter -> submit automatically
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            go(input.value);
+        }
+    });
+
+    // 2) Scanner without Enter suffix: submit when typing stops briefly
+    let timer = null;
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => go(input.value), 250);
+    });
+
+    // 3) Scan from anywhere on the page, even if the input isn't focused
+    document.addEventListener('keydown', e => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea') return; // don't hijack filters
+
+        const now = Date.now();
+        if (now - lastKey > 100) buffer = '';   // scanners type very fast
+        lastKey = now;
+
+        if (e.key === 'Enter') {
+            go(buffer);
+            buffer = '';
+        } else if (e.key.length === 1) {
+            buffer += e.key;
+        }
+    });
+})();
+</script>
     <div class="page-header">
         <div class="page-title">
             <h1>PPM Records</h1>
