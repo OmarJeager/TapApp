@@ -18,6 +18,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditRequestController;
 use App\Http\Controllers\AssetScanController;
 use App\Http\Controllers\ActivityController;
+use Illuminate\Support\Facades\Schedule;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -126,6 +127,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+    Schedule::command('ppm:import-folder')->everyMinute()->withoutOverlapping();
     Route::get('/admin/ppm-records/export/{format}', [AdminController::class, 'export'])
     ->name('ppm-records.export');
     Route::get('/adminhomepage', [AdminController::class, 'index'])->name('admin.index');

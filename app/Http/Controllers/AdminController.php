@@ -8,18 +8,36 @@ use App\Imports\PpmRecordsImport;
 use App\Models\PpmRecord;
 use App\Models\PpmWeekControl;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Illuminate\Support\Facades\Cache;
 class AdminController extends Controller
 {
     /**
      * Display PPM records.
      */
-    public function index()
-    {
-        $ppmRecords = PpmRecord::latest()->paginate(20);
+   public function index()
+{
+    $ppmRecords = PpmRecord::latest()->paginate(20);
 
-        return view('admin.index', compact('ppmRecords'));
+    $notice = Cache::pull('ppm_auto_import_notice'); // shown once
+
+    if ($notice) {
+        $msg = "Auto-import: {$notice['imported']} record(s) imported from {$notice['files']} file(s) in C:\\Eren.";
+
+        if ($notice['duplicates']) {
+            $msg .= ' ' . count($notice['duplicates']) . ' existing Job ID(s) skipped.';
+        }
+
+        if ($notice['failed']) {
+            session()->now('error', $msg . ' Failed: ' . implode(' | ', $notice['failed']));
+        } elseif ($notice['duplicates']) {
+            session()->now('warning', $msg);
+        } else {
+            session()->now('success', $msg);
+        }
     }
+
+    return view('admin.index', compact('ppmRecords'));
+}
 
     /**
      * Import PPM records from Excel or CSV.
