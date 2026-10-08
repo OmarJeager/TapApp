@@ -113,6 +113,10 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/ppm/{ppmRecord}', [SuperAdminController::class, 'show'])->name('superadmin.show');
     Route::patch('/checklist/{checklist}/toggle-status', [SuperAdminController::class, 'toggleStatus'])->name('superadmin.toggle');
     Route::post('/bulk-status', [SuperAdminController::class, 'bulkStatus'])->name('superadmin.bulk');
+    Route::get('/superadmin/notifications', [SuperAdminController::class, 'notifications'])
+    ->name('superadmin.notifications');
+    Route::post('/superadmin/notifications/{checklist}/verify', [SuperAdminController::class, 'verifyChecklist'])
+    ->name('superadmin.notifications.verify');
 });
 
 Route::middleware(['auth', 'role:quality'])->group(function () {
@@ -215,6 +219,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-records.form');
     Route::get('/ppm-records/{ppmRecord}/tstf1-form', [TstFrequencyOneController::class, 'create'])
         ->name('ppm-checklists.tst.frequency1');
+        Route::post('/tst-frequency-1', [TstFrequencyOneController::class, 'store'])
+    ->name('ppm-checklists.tst1.store');
+ 
+Route::post('/ppm-records/{ppmRecord}/tst-frequency-1/edit-request', [TstFrequencyOneController::class, 'requestEdit'])
+    ->name('ppm-checklists.tst1.edit-request');
     Route::get('/ppm-records/{ppmRecord}/tstf4-form', [TstFrequencyFourController::class, 'create'])
         ->name('ppm-checklists.tst.frequency4');
     Route::get(

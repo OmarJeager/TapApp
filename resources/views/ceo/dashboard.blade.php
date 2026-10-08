@@ -24,7 +24,57 @@
                 </div>
             @endif
 
+<a
+    href="{{ route('ceo.registration.requests') }}"
+    class="group flex items-center gap-3 p-4
+           bg-white dark:bg-gray-800 rounded-2xl
+           shadow-sm hover:shadow-lg
+           border border-gray-100 dark:border-gray-700
+           hover:-translate-y-1 transition-all duration-300"
+>
 
+    <div class="w-12 h-12 rounded-xl
+                bg-orange-100 dark:bg-orange-900/30
+                flex items-center justify-center">
+
+        <i class="fas fa-user-clock text-orange-500 text-xl"></i>
+
+    </div>
+
+    <div class="flex-1">
+
+        <h3 class="font-bold text-gray-800 dark:text-white">
+            {{ __('Registration Requests') }}
+        </h3>
+
+        <p class="text-xs text-gray-500">
+            {{ __('Review new users') }}
+        </p>
+
+    </div>
+
+    @php
+        $pendingRegistrations =
+            \App\Models\RegistrationRequest::where(
+                'status',
+                'pending'
+            )->count();
+    @endphp
+
+    @if($pendingRegistrations > 0)
+
+        <span class="min-w-7 h-7 px-2 rounded-full
+                     bg-red-500 text-white text-xs
+                     font-bold flex items-center justify-center
+                     animate-pulse">
+
+            {{ $pendingRegistrations }}
+
+        </span>
+
+    @endif
+
+</a>
             {{-- Main Card --}}
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
 

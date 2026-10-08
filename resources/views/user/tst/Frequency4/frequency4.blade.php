@@ -10,7 +10,7 @@
 
     <div class="pnl-title">
 
-        <h1>PNL Checklist</h1>
+        <h1>ROB Frequency Checklist</h1>
 
     </div>
 
@@ -20,42 +20,30 @@
     ========================= --}}
 
     @include('components.ppm-record-card', [
-        'record' => $ppmRecord
+        'record' => $ppmRecord,
     ])
-<div class="page-header">
-<h1>TST Frequency 4</h1><div class="page-header">
-@foreach($questions as $question)
+    <div class="page-header">
+        <h1>ROB Frequency 4</h1>
+        <div class="page-header">
+            @foreach ($questions as $question)
+                <div class="question-card">
 
-    <div class="question-card">
+                    <h3>
+                        {{ $question->order }}.
+                        {{ $question->question_text }}
+                    </h3>
 
-        <h3>
-            {{ $question->order }}.
-            {{ $question->question_text }}
-        </h3>
+                    <label>
+                        <input type="radio" name="responses[{{ $question->id }}]" value="OK">
+                        OK
+                    </label>
 
-        <label>
-            <input
-                type="radio"
-                name="responses[{{ $question->id }}]"
-                value="OK"
-            >
-            OK
-        </label>
+                    <label>
+                        <input type="radio" name="responses[{{ $question->id }}]" value="NOT_OK">
+                        Not OK
+                    </label>
 
-        <label>
-            <input
-                type="radio"
-                name="responses[{{ $question->id }}]"
-                value="NOT_OK"
-            >
-            Not OK
-        </label>
+                    <textarea name="comments[{{ $question->id }}]" placeholder="Comment..."></textarea>
 
-        <textarea
-            name="comments[{{ $question->id }}]"
-            placeholder="Comment..."
-        ></textarea>
-
-    </div>
-
-@endforeach
+                </div>
+            @endforeach

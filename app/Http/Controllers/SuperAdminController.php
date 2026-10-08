@@ -11,7 +11,9 @@ class SuperAdminController extends Controller
 {
     public function dashboard()
     {
-        return view('superadmin.dashboard');
+       return view('superadmin.dashboard', [
+        'pendingCount' => $this->pendingChecklists()->count(),
+    ]);
     }
 
     private const FILTERS = ['job_id', 'week_due', 'type', 'asset_id', 'frequency', 'completed_by', 'year', 'state'];
@@ -172,4 +174,68 @@ class SuperAdminController extends Controller
             ->route('superadmin.index', $request->only(self::FILTERS))
             ->with('success', "{$count} checklist(s) updated.");
     }
+    /** Checklists completed by a user but not yet verified by admin. */
+private function pendingChecklists()
+{
+    return PpmChecklist::query()
+        ->whereNotNull('completed_at')
+        ->where(function ($q) {
+            $q->whereNull('status_admin')
+              ->orWhere('status_admin', '!=', 'verified');
+        })
+        ->orderByDesc('completed_at')
+        ->orderByDesc('id');
+}
+ 
+/** JSON: count + rendered cards (used by the bell). */
+public function notifications()
+{
+    $checklists = $this->pendingChecklists()
+        ->with([
+            'ppmRecord',
+            'completedBy',
+            'questions',
+            'answers.question',
+        ])
+        ->limit(50)
+        ->get();
+ 
+    // Use the snapshot question text when it exists (same logic as show())
+    $checklists->each(function ($checklist) {
+        $snapshots = $checklist->questions->keyBy('checklist_question_id');
+ 
+        $answers = $checklist->answers
+            ->map(function ($answer) use ($snapshots) {
+                if ($snap = $snapshots->get($answer->checklist_question_id)) {
+                    $answer->setRelation('question', $snap);
+                }
+                return $answer;
+            })
+            ->sortBy(fn ($a) => $a->question->order ?? 0)
+            ->values();
+ 
+        $checklist->setRelation('answers', $answers);
+    });
+ 
+    return response()->json([
+        'count' => $this->pendingChecklists()->count(),
+        'html'  => view('superadmin.partials.notification-cards', compact('checklists'))->render(),
+    ]);
+}
+ 
+/** Mark one checklist as verified by the admin (status_admin = verified). */
+public function verifyChecklist(PpmChecklist $checklist)
+{
+    $checklist->update([
+        'status_admin'          => 'verified',
+        'verified_by_matricule' => Auth::user()->matricule,
+        'verified_at'           => now()->toDateString(),
+    ]);
+ 
+    return response()->json([
+        'success' => true,
+        'message' => 'Checklist verified.',
+        'count'   => $this->pendingChecklists()->count(),
+    ]);
+}
 }
