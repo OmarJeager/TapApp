@@ -350,7 +350,9 @@
                             <th>
                                 {{ __('Created') }}
                             </th>
-
+                            <th>
+                                {{ __('Account Status') }}
+                            </th>
                             <th>
                                 {{ __('Actions') }}
                             </th>
@@ -507,14 +509,52 @@
                                     </span>
 
                                 </td>
-
+                                {{-- ACCOUNT STATUS --}}
+<td>
+    @if($user->is_active)
+        <span class="account-status active-status">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ __('Active') }}
+        </span>
+    @else
+        <span class="account-status inactive-status">
+            <i class="fa-solid fa-ban"></i>
+            {{ __('Deactivated') }}
+        </span>
+    @endif
+</td>
 
                                 {{-- ACTIONS --}}
 
                                 <td>
 
                                     <div class="actions">
+                                        @if($user->id !== auth()->id())
+    <form
+        method="POST"
+        action="{{ route('ceo.users.toggle-status', $user) }}"
+        onsubmit="return confirm(
+            '{{ $user->is_active
+                ? __('Deactivate this account?')
+                : __('Activate this account?') }}'
+        )"
+    >
+        @csrf
+        @method('PATCH')
 
+        <button
+            type="submit"
+            class="action {{ $user->is_active ? 'deactivate' : 'activate' }}"
+            title="{{ $user->is_active ? __('Deactivate') : __('Activate') }}"
+        >
+            <i class="fa-solid {{ $user->is_active ? 'fa-user-slash' : 'fa-user-check' }}"></i>
+
+            <span class="action-label">
+                {{ $user->is_active ? __('Deactivate') : __('Activate') }}
+            </span>
+        </button>
+    </form>
+@endif
                                         <a
                                             href="{{ route('ceo.users.edit', $user) }}"
                                             class="action edit"
@@ -528,29 +568,39 @@
 
 
                                         @if($user->id !== auth()->id())
+<form
+    method="POST"
+    action="{{ route('ceo.users.destroy', $user) }}"
+    class="delete-form"
+>
+    @csrf
+    @method('DELETE')
 
-                                            <form
-                                                method="POST"
-                                                action="{{ route('ceo.users.destroy', $user) }}"
-                                                class="delete-form"
-                                            >
+    <input
+        type="password"
+        name="security_code"
+        placeholder="CEO security code"
+        aria-label="CEO security code"
+        required
+        autocomplete="off"
+        class="security-code-input"
+    >
 
-                                                @csrf
-                                                @method('DELETE')
+    @error('security_code')
+        <span class="text-red-600 text-xs">
+            {{ $message }}
+        </span>
+    @enderror
 
-                                                <button
-                                                    type="submit"
-                                                    class="action delete"
-                                                    title="{{ __('Delete') }}"
-                                                    onclick="return confirm('{{ __('Are you sure you want to delete this user?') }}')"
-                                                >
-
-                                                    <i class="fa-solid fa-trash"></i>
-                                                    <span class="action-label">{{ __('Delete') }}</span>
-
-                                                </button>
-
-                                            </form>
+    <button
+        type="submit"
+        class="action delete"
+        onclick="return confirm('Permanently delete this account?')"
+    >
+        <i class="fa-solid fa-trash"></i>
+        <span class="action-label">{{ __('Delete') }}</span>
+    </button>
+</form>
 
                                         @else
 
@@ -1699,6 +1749,58 @@
 
         }
 
+.account-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.active-status {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.inactive-status {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.action.activate {
+    color: #15803d;
+    background: #dcfce7;
+}
+
+.action.deactivate {
+    color: #b45309;
+    background: #ffedd5;
+}
+
+.security-code-input {
+    width: 145px;
+    min-width: 120px;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 12px;
+    outline: none;
+}
+
+.security-code-input:focus {
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, .12);
+}
+
+.delete-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
     </style>
 
 </x-app-layout>

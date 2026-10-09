@@ -1,7 +1,8 @@
 <?php
 
 return [
-
+    
+    'ceo_delete_security_code' => env('CEO_DELETE_SECURITY_CODE'),
     /*
     |--------------------------------------------------------------------------
     | Application Name

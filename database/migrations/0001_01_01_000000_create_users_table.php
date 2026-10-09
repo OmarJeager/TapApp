@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('role')->default('user');
             $table->string('profile_picture')->nullable();
             $table->string('matricule')->unique();
-             $table->string('signature')->nullable();
+            $table->string('signature')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

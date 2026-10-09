@@ -104,6 +104,10 @@ Route::middleware(['auth', 'role:ceo'])->group(function () {
             CeoController::class,
             'deletePicture'
         ])->name('ceo.users.picture.destroy');
+        
+        Route::patch('/ceo/users/{user}/toggle-status',
+             [CeoController::class, 'toggleAccountStatus']
+        )->name('ceo.users.toggle-status');
 });
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin', function () {

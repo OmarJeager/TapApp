@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
 class CeoController extends Controller
 {
     //
@@ -357,47 +362,105 @@ class CeoController extends Controller
     /**
      * Delete user.
      */
-    public function destroy(User $user)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent CEO from deleting himself
-        |--------------------------------------------------------------------------
-        */
-
-        if ($user->id === Auth::id()) {
-
-            return back()->with(
-                'error',
-                'You cannot delete your own account.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Delete profile picture
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $user->profile_picture &&
-            Storage::disk('public')->exists($user->profile_picture)
-        ) {
-
-            Storage::disk('public')->delete(
-                $user->profile_picture
-            );
-        }
-
-
-        $user->delete();
-
-        return redirect()
-            ->route('ceo.users.index')
-            ->with(
-                'success',
-                'User deleted successfully.'
-            );
+    
+/**
+ * Delete a user after validating the CEO security code.
+ */
+public function destroy(Request $request, User $user)
+{
+    if ($user->id === Auth::id()) {
+        return back()->with(
+            'error',
+            'You cannot delete your own account.'
+        );
     }
+
+    $request->validate([
+        'security_code' => ['required', 'string', 'max:255'],
+    ]);
+
+    $configuredCode = (string) config('app.ceo_delete_security_code');
+    $enteredCode = (string) $request->input('security_code');
+
+    if (
+        $configuredCode === '' ||
+        ! hash_equals($configuredCode, $enteredCode)
+    ) {
+        throw ValidationException::withMessages([
+            'security_code' => 'Incorrect security code. The account was not deleted.',
+        ]);
+    }
+
+    if (
+        $user->profile_picture &&
+        Storage::disk('public')->exists($user->profile_picture)
+    ) {
+        Storage::disk('public')->delete($user->profile_picture);
+    }
+
+    $user->delete();
+
+    return redirect()
+        ->route('ceo.users.index')
+        ->with('success', 'User deleted successfully.');
+}
+    /**
+ * Activate or deactivate a user account.
+ */
+public function toggleAccountStatus(User $user)
+{
+    // Never allow the CEO to deactivate their own account.
+    if ($user->id === Auth::id()) {
+        return back()->with(
+            'error',
+            'You cannot deactivate your own account.'
+        );
+    }
+
+    // Change the status.
+    $user->is_active = ! $user->is_active;
+    $user->save();
+
+    $isActive = $user->is_active;
+
+    $subject = $isActive
+        ? 'TapApp account activated'
+        : 'TapApp account deactivated';
+
+    $message = $isActive
+        ? "Hello {$user->name},\n\n"
+            . "Your TapApp account has been activated by the CEO. "
+            . "You can now log in using your usual credentials."
+        : "Hello {$user->name},\n\n"
+            . "Your TapApp account has been deactivated by the CEO. "
+            . "You cannot log in while your account is inactive. "
+            . "Please contact your administrator if you need assistance.";
+
+    // The database status is saved even if email delivery fails.
+    try {
+        Mail::raw($message, function ($mail) use ($user, $subject) {
+            $mail->to($user->email)
+                ->subject($subject);
+        });
+
+        $emailMessage = ' Notification email sent.';
+    } catch (Throwable $e) {
+        Log::error('TapApp account status email failed.', [
+            'user_id' => $user->id,
+            'exception' => $e->getMessage(),
+        ]);
+
+        $emailMessage =
+            ' However, the notification email could not be sent.';
+    }
+
+    return back()->with(
+        'success',
+        ($isActive
+            ? 'Account activated successfully.'
+            : 'Account deactivated successfully.')
+        . $emailMessage
+    );
+}
+
 }
