@@ -105,7 +105,7 @@ Route::middleware(['auth', 'role:ceo'])->group(function () {
             CeoController::class,
             'deletePicture'
         ])->name('ceo.users.picture.destroy');
-        
+
         Route::patch('/ceo/users/{user}/toggle-status',
              [CeoController::class, 'toggleAccountStatus']
         )->name('ceo.users.toggle-status');
@@ -239,6 +239,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get(
     '/ppm-records/{ppmRecord}/tst-frequency4-hv',[TstFreauencyFourHvController::class, 'frequency4Hv'])
         ->name('ppm-checklists.tst.frequency4hv');
+        Route::post('/tst-frequency-4-hv', [TstFreauencyFourHvController::class, 'store'])
+    ->name('ppm-checklists.tst4hv.store');
+
+Route::post('/ppm-records/{ppmRecord}/tst-frequency-4-hv/edit-request', [TstFreauencyFourHvController::class, 'requestEdit'])
+    ->name('ppm-checklists.tst4hv.edit-request');
     Route::post('/ppm-records/{ppmRecord}/pnl-edit-request', [PnlChecklistController::class, 'requestEdit'])
     ->name('ppm-checklists.pnl.edit-request');
     Route::get('/scanasset', [AssetScanController::class, 'index'])

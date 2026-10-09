@@ -362,7 +362,7 @@ class CeoController extends Controller
     /**
      * Delete user.
      */
-    
+
 /**
  * Delete a user after validating the CEO security code.
  */
