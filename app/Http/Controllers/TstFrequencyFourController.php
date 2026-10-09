@@ -174,10 +174,18 @@ class TstFrequencyFourController extends Controller
             ], 201);
         }
 
-        /* ---------- Next TST record, same week ---------- */
+        /* ---------- Next TST record, same frequency and same week ---------- */
         $next = PpmRecord::where('week_due', $currentRecord->week_due)
+            ->where('frequency', $currentRecord->frequency)
             ->where('asset_id', 'like', 'TST%')
             ->where('id', '>', $currentRecord->id)
+            ->whereExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('ppm_checklists')
+                    ->join('ppm_checklist_questions', 'ppm_checklist_questions.ppm_checklist_id', '=', 'ppm_checklists.id')
+                    ->whereColumn('ppm_checklists.ppm_records_id', 'ppm_records.id')
+                    ->whereNull('ppm_checklist_questions.variant');
+            })
             ->orderBy('id')
             ->first();
 

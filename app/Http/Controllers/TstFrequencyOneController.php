@@ -46,7 +46,12 @@ class TstFrequencyOneController extends Controller
             && ($editRequest?->status !== 'approved');
 
         return view('user.tst.Frequency1.frequency1', compact(
-            'ppmRecord', 'questions', 'checklist', 'answers', 'editRequest', 'isLocked'
+            'ppmRecord',
+            'questions',
+            'checklist',
+            'answers',
+            'editRequest',
+            'isLocked'
         ));
     }
 
@@ -174,9 +179,10 @@ class TstFrequencyOneController extends Controller
             ], 201);
         }
 
-        /* ---------- Next TST record, same week ---------- */
+        /* ---------- Next TST record, same week and same frequency ---------- */
         $next = PpmRecord::where('week_due', $currentRecord->week_due)
             ->where('asset_id', 'like', 'TST%')
+            ->where('frequency', $currentRecord->frequency)
             ->where('id', '>', $currentRecord->id)
             ->orderBy('id')
             ->first();
