@@ -77,6 +77,8 @@ class CeoController extends Controller
 
         $adminCount = User::where('role', 'admin')->count();
 
+        $qualityCount = User::where('role', 'quality')->count();
+
         $userCount = User::where('role', 'user')->count();
 
         return view('ceo.users.index', compact(
@@ -85,6 +87,7 @@ class CeoController extends Controller
             'ceoCount',
             'superadminCount',
             'adminCount',
+            'qualityCount',
             'userCount'
         ));
     }
@@ -132,6 +135,7 @@ class CeoController extends Controller
                     'ceo',
                     'superadmin',
                     'admin',
+                    'quality',
                     'user',
                 ]),
             ],
@@ -235,6 +239,7 @@ class CeoController extends Controller
                     'ceo',
                     'superadmin',
                     'admin',
+                    'quality',
                     'user',
                 ]),
             ],

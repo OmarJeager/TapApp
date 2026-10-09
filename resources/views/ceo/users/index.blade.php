@@ -522,6 +522,7 @@
                                         >
 
                                             <i class="fa-solid fa-pen"></i>
+                                            <span class="action-label">{{ __('Edit') }}</span>
 
                                         </a>
 
@@ -545,6 +546,7 @@
                                                 >
 
                                                     <i class="fa-solid fa-trash"></i>
+                                                    <span class="action-label">{{ __('Delete') }}</span>
 
                                                 </button>
 
@@ -1494,25 +1496,29 @@
 
         .action {
 
-            width: 34px;
+            display: inline-flex;
 
-            height: 34px;
+            align-items: center;
+
+            gap: 5px;
+
+            padding: 7px 10px;
 
             border-radius: 9px;
 
             border: 0;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
 
             cursor: pointer;
 
             transition: .2s;
 
             text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
 
         }
 
@@ -1559,6 +1565,13 @@
             background: #f0fdf4;
 
             border-radius: 9px;
+
+        }
+
+
+        .action-label {
+
+            display: inline;
 
         }
 

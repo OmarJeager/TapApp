@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
 });
 Route::middleware(['auth', 'role:ceo'])->group(function () {
     Route::get('/ceodashboard', [CeoController::class, 'dashboard'])->name('ceo.dashboard');
-    
+
         /*
         |--------------------------------------------------------------------------
         | User Management
@@ -221,11 +221,16 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('ppm-checklists.tst.frequency1');
         Route::post('/tst-frequency-1', [TstFrequencyOneController::class, 'store'])
     ->name('ppm-checklists.tst1.store');
- 
-Route::post('/ppm-records/{ppmRecord}/tst-frequency-1/edit-request', [TstFrequencyOneController::class, 'requestEdit'])
+
+    Route::post('/ppm-records/{ppmRecord}/tst-frequency-1/edit-request', [TstFrequencyOneController::class, 'requestEdit'])
     ->name('ppm-checklists.tst1.edit-request');
     Route::get('/ppm-records/{ppmRecord}/tstf4-form', [TstFrequencyFourController::class, 'create'])
         ->name('ppm-checklists.tst.frequency4');
+        Route::post('/tst-frequency-4', [TstFrequencyFourController::class, 'store'])
+    ->name('ppm-checklists.tst4.store');
+
+    Route::post('/ppm-records/{ppmRecord}/tst-frequency-4/edit-request', [TstFrequencyFourController::class, 'requestEdit'])
+    ->name('ppm-checklists.tst4.edit-request');
     Route::get(
     '/ppm-records/{ppmRecord}/tst-frequency4-hv',[TstFreauencyFourHvController::class, 'frequency4Hv'])
         ->name('ppm-checklists.tst.frequency4hv');
