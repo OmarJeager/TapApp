@@ -15,6 +15,7 @@
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^4.0",
         "milon/barcode": "*",
+        "resend/resend-laravel": "^1.6",
         "resend/resend-php": "^1.16",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^8.3"

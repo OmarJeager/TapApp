@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
 Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {

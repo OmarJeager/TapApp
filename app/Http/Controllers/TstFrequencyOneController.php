@@ -183,7 +183,7 @@ class TstFrequencyOneController extends Controller
 
         if ($next) {
             return redirect()
-                ->route('ppm-checklists.tst1.create', $next)
+                ->route('ppm-checklists.tst.frequency1', $next)
                 ->with('status', 'Checklist saved. Moving to the next TST.');
         }
 
