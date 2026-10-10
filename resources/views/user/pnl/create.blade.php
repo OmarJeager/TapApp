@@ -1,4 +1,4 @@
- <div class="back-btn-container"> <a href="{{ route('user.index') }}" class="back-btn"> <span class="back-arrow">←</span> <span>Back</span> </a> </div>
+<div class="back-btn-container"> <a href="{{ route('user.index') }}" class="back-btn"> <span class="back-arrow">←</span> <span>Back</span> </a> </div>
 <button type="button" class="logout-trigger" onclick="document.getElementById('logoutDialog').classList.add('is-open')" aria-label="Log out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3m9-8h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/></svg> Log out</button>
 <div class="logout-overlay" id="logoutDialog" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" onclick="if(event.target === this) this.classList.remove('is-open')">
     <div class="logout-dialog">
@@ -54,7 +54,7 @@
 .logout-cancel { color: #333; background: #eee; }
 .logout-confirm { color: #fff; background: #c62828; }
 @media (max-width: 600px) { .logout-trigger { top: 14px; right: 14px; padding: 10px 13px; } }
-.back-btn-c ontainer { display: flex; justify-content: flex-start; margin: 25px 0; } .back-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 180px; padding: 15px 28px; background: linear-gradient(135deg, #ff9800, #f4511e); color: white; font-size: 18px; font-weight: 700; text-decoration: none; border-radius: 13px; box-shadow: 0 8px 20px rgba(255, 111, 0, 0.35); overflow: hidden; transition: all 0.3s ease; } /* Shine effect */ .back-btn::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: rgba(255, 255, 255, 0.25); transform: skewX(-25deg); transition: left 0.6s ease; } .back-btn:hover::before { left: 140%; } /* Hover animation */ .back-btn:hover { transform: translateY(-4px) scale(1.03); background: linear-gradient(135deg, #ffab00, #ff5722); box-shadow: 0 14px 30px rgba(255, 111, 0, 0.5); } /* Arrow animation */ .back-arrow { position: relative; z-index: 1; font-size: 27px; line-height: 1; transition: transform 0.3s ease; } .back-btn:hover .back-arrow { transform: translateX(-6px); } .back-btn span:last-child { position: relative; z-index: 1; } /* Click animation */ .back-btn:active { transform: scale(0.96); }
+.back-btn-container { display: flex; justify-content: flex-start; margin: 25px 0; } .back-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-width: 180px; padding: 15px 28px; background: linear-gradient(135deg, #ff9800, #f4511e); color: white; font-size: 18px; font-weight: 700; text-decoration: none; border-radius: 13px; box-shadow: 0 8px 20px rgba(255, 111, 0, 0.35); overflow: hidden; transition: all 0.3s ease; } /* Shine effect */ .back-btn::before { content: ""; position: absolute; top: 0; left: -120%; width: 70%; height: 100%; background: rgba(255, 255, 255, 0.25); transform: skewX(-25deg); transition: left 0.6s ease; } .back-btn:hover::before { left: 140%; } /* Hover animation */ .back-btn:hover { transform: translateY(-4px) scale(1.03); background: linear-gradient(135deg, #ffab00, #ff5722); box-shadow: 0 14px 30px rgba(255, 111, 0, 0.5); } /* Arrow animation */ .back-arrow { position: relative; z-index: 1; font-size: 27px; line-height: 1; transition: transform 0.3s ease; } .back-btn:hover .back-arrow { transform: translateX(-6px); } .back-btn span:last-child { position: relative; z-index: 1; } /* Click animation */ .back-btn:active { transform: scale(0.96); }
     .submit-row {
     margin-top: 30px;
     text-align: right;
@@ -310,6 +310,190 @@
         margin-top: 10px;
     }
 
+    /* =====================================================
+       AUTO TIME (shift selector) - compact
+    ===================================================== */
+    .auto-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+        font-family: Arial, sans-serif;
+    }
+
+    /* small pill button */
+    .auto-pill {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        background: linear-gradient(135deg, #ff9800, #f4511e);
+        box-shadow: 0 4px 12px rgba(244, 81, 30, .3);
+        font: 700 13px Arial, sans-serif;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .auto-pill::before {
+        content: "";
+        position: absolute;
+        top: 0; left: -120%;
+        width: 60%; height: 100%;
+        background: rgba(255, 255, 255, .3);
+        transform: skewX(-25deg);
+        transition: left .6s ease;
+    }
+    .auto-pill:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(244, 81, 30, .4); }
+    .auto-pill:hover:not(:disabled)::before { left: 140%; }
+    .auto-pill:active:not(:disabled) { transform: scale(.96); }
+    .auto-pill:disabled { opacity: .55; cursor: not-allowed; }
+    .auto-pill > * { position: relative; z-index: 1; }
+    .auto-bolt { font-size: 15px; display: inline-block; animation: auto-bolt 2s ease-in-out infinite; }
+    @keyframes auto-bolt {
+        0%, 100% { transform: scale(1) rotate(0); }
+        50%      { transform: scale(1.25) rotate(-12deg); }
+    }
+    .auto-arrow { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+    .auto-wrap.open .auto-arrow { transform: rotate(180deg); }
+
+    /* popover */
+    .auto-pop {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        z-index: 50;
+        width: 330px;
+        max-width: 100%;
+        padding: 14px;
+        background: #fff;
+        border: 1px solid #ffd9a8;
+        border-radius: 14px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, .18);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px) scale(.97);
+        transform-origin: top left;
+        transition: opacity .22s, transform .22s, visibility .22s;
+    }
+    .auto-wrap.open .auto-pop { opacity: 1; visibility: visible; transform: none; }
+    .auto-pop-title { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #555; }
+
+    .shift-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .shift-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 10px 4px;
+        background: #fff;
+        border: 2px solid #eee;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: transform .25s, box-shadow .25s, border-color .25s, background .25s, opacity .3s;
+    }
+    .auto-wrap.open .shift-card { opacity: 1; transform: none; }
+    .auto-wrap.open .shift-card:nth-child(2) { transition-delay: .05s, 0s, 0s, 0s, .05s; }
+    .auto-wrap.open .shift-card:nth-child(3) { transition-delay: .1s, 0s, 0s, 0s, .1s; }
+    .shift-card:hover { transform: translateY(-3px); border-color: #ffb066; box-shadow: 0 6px 14px rgba(244, 81, 30, .18); transition-delay: 0s; }
+    .shift-icon { font-size: 22px; transition: transform .3s; }
+    .shift-card:hover .shift-icon { transform: scale(1.2) rotate(-8deg); }
+    .shift-name { font-weight: 700; font-size: 12px; color: #333; }
+    .shift-hours { font-size: 11px; color: #888; }
+    .shift-check {
+        position: absolute; top: 4px; right: 5px;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: #f4511e; color: #fff; font-size: 10px;
+        display: grid; place-items: center;
+        transform: scale(0);
+        transition: transform .25s cubic-bezier(.2, 1.6, .4, 1);
+    }
+    .shift-card.selected { border-color: #f4511e; background: linear-gradient(135deg, #fff3e6, #ffe3d1); box-shadow: 0 6px 14px rgba(244, 81, 30, .25); }
+    .shift-card.selected .shift-check { transform: scale(1); }
+
+    .auto-pop-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 12px; }
+    .shift-date { font-size: 11px; font-weight: 700; color: #555; display: flex; flex-direction: column; gap: 3px; }
+    .shift-date input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; }
+    .auto-pop-actions { display: flex; gap: 6px; }
+    .auto-btn { padding: 8px 14px; border: 0; border-radius: 8px; font: 700 13px Arial, sans-serif; cursor: pointer; transition: transform .2s, background .2s, opacity .2s; }
+    .auto-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .auto-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .auto-ok { color: #fff; background: #2e9e4f; }
+    .auto-ok:hover:not(:disabled) { background: #238540; }
+    .auto-cancel { color: #333; background: #eee; }
+
+    /* show more (all PNL with time) */
+    .auto-more {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        width: 100%; margin-top: 12px; padding: 7px 10px;
+        border: 1px dashed #ffb066; border-radius: 8px;
+        color: #c75a00; background: #fff8ed;
+        font: 700 12px Arial, sans-serif; cursor: pointer;
+        transition: background .2s, transform .2s, opacity .2s;
+    }
+    .auto-more:hover:not(:disabled) { background: #ffeed9; transform: translateY(-1px); }
+    .auto-more:disabled { opacity: .45; cursor: not-allowed; }
+    .auto-more svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s; }
+    .auto-more.open svg { transform: rotate(180deg); }
+    .auto-more-box { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s ease; }
+    .auto-more-box.open { grid-template-rows: 1fr; }
+    .auto-more-inner { overflow: hidden; min-height: 0; }
+    .auto-more-inner .shift-timeline { max-height: 240px; }
+
+    /* applied chip */
+    .auto-chip {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 6px 5px 12px;
+        background: #fff3e6;
+        border: 1px solid #ffb066;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #8a3b00;
+    }
+    .auto-chip.show { display: inline-flex; animation: auto-pop-in .35s cubic-bezier(.2, 1.4, .4, 1); }
+    @keyframes auto-pop-in { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+    .auto-chip .chip-ico { font-size: 15px; }
+    .auto-chip button { border: 0; cursor: pointer; font: 700 12px Arial, sans-serif; border-radius: 999px; padding: 4px 9px; transition: transform .2s, background .2s; }
+    .auto-chip button:hover { transform: scale(1.06); }
+    .chip-list { color: #8a3b00; background: #ffe3d1; }
+    .chip-list:hover { background: #ffd2b5; }
+    .chip-remove { color: #fff; background: #d32f2f; }
+    .chip-remove:hover { background: #b71c1c; }
+
+    .shift-loading { display: none; font-size: 12px; color: #c75a00; font-weight: 700; }
+    .shift-loading.show { display: inline-block; animation: auto-blink 1s infinite; }
+    @keyframes auto-blink { 50% { opacity: .4; } }
+
+    /* timeline (opens under the bar) */
+    .auto-timeline-box {
+        flex-basis: 100%;
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows .35s ease;
+    }
+    .auto-timeline-box.open { grid-template-rows: 1fr; }
+    .auto-timeline-inner { overflow: hidden; min-height: 0; }
+    .shift-summary { margin: 8px 0 6px; font-size: 12px; font-weight: 700; color: #444; }
+    .shift-timeline { display: flex; flex-direction: column; gap: 5px; max-height: 220px; overflow-y: auto; padding-bottom: 4px; }
+    .shift-day { margin-top: 6px; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #c75a00; border-bottom: 1px dashed #ffb066; padding-bottom: 2px; opacity: 0; animation: auto-slide .35s forwards; }
+    .shift-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 6px 10px; background: #fff; border: 1px solid #eee; border-left: 4px solid #ddd; border-radius: 8px; font-size: 12px; opacity: 0; animation: auto-slide .35s forwards; }
+    .shift-row.current { border-left-color: #f4511e; background: #fff0e6; font-weight: 700; box-shadow: 0 3px 10px rgba(244, 81, 30, .2); }
+    .shift-row .t { font-variant-numeric: tabular-nums; color: #333; }
+    .shift-row .m { color: #999; font-size: 11px; }
+    @keyframes auto-slide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+
     @media (max-width: 600px) {
         body {
             padding: 0;
@@ -441,6 +625,8 @@
             max-width: none;
             box-sizing: border-box;
         }
+
+        .auto-pop { width: 100%; }
     }
 </style>
 </head>
@@ -480,6 +666,83 @@
 
         <fieldset {{ $isLocked ? 'disabled' : '' }}
                   style="border:0;padding:0;margin:0;min-width:0;">
+
+        {{-- =====================================================
+             AUTO TIME (shift) - values carried to the next PNL
+        ===================================================== --}}
+        <input type="hidden" name="shift" id="shiftInput" value="{{ $autoShift ?? '' }}">
+        <input type="hidden" name="schedule_date" id="shiftDateInput" value="{{ $autoDate ?? '' }}">
+
+        <div class="auto-wrap" id="autoWrap"
+             data-url="{{ route('ppm-checklists.pnl.schedule', $ppmRecord) }}"
+             data-auto-shift="{{ $autoShift ?? '' }}"
+             data-auto-date="{{ $autoDate ?? '' }}"
+             data-has-times="{{ $checklist?->start_time ? 1 : 0 }}">
+
+            {{-- small button --}}
+            <button type="button" class="auto-pill" id="autoPill" aria-expanded="false" aria-controls="autoPop">
+                <span class="auto-bolt">⚡</span>
+                <span>Auto time</span>
+                <svg class="auto-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+
+            {{-- applied chip --}}
+            <div class="auto-chip" id="autoChip">
+                <span class="chip-ico" id="chipIcon">⚡</span>
+                <span id="chipText"></span>
+                <button type="button" class="chip-list" id="chipList" title="Show schedule">📋</button>
+                <button type="button" class="chip-remove" id="chipRemove" title="Remove auto time">✕ Remove</button>
+            </div>
+
+            <span class="shift-loading" id="shiftLoading">Calculating…</span>
+
+            {{-- popover with the 3 shifts --}}
+            <div class="auto-pop" id="autoPop" role="dialog" aria-label="Choose a shift">
+                <p class="auto-pop-title">Choose a shift</p>
+
+                <div class="shift-cards">
+                    @foreach (config('ppm.shifts') as $key => $shift)
+                        <button type="button" class="shift-card" data-shift="{{ $key }}" data-icon="{{ $shift['icon'] }}">
+                            <span class="shift-icon">{{ $shift['icon'] }}</span>
+                            <span class="shift-name">{{ $shift['label'] }}</span>
+                            <span class="shift-hours">{{ $shift['start'] }} → {{ $shift['end'] }}</span>
+                            <span class="shift-check">✓</span>
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="auto-pop-row">
+                    <label class="shift-date">
+                        Start date
+                        <input type="date" id="shiftDate" value="{{ !empty($autoDate) ? $autoDate : now()->toDateString() }}">
+                    </label>
+                    <div class="auto-pop-actions">
+                        <button type="button" class="auto-btn auto-cancel" id="autoCancel">Cancel</button>
+                        <button type="button" class="auto-btn auto-ok" id="autoOk" disabled>OK</button>
+                    </div>
+                </div>
+
+                {{-- show more: all PNL of the week with their time --}}
+                <button type="button" class="auto-more" id="autoMore" disabled aria-expanded="false">
+                    <span id="autoMoreLabel">Show more</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="auto-more-box" id="moreBox">
+                    <div class="auto-more-inner">
+                        <div class="shift-summary" id="moreSummary"></div>
+                        <div class="shift-timeline" id="moreTimeline"></div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- timeline of all PNL --}}
+            <div class="auto-timeline-box" id="timelineBox">
+                <div class="auto-timeline-inner">
+                    <div class="shift-summary" id="shiftSummary"></div>
+                    <div class="shift-timeline" id="shiftTimeline"></div>
+                </div>
+            </div>
+        </div>
 
         @php
             $sectionHeaders = [
@@ -678,6 +941,9 @@
     <div class="page-footer">DPEO MEN-MEC 00.39-07.005 F1</div>
 </div>
 
+{{-- =====================================================
+     Total time (start / end) - supports night shift (midnight)
+===================================================== --}}
 <script>
 (function () {
     var startInput = document.getElementById('start_time_input');
@@ -696,7 +962,7 @@
         if (!startInput.value || !endInput.value) {
             totalInput.value = '';
             endError.textContent = '';
-            submitButton.disabled = false;
+            if (submitButton) submitButton.disabled = false;
             return;
         }
 
@@ -704,14 +970,18 @@
         var endMin = toMinutes(endInput.value);
 
         if (endMin < startMin) {
-            endError.textContent = 'End time cannot be earlier than start time.';
-            totalInput.value = '';
-            submitButton.disabled = true;
-            return;
+            if (window.__shiftActive) {
+                endMin += 1440;               // crossed midnight (night shift)
+            } else {
+                endError.textContent = 'End time cannot be earlier than start time.';
+                totalInput.value = '';
+                if (submitButton) submitButton.disabled = true;
+                return;
+            }
         }
 
         endError.textContent = '';
-        submitButton.disabled = false;
+        if (submitButton) submitButton.disabled = false;
         totalInput.value = endMin - startMin;
     }
 
@@ -720,6 +990,256 @@
     endInput.addEventListener('input', updateTotal);
 
     updateTotal();
+})();
+</script>
+
+{{-- =====================================================
+     Auto time: open -> choose shift -> OK (start) -> Remove
+===================================================== --}}
+<script>
+(function () {
+    var wrap = document.getElementById('autoWrap');
+    if (!wrap) return;
+
+    var url        = wrap.dataset.url;
+    var pill       = document.getElementById('autoPill');
+    var pop        = document.getElementById('autoPop');
+    var cards      = wrap.querySelectorAll('.shift-card');
+    var dateEl     = document.getElementById('shiftDate');
+    var okBtn      = document.getElementById('autoOk');
+    var cancelBtn  = document.getElementById('autoCancel');
+    var chip       = document.getElementById('autoChip');
+    var chipIcon   = document.getElementById('chipIcon');
+    var chipText   = document.getElementById('chipText');
+    var chipList   = document.getElementById('chipList');
+    var chipRemove = document.getElementById('chipRemove');
+    var loading    = document.getElementById('shiftLoading');
+    var summary    = document.getElementById('shiftSummary');
+    var timeline   = document.getElementById('shiftTimeline');
+    var tlBox      = document.getElementById('timelineBox');
+    var shiftIn    = document.getElementById('shiftInput');
+    var dateIn     = document.getElementById('shiftDateInput');
+    var startEl    = document.getElementById('start_time_input');
+    var endEl      = document.getElementById('end_time_input');
+    var moreBtn    = document.getElementById('autoMore');
+    var moreLabel  = document.getElementById('autoMoreLabel');
+    var moreBox    = document.getElementById('moreBox');
+    var moreSum    = document.getElementById('moreSummary');
+    var moreTl     = document.getElementById('moreTimeline');
+    var moreOpen   = false;
+
+    var selected = null;   // chosen in the popover (not applied yet)
+    var applied  = null;   // applied shift
+
+    function fire(el) {
+        el.dispatchEvent(new Event('input',  { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    /* ---------- open / close ---------- */
+    function setOpen(open) {
+        wrap.classList.toggle('open', open);
+        pill.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    pill.addEventListener('click', function (e) {
+        e.stopPropagation();
+        setOpen(!wrap.classList.contains('open'));
+    });
+
+    pop.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', function () { setOpen(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+
+    cancelBtn.addEventListener('click', function () { setOpen(false); });
+
+    /* ---------- choose a shift (highlight only) ---------- */
+    function select(key) {
+        selected = key;
+        cards.forEach(function (c) { c.classList.toggle('selected', c.dataset.shift === key); });
+        okBtn.disabled = !key;
+        moreBtn.disabled = !key;
+
+        if (!key) {
+            moreOpen = false;
+            moreBox.classList.remove('open');
+            moreBtn.classList.remove('open');
+            moreBtn.setAttribute('aria-expanded', 'false');
+            moreLabel.textContent = 'Show more';
+            moreTl.innerHTML = '';
+            moreSum.textContent = '';
+        } else if (moreOpen) {
+            loadPreview();
+        }
+    }
+
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () { select(card.dataset.shift); });
+    });
+
+    /* ---------- build the list of all PNL (used by preview and by chip) ---------- */
+    function fillList(tlEl, sumEl, data) {
+        tlEl.innerHTML = '';
+        sumEl.textContent = data.shift.label + ' (' + data.shift.start + ' → ' + data.shift.end + ') · '
+            + data.items.length + ' PNL over ' + data.days + ' day' + (data.days > 1 ? 's' : '');
+
+        var lastDay = 0, delay = 0, currentRow = null, currentItem = null;
+
+        data.items.forEach(function (it) {
+            if (it.day !== lastDay) {
+                lastDay = it.day;
+                var h = document.createElement('div');
+                h.className = 'shift-day';
+                h.style.animationDelay = delay + 'ms';
+                h.textContent = 'Day ' + it.day + ' · ' + it.date;
+                tlEl.appendChild(h);
+                delay += 40;
+            }
+
+            var row = document.createElement('div');
+            row.className = 'shift-row' + (it.current ? ' current' : '');
+            row.style.animationDelay = delay + 'ms';
+            row.innerHTML = '<span></span><span class="t"></span><span class="m"></span>';
+            row.children[0].textContent = it.asset_id + (it.current ? '  ← this PNL' : '');
+            row.children[1].textContent = it.start + ' → ' + it.end;
+            row.children[2].textContent = it.minutes + ' min';
+            tlEl.appendChild(row);
+            delay += 40;
+
+            if (it.current) { currentRow = row; currentItem = it; }
+        });
+
+        if (currentRow) {
+            setTimeout(function () {
+                tlEl.scrollTo({ top: Math.max(0, currentRow.offsetTop - 40), behavior: 'smooth' });
+            }, delay + 100);
+        }
+
+        return currentItem;
+    }
+
+    /* ---------- show more: preview of the selected shift (does not change the times) ---------- */
+    function loadPreview() {
+        if (!selected) return;
+
+        moreSum.textContent = 'Calculating…';
+        moreTl.innerHTML = '';
+
+        var q = new URLSearchParams({ shift: selected, date: dateEl.value });
+
+        fetch(url + '?' + q.toString(), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (data) { fillList(moreTl, moreSum, data); })
+            .catch(function () { moreSum.textContent = 'Could not calculate the schedule.'; });
+    }
+
+    moreBtn.addEventListener('click', function () {
+        moreOpen = !moreOpen;
+        moreBox.classList.toggle('open', moreOpen);
+        moreBtn.classList.toggle('open', moreOpen);
+        moreBtn.setAttribute('aria-expanded', moreOpen ? 'true' : 'false');
+        moreLabel.textContent = moreOpen ? 'Show less' : 'Show more';
+
+        if (moreOpen) loadPreview();
+    });
+
+    dateEl.addEventListener('change', function () {
+        if (moreOpen) loadPreview();
+    });
+
+    /* ---------- render after OK (fills the times) ---------- */
+    function render(data, key, keepTimes) {
+        var card = wrap.querySelector('.shift-card[data-shift="' + key + '"]');
+        var icon = card ? card.dataset.icon : '⚡';
+
+        var currentItem = fillList(timeline, summary, data);
+
+        if (currentItem) {
+            window.__shiftActive = true;
+
+            if (!keepTimes) {
+                startEl.value = currentItem.start;   // shift start (or previous PNL end)
+                endEl.value   = currentItem.end;     // start + est_resource_time
+                fire(startEl);
+                fire(endEl);
+            }
+
+            chipText.textContent = data.shift.label + ' · Day ' + currentItem.day + ' · '
+                + currentItem.start + ' → ' + currentItem.end;
+        } else {
+            chipText.textContent = data.shift.label;
+        }
+
+        chipIcon.textContent = icon;
+        chip.classList.add('show');
+        pill.querySelector('.auto-bolt').textContent = icon;
+    }
+
+    /* ---------- OK = start the option ---------- */
+    function apply(key, keepTimes) {
+        if (!key) return;
+
+        applied = key;
+        shiftIn.value = key;                 // saved with the form -> carried to the next PNL
+        dateIn.value  = dateEl.value;
+        loading.classList.add('show');
+        okBtn.disabled = true;
+
+        var q = new URLSearchParams({ shift: key, date: dateEl.value });
+
+        fetch(url + '?' + q.toString(), { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+            .then(function (data) { render(data, key, keepTimes); })
+            .catch(function () {
+                chipText.textContent = 'Could not calculate the schedule.';
+                chip.classList.add('show');
+            })
+            .finally(function () {
+                loading.classList.remove('show');
+                okBtn.disabled = !selected;
+            });
+    }
+
+    okBtn.addEventListener('click', function () {
+        setOpen(false);
+        apply(selected, false);
+    });
+
+    /* ---------- show / hide the list of all PNL ---------- */
+    chipList.addEventListener('click', function () {
+        tlBox.classList.toggle('open');
+    });
+
+    /* ---------- Remove = remove the option ---------- */
+    chipRemove.addEventListener('click', function () {
+        applied = null;
+        window.__shiftActive = false;
+
+        shiftIn.value = '';
+        dateIn.value  = '';
+
+        startEl.value = '';
+        endEl.value   = '';
+        fire(startEl);
+        fire(endEl);
+
+        select(null);
+        timeline.innerHTML = '';
+        summary.textContent = '';
+        tlBox.classList.remove('open');
+        chip.classList.remove('show');
+        pill.querySelector('.auto-bolt').textContent = '⚡';
+    });
+
+    /* ---------- arrived from "Save & Next": same shift automatically ---------- */
+    var autoShift = wrap.dataset.autoShift;
+
+    if (autoShift) {
+        if (wrap.dataset.autoDate) dateEl.value = wrap.dataset.autoDate;
+        select(autoShift);
+        // if times were already saved for this PNL, do not overwrite them
+        apply(autoShift, wrap.dataset.hasTimes === '1');
+    }
 })();
 </script>
 
