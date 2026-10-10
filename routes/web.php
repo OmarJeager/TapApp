@@ -18,15 +18,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditRequestController;
 use App\Http\Controllers\AssetScanController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/', [LandingPageController::class, 'index'])
+    ->name('welcome');
 Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {
