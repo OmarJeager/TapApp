@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class PpmRecord extends Model
@@ -31,13 +33,19 @@ class PpmRecord extends Model
         'plant_group',
         'position',
         'year',
-
     ];
+
     public function ppmChecklists()
     {
         return $this->hasMany(PpmChecklist::class, 'ppm_records_id');
     }
-      /**
+
+    public function checklist()
+    {
+        return $this->hasOne(PpmChecklist::class, 'ppm_records_id');
+    }
+
+    /**
      * Resolve the asset prefix (pnl, tst, khm, cons, etc.)
      */
     public function getAssetPrefixAttribute(): string
@@ -51,75 +59,95 @@ class PpmRecord extends Model
 
         return 'generic';
     }
-     /**
-     * week_due is stored like 202640 (YYYYWW).
-     * Display it as "WK/YY" -> "40/26".
+
+    /**
+     * ISO weeks in a year (52 or 53). 2026 => 53.
+     * Dec 28 is always in the last ISO week of its year.
+     */
+    public static function weeksInYear(int $year): int
+    {
+        return Carbon::create($year, 12, 28)->isoWeek;
+    }
+
+    /**
+     * Split week_due (stored as YYYYWW, e.g. 202640) into [week, year].
+     */
+    protected function splitWeekDue(): ?array
+    {
+        $value = preg_replace('/\D/', '', (string) $this->week_due);
+
+        if (strlen($value) !== 6) {
+            return null;
+        }
+
+        return [(int) substr($value, 4, 2), (int) substr($value, 0, 4)];
+    }
+
+    /**
+     * Intervention WK: 202640 -> "40/26"
      */
     public function getInterventionWeekAttribute(): ?string
     {
-        if (!$this->week_due) {
+        $parts = $this->splitWeekDue();
+
+        if (!$parts) {
             return null;
         }
 
-        $weekDue = (string) $this->week_due;
-        $year = (int) substr($weekDue, 0, 4);
-        $week = (int) substr($weekDue, 4, 2);
+        [$week, $year] = $parts;
 
         return sprintf('%02d/%02d', $week, $year % 100);
     }
-      /**
-     * Next Preventative Maintenance Week = current week + frequency (weeks).
-     * e.g. 38/26 + frequency 1 -> 39/26. Wraps into the next year past week 52.
+
+    /**
+     * Next PM week = week_due + frequency (weeks), rolling into the next year
+     * using the real number of weeks in each year (2026 = 53).
      */
     public function getNextPmWeekAttribute(): ?string
     {
-        if (!$this->week_due || !$this->frequency) {
+        $parts = $this->splitWeekDue();
+
+        if (!$parts || !is_numeric($this->frequency) || (int) $this->frequency <= 0) {
             return null;
         }
 
-        $weekDue = (string) $this->week_due;
-        $year = (int) substr($weekDue, 0, 4);
-        $week = (int) substr($weekDue, 4, 2);
+        [$week, $year] = $parts;
 
-        $nextWeek = $week + (int) $this->frequency;
-        $nextYear = $year;
+        $week += (int) $this->frequency;
 
-        while ($nextWeek > 52) {
-            $nextWeek -= 52;
-            $nextYear++;
+        while ($week > self::weeksInYear($year)) {
+            $week -= self::weeksInYear($year);
+            $year++;
         }
 
-        return sprintf('%02d/%02d', $nextWeek, $nextYear % 100);
+        return sprintf('%02d/%02d', $week, $year % 100);
     }
-     public function checklist()
-    {
-        return $this->hasOne(PpmChecklist::class, 'ppm_records_id');
-    }
-    /** Last completed preventive for the same asset (other records). */
-public function lastDoneChecklist()
-{
-    return PpmChecklist::with(['ppmRecord', 'completedBy'])
-        ->whereNotNull('completed_at')
-        ->whereHas('ppmRecord', fn ($q) => $q
-            ->where('asset_id', $this->asset_id)
-            ->where('id', '!=', $this->id))
-        ->orderByDesc('completed_at')
-        ->orderByDesc('id')
-        ->first();
-}
 
-/** 4 -> Monthly, 1 -> Weekly ... */
-public function getFrequencyLabelAttribute(): ?string
-{
-    return match ((int) $this->frequency) {
-        0       => null,
-        1       => 'Weekly',
-        2       => 'Bi-weekly',
-        4       => 'Monthly',
-        13      => 'Quarterly',
-        26      => 'Semi-annual',
-        52      => 'Annual',
-        default => $this->frequency . ' weeks',
-    };
-}
+    /** Last completed preventive for the same asset (other records). */
+    public function lastDoneChecklist()
+    {
+        return PpmChecklist::with(['ppmRecord', 'completedBy'])
+            ->whereNotNull('completed_at')
+            ->whereHas('ppmRecord', fn ($q) => $q
+                ->where('asset_id', $this->asset_id)
+                ->where('id', '!=', $this->id))
+            ->orderByDesc('completed_at')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /** 4 -> Monthly, 1 -> Weekly ... */
+    public function getFrequencyLabelAttribute(): ?string
+    {
+        return match ((int) $this->frequency) {
+            0       => null,
+            1       => 'Weekly',
+            2       => 'Bi-weekly',
+            4       => 'Monthly',
+            13      => 'Quarterly',
+            26      => 'Semi-annual',
+            52      => 'Annual',
+            default => $this->frequency . ' weeks',
+        };
+    }
 }

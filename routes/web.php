@@ -258,6 +258,10 @@ Route::post('/ppm-records/{ppmRecord}/tst-frequency-4-hv/edit-request', [TstFrea
         ->name('tickets.frequencies');
     Route::get('/tickets/print', [TicketController::class, 'print'])
         ->name('tickets.print');
+
+    Route::get('/tickets/variants', [TicketController::class, 'variants'])
+        ->name('tickets.variants');
+
 });
 
 require __DIR__.'/auth.php';
