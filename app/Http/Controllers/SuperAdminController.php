@@ -186,7 +186,7 @@ private function pendingChecklists()
         ->orderByDesc('completed_at')
         ->orderByDesc('id');
 }
- 
+
 /** JSON: count + rendered cards (used by the bell). */
 public function notifications()
 {
@@ -199,11 +199,11 @@ public function notifications()
         ])
         ->limit(50)
         ->get();
- 
+
     // Use the snapshot question text when it exists (same logic as show())
     $checklists->each(function ($checklist) {
         $snapshots = $checklist->questions->keyBy('checklist_question_id');
- 
+
         $answers = $checklist->answers
             ->map(function ($answer) use ($snapshots) {
                 if ($snap = $snapshots->get($answer->checklist_question_id)) {
@@ -213,16 +213,16 @@ public function notifications()
             })
             ->sortBy(fn ($a) => $a->question->order ?? 0)
             ->values();
- 
+
         $checklist->setRelation('answers', $answers);
     });
- 
+
     return response()->json([
         'count' => $this->pendingChecklists()->count(),
         'html'  => view('superadmin.partials.notification-cards', compact('checklists'))->render(),
     ]);
 }
- 
+
 /** Mark one checklist as verified by the admin (status_admin = verified). */
 public function verifyChecklist(PpmChecklist $checklist)
 {
@@ -231,11 +231,12 @@ public function verifyChecklist(PpmChecklist $checklist)
         'verified_by_matricule' => Auth::user()->matricule,
         'verified_at'           => now()->toDateString(),
     ]);
- 
+
     return response()->json([
         'success' => true,
         'message' => 'Checklist verified.',
         'count'   => $this->pendingChecklists()->count(),
     ]);
 }
+
 }

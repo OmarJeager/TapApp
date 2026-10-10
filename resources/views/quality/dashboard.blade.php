@@ -27,7 +27,7 @@
                 </div>
             @endif
 
-
+   @include('quality.partials.notification-bell')
             {{-- Main Card --}}
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
 

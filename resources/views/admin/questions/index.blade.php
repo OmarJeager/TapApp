@@ -1,537 +1,876 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Checklist questions</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Checklist Studio | TapApp</title>
 
-{{-- If you already have an admin layout: delete the <html>/<head>/<body> wrapper,
-     use @extends('layouts.admin') + @section('content'), and move <style>/<script> to @push. --}}
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #fff;
+            --text: #182238;
+            --muted: #718096;
+            --primary: #f47721;
+            --primary-light: #fff0e5;
+            --border: #e7eaf1;
+            --green: #16865c;
+            --red: #cf4141;
+            --radius: 18px;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        * { box-sizing: border-box; }
 
-<style>
-:root{
-  --paper:#f5f6f2; --card:#ffffff; --ink:#1c2b2d; --muted:#6b7a7c; --line:#e0e5e0;
-  --teal:#0f766e; --teal-soft:#d9f0ec; --amber:#b45309; --amber-soft:#fdf0d8;
-  --red:#be3a34; --red-soft:#fbe4e2; --shadow:0 1px 2px rgba(28,43,45,.06),0 8px 24px rgba(28,43,45,.06);
-}
-@media (prefers-color-scheme: dark){
-  :root{--paper:#121a1b; --card:#1a2527; --ink:#e8efee; --muted:#93a3a5; --line:#2a3a3c;
-    --teal:#2dd4bf; --teal-soft:#123a36; --amber:#f5b04c; --amber-soft:#3b2c12;
-    --red:#ff7b73; --red-soft:#3e1c1a; --shadow:0 8px 24px rgba(0,0,0,.35);}
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'Manrope',system-ui,sans-serif;font-size:14px;line-height:1.5}
-.wrap{max-width:1240px;margin:0 auto;padding:32px 20px 60px}
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, "Segoe UI", sans-serif;
+        }
 
-/* header */
-.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
-.top h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:12px}
-.top h1 i{width:44px;height:44px;border-radius:12px;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:22px;
-  animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
-.top p{margin:4px 0 0;color:var(--muted)}
-.stats{display:flex;gap:10px;flex-wrap:wrap}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;min-width:110px}
-.stat b{display:block;font-size:22px;font-weight:800}
-.stat span{color:var(--muted);font-size:12px}
-.stat.ok b{color:var(--teal)} .stat.off b{color:var(--amber)}
+        button, input, select, textarea { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled { opacity: .55; cursor: wait; }
 
-/* buttons */
-.btn{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-  transition:transform .15s,box-shadow .15s,background .15s}
-.btn:active{transform:scale(.96)}
-.btn:focus-visible,.icon-btn:focus-visible,.f-input:focus-visible,.field input:focus-visible,.field textarea:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-.btn-primary{background:var(--teal);color:#fff}
-.btn-primary:hover{box-shadow:0 6px 16px rgba(15,118,110,.35)}
-.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn-ghost:hover{background:var(--paper)}
-.btn-danger{background:var(--red);color:#fff}
-.btn[disabled]{opacity:.6;cursor:wait}
+        .app {
+            width: min(1450px, 100%);
+            margin: auto;
+            padding: 30px;
+        }
 
-/* card + table */
-.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-.bar{height:3px;background:transparent;position:relative;overflow:hidden}
-.card.loading .bar::after{content:"";position:absolute;inset:0;width:40%;background:var(--teal);animation:slide 1s infinite ease-in-out}
-.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.search{position:relative;flex:1;min-width:220px;max-width:420px}
-.search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
-.search input{width:100%;padding:10px 12px 10px 36px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit}
-.search .spin{left:auto;right:12px;display:none;animation:spin .7s linear infinite}
-.card.loading .search .spin{display:block}
-.table-scroll{overflow-x:auto;position:relative}
-table{width:100%;border-collapse:collapse;min-width:900px}
-thead th{text-align:left;padding:12px 14px;font-weight:700;color:var(--muted);font-size:12.5px;white-space:nowrap}
-thead th i{margin-right:6px;color:var(--teal)}
-thead tr.titles th{padding-bottom:6px}
-thead tr.filters th{padding-top:0;padding-bottom:14px;border-bottom:1px solid var(--line);background:var(--card)}
-.f-input{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;cursor:pointer;transition:border-color .15s}
-.f-input:hover{border-color:var(--teal)}
-.f-input.on{border-color:var(--teal);background:var(--teal-soft)}
-tbody td{padding:14px;border-bottom:1px solid var(--line);vertical-align:middle}
-tbody tr{transition:background .15s}
-tbody tr:hover{background:color-mix(in srgb,var(--teal) 5%,transparent)}
-tbody tr.enter{animation:rowIn .35s ease both}
-tbody tr.removing{animation:rowOut .4s ease forwards}
-tbody tr.is-hidden td:not(.actions){opacity:.5}
-.table-scroll .veil{position:absolute;inset:0;background:color-mix(in srgb,var(--card) 70%,transparent);backdrop-filter:blur(1px);
-  display:none;place-items:center;z-index:2}
-.card.loading .veil{display:grid;animation:fade .2s}
-.loader{width:34px;height:34px;border:3px solid var(--teal-soft);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite}
-.num{width:48px;font-weight:800;color:var(--muted)}
-.qtext{max-width:420px;font-weight:600}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;background:var(--paper);border:1px solid var(--line)}
-.status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.status.on{background:var(--teal-soft);color:var(--teal)}
-.status.off{background:var(--amber-soft);color:var(--amber)}
-.status .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
-.status.on .dot{animation:pulse 1.8s infinite}
-.actions{white-space:nowrap;text-align:right}
-.icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;
-  display:inline-grid;place-items:center;font-size:15px;transition:transform .15s,background .15s,color .15s,border-color .15s}
-.icon-btn:hover{transform:translateY(-2px)}
-.icon-btn.edit:hover{background:var(--teal-soft);color:var(--teal);border-color:var(--teal)}
-.icon-btn.hide:hover{background:var(--amber-soft);color:var(--amber);border-color:var(--amber)}
-.icon-btn.del:hover{background:var(--red-soft);color:var(--red);border-color:var(--red)}
-.empty{text-align:center;padding:56px 20px;color:var(--muted)}
-.empty i{font-size:42px;color:var(--teal);display:block;margin-bottom:8px;animation:float 3s ease-in-out infinite}
-.empty b{display:block;color:var(--ink);font-size:16px}
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(125deg, #202c43, #344767);
+            color: white;
+            padding: 30px;
+            border-radius: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            animation: rise .5s ease both;
+        }
 
-/* pager */
-.pager{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;color:var(--muted);flex-wrap:wrap;gap:10px}
-.pager .btns{display:flex;gap:8px}
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            right: -70px;
+            top: -110px;
+            border: 35px solid #ffffff0b;
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
-/* modal */
-.modal{position:fixed;inset:0;background:rgba(10,20,22,.5);backdrop-filter:blur(3px);display:none;place-items:center;padding:16px;z-index:50}
-.modal.open{display:grid;animation:fade .2s}
-.dialog{background:var(--card);border-radius:18px;width:100%;max-width:520px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:dialogIn .3s cubic-bezier(.2,1.2,.4,1)}
-.dialog h2{margin:0 0 16px;font-size:20px;display:flex;align-items:center;gap:10px}
-.dialog.small{max-width:410px;text-align:center}
-.warn{width:64px;height:64px;border-radius:50%;background:var(--red-soft);color:var(--red);display:grid;place-items:center;font-size:30px;margin:0 auto 12px;animation:shake .5s .15s}
-.dialog.small p{color:var(--muted);margin:6px 0 20px}
-.dialog.small .q{display:block;margin:10px 0;padding:10px;border-radius:10px;background:var(--paper);color:var(--ink);font-weight:600}
-.field{margin-bottom:14px}
-.field label{display:block;font-weight:700;margin-bottom:5px;font-size:13px}
-.field input[type=text],.field input[type=number],.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit}
-.field textarea{min-height:90px;resize:vertical}
-.field .err{color:var(--red);font-size:12px;margin-top:4px;display:none}
-.field.bad input,.field.bad textarea{border-color:var(--red)}
-.field.bad .err{display:block;animation:fade .2s}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.switch{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:700}
-.switch input{appearance:none;width:42px;height:24px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;margin:0}
-.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
-.switch input:checked{background:var(--teal)}
-.switch input:checked::after{transform:translateX(18px)}
-.dialog .foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-.dialog.small .foot{justify-content:center}
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ffbd88;
+            font-size: 11px;
+            font-weight: 800;
+        }
 
-/* toast */
-#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:100}
-.toast{background:var(--ink);color:var(--paper);padding:12px 16px;border-radius:12px;display:flex;align-items:center;gap:10px;font-weight:600;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);animation:toastIn .35s cubic-bezier(.2,1.2,.4,1)}
-.toast.out{animation:toastOut .3s forwards}
-.toast i{font-size:18px;color:#5eead4}
-.toast.error i{color:#ff9d96}
+        h1 { margin: 9px 0; font-size: clamp(25px, 4vw, 36px); }
+        .sub { color: #d4dcec; font-size: 14px; line-height: 1.6; }
 
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes slide{0%{left:-40%}100%{left:100%}}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-@keyframes pop{from{transform:scale(.4) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
-@keyframes rowIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes rowOut{to{opacity:0;transform:translateX(40px);background:var(--red-soft)}}
-@keyframes dialogIn{from{opacity:0;transform:translateY(20px) scale(.94)}to{opacity:1;transform:none}}
-@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
-@keyframes shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
-@keyframes pulse{0%{box-shadow:0 0 0 0 currentColor}70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
-@media (max-width:560px){.grid2{grid-template-columns:1fr}}
-</style>
+        .button {
+            border: 0;
+            padding: 11px 16px;
+            border-radius: 11px;
+            font-weight: 700;
+            transition: transform .2s, box-shadow .2s, background .2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px #19253b18;
+        }
+
+        .primary { background: var(--primary); color: white; }
+        .light { background: white; color: var(--text); }
+        .soft { background: var(--primary-light); color: #b95616; }
+        .danger { background: #fff0f0; color: var(--red); }
+        .success { background: #e8f8ef; color: var(--green); }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin: 22px 0;
+        }
+
+        .stat, .panel, .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 5px 24px #26334d05;
+        }
+
+        .stat { padding: 20px; }
+        .stat-label { font-size: 13px; color: var(--muted); }
+        .stat-value { font-size: 30px; font-weight: 800; margin-top: 8px; }
+
+        .panel { padding: 22px; margin-bottom: 20px; }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
+
+        h2 { font-size: 18px; margin: 0; }
+        .muted { color: var(--muted); font-size: 13px; }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 2fr repeat(4, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 7px; }
+        .field label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .control {
+            width: 100%;
+            min-width: 0;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            padding: 11px 12px;
+            border-radius: 10px;
+            outline: none;
+            transition: border .2s, box-shadow .2s;
+        }
+
+        .control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px #f477211a;
+        }
+
+        textarea.control { resize: vertical; line-height: 1.65; }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .question-list {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .question-card {
+            padding: 17px;
+            transition: transform .2s, box-shadow .2s, opacity .2s;
+            animation: rise .32s ease both;
+        }
+
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px #26334d0d;
+        }
+
+        .question-card.inactive { opacity: .68; }
+
+        .question-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .number {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+        .question-text {
+            font-weight: 650;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            margin: 9px 0 16px;
+        }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .tag {
+            background: #f1f3f8;
+            color: #56647c;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .tag.orange { background: var(--primary-light); color: #b95616; }
+        .tag.green { background: #e8f8ef; color: var(--green); }
+        .tag.red { background: #fff0f0; color: var(--red); }
+
+        .actions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .small { font-size: 12px; padding: 8px 10px; }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: #15203699;
+            backdrop-filter: blur(5px);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .modal.open { display: flex; animation: fade .2s ease; }
+
+        .modal-box {
+            width: min(650px, 100%);
+            max-height: 92vh;
+            overflow: auto;
+            background: white;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 25px 80px #0002;
+            animation: rise .25s ease;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 18px 0;
+        }
+
+        .full { grid-column: 1 / -1; }
+
+        .notice {
+            display: none;
+            padding: 13px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .notice.show { display: block; animation: rise .25s ease; }
+        .notice.ok { background: #e8f8ef; color: #126f4a; }
+        .notice.error { background: #fff0f0; color: #a72e2e; }
+
+        .empty {
+            grid-column: 1 / -1;
+            padding: 45px 20px;
+            text-align: center;
+            border: 1px dashed #d6dce7;
+            border-radius: 15px;
+            color: var(--muted);
+        }
+
+        .empty strong { display: block; margin-bottom: 7px; color: var(--text); }
+
+        .check-row { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 1000px) {
+            .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .question-list { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .app { padding: 13px; }
+            .hero { padding: 22px; align-items: flex-start; flex-direction: column; }
+            .stats { gap: 8px; }
+            .stat { padding: 13px; }
+            .stat-value { font-size: 24px; }
+            .stat-label { font-size: 11px; }
+            .panel { padding: 15px; }
+            .filters, .form-grid { grid-template-columns: 1fr; }
+            .full { grid-column: auto; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app">
+    <header class="hero">
+        <div>
+            <div class="eyebrow">TapApp · Administration</div>
+            <h1>Checklist Studio</h1>
+            <div class="sub">Manage, organize and publish your maintenance checklist questions.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="button light" onclick="openBulk()">⇧ Bulk paste</button>
+            <button class="button primary" onclick="openCreate()">＋ New question</button>
+        </div>
+    </header>
 
-  {{-- Header --}}
-  <div class="top">
-    <div>
-      <h1><i class="bi bi-ui-checks"></i> Checklist questions</h1>
-      <p>Add, edit, hide or remove the questions admins and staff answer.</p>
-    </div>
     <div class="stats">
-      <div class="stat"><b id="statTotal">{{ $stats['total'] }}</b><span>Total</span></div>
-      <div class="stat ok"><b id="statActive">{{ $stats['active'] }}</b><span>Visible</span></div>
-      <div class="stat off"><b id="statHidden">{{ $stats['hidden'] }}</b><span>Hidden</span></div>
-    </div>
-  </div>
-
-  {{-- Table card --}}
-  <div class="card" id="card">
-    <div class="bar"></div>
-
-    <div class="toolbar">
-      <div class="search">
-        <i class="bi bi-search"></i>
-        <input type="search" id="search" placeholder="Search question text" value="{{ request('search') }}" autocomplete="off">
-        <i class="bi bi-arrow-repeat spin"></i>
-      </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-ghost" id="resetBtn"><i class="bi bi-x-circle"></i> Clear filters</button>
-        <button class="btn btn-primary" id="addBtn"><i class="bi bi-plus-lg"></i> Add question</button>
-      </div>
+        <div class="stat">
+            <div class="stat-label">Total questions</div>
+            <div class="stat-value" id="totalStat">{{ $stats['total'] }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Active questions</div>
+            <div class="stat-value" id="activeStat">{{ $stats['active'] }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Hidden questions</div>
+            <div class="stat-value" id="hiddenStat">{{ $stats['hidden'] }}</div>
+        </div>
     </div>
 
-    <div class="table-scroll">
-      <div class="veil"><div class="loader"></div></div>
-      <table>
-        <thead>
-          <tr class="titles">
-            <th><i class="bi bi-sort-numeric-down"></i>Order</th>
-            <th><i class="bi bi-chat-left-text"></i>Question</th>
-            <th><i class="bi bi-tag"></i>Type</th>
-            <th><i class="bi bi-calendar-check"></i>Frequency</th>
-            <th><i class="bi bi-diagram-2"></i>Variant</th>
-            <th><i class="bi bi-toggle-on"></i>Status</th>
-            <th style="text-align:right"><i class="bi bi-lightning-charge"></i>Actions</th>
-          </tr>
-          <tr class="filters">
-            <th></th>
-            <th></th>
-            <th>
-              <select class="f-input" data-filter="type">
-                <option value="">All types</option>
-                @foreach($types as $t)
-                  <option value="{{ $t }}" @selected(request('type') === $t)>{{ ucfirst($t) }}</option>
-                @endforeach
-              </select>
-            </th>
-            <th>
-              <select class="f-input" data-filter="frequency">
-                <option value="">All frequencies</option>
-                @foreach($frequencies as $f)
-                  <option value="{{ $f }}" @selected(request('frequency') === $f)>{{ ucfirst($f) }}</option>
-                @endforeach
-              </select>
-            </th>
-            <th>
-              <select class="f-input" data-filter="variant">
-                <option value="">All variants</option>
-                @foreach($variants as $v)
-                  <option value="{{ $v }}" @selected(request('variant') === $v)>{{ ucfirst($v) }}</option>
-                @endforeach
-              </select>
-            </th>
-            <th>
-              <select class="f-input" data-filter="is_active">
-                <option value="">All statuses</option>
-                <option value="1" @selected(request('is_active') === '1')>Visible</option>
-                <option value="0" @selected(request('is_active') === '0')>Hidden</option>
-              </select>
-            </th>
-            <th></th>
-          </tr>
-        </thead>
+    <div id="notice" class="notice"></div>
 
-        <tbody id="tableBody">
-          @forelse($questions as $q)
-            <tr class="enter {{ $q->is_active ? '' : 'is-hidden' }}" style="animation-delay:{{ $loop->index * 30 }}ms"
-                data-id="{{ $q->id }}"
-                data-question="{{ json_encode($q->only(['id','type','frequency','question_text','order','variant','is_active'])) }}">
-              <td class="num">{{ $q->order }}</td>
-              <td class="qtext">{{ $q->question_text }}</td>
-              <td><span class="pill"><i class="bi bi-tag"></i>{{ $q->type }}</span></td>
-              <td><span class="pill"><i class="bi bi-arrow-repeat"></i>{{ $q->frequency }}</span></td>
-              <td>{!! $q->variant ? '<span class="pill"><i class="bi bi-diagram-2"></i>'.e($q->variant).'</span>' : '<span style="color:var(--muted)">None</span>' !!}</td>
-              <td>
-                @if($q->is_active)
-                  <span class="status on"><span class="dot"></span>Visible</span>
-                @else
-                  <span class="status off"><span class="dot"></span>Hidden</span>
-                @endif
-              </td>
-              <td class="actions">
-                <button class="icon-btn edit" data-action="edit" title="Edit question"><i class="bi bi-pencil-square"></i></button>
-                <button class="icon-btn hide" data-action="toggle" title="{{ $q->is_active ? 'Hide question' : 'Show question' }}">
-                  <i class="bi {{ $q->is_active ? 'bi-eye-slash' : 'bi-eye' }}"></i>
-                </button>
-                <button class="icon-btn del" data-action="delete" title="Remove question"><i class="bi bi-trash3"></i></button>
-              </td>
-            </tr>
-          @empty
-            <tr><td colspan="7">
-              <div class="empty">
-                <i class="bi bi-clipboard-x"></i>
-                <b>No questions found</b>
-                Change the filters or add a new question.
-              </div>
-            </td></tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
+    <section class="panel">
+        <div class="panel-head">
+            <div>
+                <h2>Find questions</h2>
+                <div class="muted" style="margin-top:5px">Filters update the list automatically.</div>
+            </div>
+            <button class="button soft" onclick="resetFilters()">Reset filters ↺</button>
+        </div>
 
-    <div class="pager" id="pager">
-      <span>Showing {{ $questions->firstItem() ?? 0 }} to {{ $questions->lastItem() ?? 0 }} of {{ $questions->total() }} questions</span>
-      <div class="btns">
-        <button class="btn btn-ghost" data-page="{{ $questions->currentPage() - 1 }}" @disabled($questions->onFirstPage())><i class="bi bi-chevron-left"></i> Previous</button>
-        <button class="btn btn-ghost" data-page="{{ $questions->currentPage() + 1 }}" @disabled(!$questions->hasMorePages())>Next <i class="bi bi-chevron-right"></i></button>
-      </div>
-    </div>
-  </div>
+        <div class="filters">
+            <div class="field">
+                <label for="search">Search text</label>
+                <input class="control" id="search" placeholder="Search questions..." autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="filterType">Type</label>
+                <select class="control" id="filterType">
+                    <option value="">All types</option>
+                    <option value="PNL">PNL</option>
+                    <option value="TRQ">TRQ</option>
+                    <option value="TST">TST</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="filterFrequency">Frequency</label>
+                <select class="control" id="filterFrequency">
+                    <option value="">All frequencies</option>
+                    <option value="1">Frequency 1</option>
+                    <option value="4">Frequency 4</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="filterVariant">Variant</label>
+                <select class="control" id="filterVariant">
+                    <option value="">All variants</option>
+                    <option value="null">null</option>
+                    <option value="HV">HV</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="filterActive">Visibility</label>
+                <select class="control" id="filterActive">
+                    <option value="">All statuses</option>
+                    <option value="1">Active</option>
+                    <option value="0">Hidden</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="toolbar">
+            <div>
+                <h2>Question library</h2>
+                <div class="muted" id="resultCount" style="margin-top:5px">
+                    {{ $questions->count() }} questions
+                </div>
+            </div>
+            <button class="button soft" onclick="copyVisible()">Copy visible questions</button>
+        </div>
+
+        <div class="question-list" id="questionList">
+            @forelse($questions as $question)
+                <article class="question-card {{ $question->is_active ? '' : 'inactive' }}">
+                    <div class="question-top">
+                        <span class="number">#{{ $question->order }}</span>
+                        <span class="tag {{ $question->is_active ? 'green' : 'red' }}">
+                            {{ $question->is_active ? 'ACTIVE' : 'HIDDEN' }}
+                        </span>
+                    </div>
+                    <div class="question-text">{{ $question->question_text }}</div>
+                    <div class="tags">
+                        <span class="tag orange">{{ $question->type }}</span>
+                        <span class="tag">Frequency {{ $question->frequency ?? '—' }}</span>
+                        <span class="tag">{{ $question->variant ?: 'null' }}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="button soft small" onclick="editQuestion({{ $question->id }})">Edit</button>
+                        <button class="button {{ $question->is_active ? 'light' : 'success' }} small"
+                            onclick="toggleQuestion({{ $question->id }})">
+                            {{ $question->is_active ? 'Hide' : 'Activate' }}
+                        </button>
+                        <button class="button danger small" onclick="deleteQuestion({{ $question->id }})">Delete</button>
+                    </div>
+                </article>
+            @empty
+                <div class="empty"><strong>No questions yet</strong>Create your first question or paste a list.</div>
+            @endforelse
+        </div>
+    </section>
 </div>
 
-{{-- Add / edit modal --}}
-<div class="modal" id="formModal" aria-hidden="true">
-  <form class="dialog" id="qForm" novalidate>
-    <h2><i class="bi bi-plus-circle" id="formIcon" style="color:var(--teal)"></i><span id="formTitle">Add question</span></h2>
-    <input type="hidden" id="qId">
+<!-- Create / edit modal -->
+<div class="modal" id="editorModal">
+    <div class="modal-box">
+        <div class="panel-head">
+            <div>
+                <h2 id="editorTitle">Create question</h2>
+                <div class="muted" style="margin-top:5px">Configure the question and its checklist group.</div>
+            </div>
+            <button class="button light" onclick="closeModal('editorModal')">✕</button>
+        </div>
 
-    <div class="field" data-field="question_text">
-      <label for="question_text">Question</label>
-      <textarea id="question_text" placeholder="e.g. Is the fire exit clear?"></textarea>
-      <div class="err"></div>
+        <form id="questionForm">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="qType">Type</label>
+                    <select class="control" id="qType" required>
+                        <option value="PNL">PNL</option>
+                        <option value="TRQ">TRQ</option>
+                        <option value="TST">TST</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="qFrequency">Frequency</label>
+                    <select class="control" id="qFrequency">
+                        <option value="">Not specified</option>
+                        <option value="1">Frequency 1</option>
+                        <option value="4">Frequency 4</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="qVariant">Variant</label>
+                    <select class="control" id="qVariant">
+                        <option value="null">null</option>
+                        <option value="HV">HV</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="qOrder">Display order</label>
+                    <input class="control" type="number" min="0" id="qOrder" placeholder="Auto">
+                </div>
+                <div class="field full">
+                    <label for="qText">Question text</label>
+                    <textarea class="control" id="qText" rows="4" maxlength="1000" required
+                        placeholder="Enter the checklist question..."></textarea>
+                </div>
+                <div class="full check-row">
+                    <input type="checkbox" id="qActive" checked>
+                    <label for="qActive">Question is active and visible</label>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="button primary" id="saveQuestion" type="submit">Save question</button>
+                <button class="button light" type="button" onclick="closeModal('editorModal')">Cancel</button>
+            </div>
+        </form>
     </div>
-
-    <div class="grid2">
-      <div class="field" data-field="type">
-        <label for="type">Type</label>
-        <input type="text" id="type" list="typeList" placeholder="e.g. safety">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-field="frequency">
-        <label for="frequency">Frequency</label>
-        <input type="text" id="frequency" list="freqList" placeholder="e.g. daily">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-field="variant">
-        <label for="variant">Variant (optional)</label>
-        <input type="text" id="variant" list="variantList" placeholder="e.g. standard">
-        <div class="err"></div>
-      </div>
-      <div class="field" data-field="order">
-        <label for="order">Order</label>
-        <input type="number" id="order" min="0" placeholder="Auto">
-        <div class="err"></div>
-      </div>
-    </div>
-
-    <datalist id="typeList">@foreach($types as $t)<option value="{{ $t }}">@endforeach</datalist>
-    <datalist id="freqList">@foreach($frequencies as $f)<option value="{{ $f }}">@endforeach</datalist>
-    <datalist id="variantList">@foreach($variants as $v)<option value="{{ $v }}">@endforeach</datalist>
-
-    <label class="switch"><input type="checkbox" id="is_active" checked> Visible to users</label>
-
-    <div class="foot">
-      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
-      <button type="submit" class="btn btn-primary" id="saveBtn"><i class="bi bi-check2"></i> Save question</button>
-    </div>
-  </form>
 </div>
 
-{{-- Delete confirmation modal --}}
-<div class="modal" id="delModal" aria-hidden="true">
-  <div class="dialog small">
-    <div class="warn"><i class="bi bi-exclamation-triangle"></i></div>
-    <h2 style="justify-content:center;margin:0">Remove this question?</h2>
-    <span class="q" id="delText"></span>
-    <p>This permanently deletes the question. If you only want to stop showing it, hide it instead.</p>
-    <div class="foot">
-      <button class="btn btn-ghost" data-close>Keep it</button>
-      <button class="btn btn-danger" id="confirmDel"><i class="bi bi-trash3"></i> Remove question</button>
-    </div>
-  </div>
-</div>
+<!-- Bulk paste modal -->
+<div class="modal" id="bulkModal">
+    <div class="modal-box">
+        <div class="panel-head">
+            <div>
+                <h2>Bulk question editor</h2>
+                <div class="muted" style="margin-top:5px">Paste one question per line from Excel, Word or a text file.</div>
+            </div>
+            <button class="button light" onclick="closeModal('bulkModal')">✕</button>
+        </div>
 
-<div id="toasts"></div>
+        <form id="bulkForm">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="bulkType">Type</label>
+                    <select class="control" id="bulkType" required>
+                        <option value="PNL">PNL</option>
+                        <option value="TRQ">TRQ</option>
+                        <option value="TST">TST</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bulkFrequency">Frequency</label>
+                    <select class="control" id="bulkFrequency">
+                        <option value="">Not specified</option>
+                        <option value="1">Frequency 1</option>
+                        <option value="4">Frequency 4</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bulkVariant">Variant</label>
+                    <select class="control" id="bulkVariant">
+                        <option value="null">null</option>
+                        <option value="HV">HV</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="bulkMode">Import mode</label>
+                    <select class="control" id="bulkMode">
+                        <option value="append">Append questions</option>
+                        <option value="replace">Replace this group</option>
+                    </select>
+                </div>
+                <div class="field full">
+                    <label for="bulkText">Questions — one per line</label>
+                    <textarea class="control" id="bulkText" rows="9" required
+                        placeholder="Inspect the equipment condition&#10;Check all safety labels&#10;Verify the connections"></textarea>
+                </div>
+                <div class="full">
+                    <div class="muted">
+                        Replace affects only the selected type, frequency and variant.
+                        Existing questions with saved answers cannot be replaced.
+                    </div>
+                </div>
+                <div class="full check-row">
+                    <input type="checkbox" id="bulkActive" checked>
+                    <label for="bulkActive">Import questions as active</label>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="button primary" id="bulkSubmit" type="submit">Import questions</button>
+                <button class="button light" type="button" onclick="closeModal('bulkModal')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-const BASE = @json(route('admin.checklist-questions.index'));
-const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-const $  = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const baseUrl = @json(url('/checklist-questions'));
+    const csrf = document.querySelector('meta[name="csrf-token"]').content;
 
-const card = $('#card'), searchEl = $('#search');
-let currentPage = 1, debounce, reqId = 0, deleteId = null;
+    let questions = @json($questions);
+    let editingId = null;
+    let filterTimer = null;
 
-/* ---------- helpers ---------- */
-function toast(msg, type = 'success') {
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.innerHTML = `<i class="bi ${type === 'error' ? 'bi-x-octagon' : 'bi-check-circle-fill'}"></i><span></span>`;
-  t.querySelector('span').textContent = msg;
-  $('#toasts').appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3200);
-}
+    const $ = id => document.getElementById(id);
 
-async function api(url, method = 'GET', body = null) {
-  const res = await fetch(url, {
-    method,
-    headers: {
-      'X-CSRF-TOKEN': CSRF,
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      ...(body ? { 'Content-Type': 'application/json' } : {})
-    },
-    body: body ? JSON.stringify(body) : null
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) { const e = new Error(data.message || 'Something went wrong'); e.status = res.status; e.errors = data.errors; throw e; }
-  return data;
-}
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        })[char]);
+    }
 
-/* ---------- filtering + loading ---------- */
-function buildUrl(page = 1) {
-  const p = new URLSearchParams();
-  if (searchEl.value.trim()) p.set('search', searchEl.value.trim());
-  $$('[data-filter]').forEach(s => { if (s.value !== '') p.set(s.dataset.filter, s.value); });
-  if (page > 1) p.set('page', page);
-  const qs = p.toString();
-  return BASE + (qs ? '?' + qs : '');
-}
+    async function api(url, method = 'GET', data = null) {
+        const options = {
+            method,
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrf
+            }
+        };
 
-async function load(page = 1) {
-  currentPage = page;
-  const id = ++reqId;
-  card.classList.add('loading');
-  const url = buildUrl(page);
-  try {
-    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    if (!res.ok) throw new Error();
-    const html = await res.text();
-    if (id !== reqId) return; // a newer request replaced this one
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    $('#tableBody').innerHTML = doc.querySelector('#tableBody').innerHTML;
-    $('#pager').innerHTML = doc.querySelector('#pager').innerHTML;
-    ['statTotal', 'statActive', 'statHidden'].forEach(k => $('#' + k).textContent = doc.getElementById(k).textContent);
-    history.replaceState(null, '', url);
-    markActiveFilters();
-  } catch (e) {
-    if (id === reqId) toast('Could not load questions. Try again.', 'error');
-  } finally {
-    if (id === reqId) setTimeout(() => card.classList.remove('loading'), 250);
-  }
-}
+        if (data !== null) {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(data);
+        }
 
-function markActiveFilters() {
-  $$('[data-filter]').forEach(s => s.classList.toggle('on', s.value !== ''));
-}
+        const response = await fetch(url, options);
+        const result = await response.json().catch(() => ({}));
 
-searchEl.addEventListener('input', () => { clearTimeout(debounce); card.classList.add('loading'); debounce = setTimeout(() => load(1), 400); });
-$$('[data-filter]').forEach(s => s.addEventListener('change', () => load(1)));
-$('#resetBtn').addEventListener('click', () => {
-  searchEl.value = ''; $$('[data-filter]').forEach(s => s.value = ''); load(1);
-});
-$('#pager').addEventListener('click', e => {
-  const b = e.target.closest('[data-page]'); if (b && !b.disabled) load(+b.dataset.page);
-});
-markActiveFilters();
+        if (!response.ok) {
+            let message = result.message || 'Something went wrong.';
 
-/* ---------- modals ---------- */
-function openModal(el) { el.classList.add('open'); el.setAttribute('aria-hidden', 'false'); }
-function closeModal(el) { el.classList.remove('open'); el.setAttribute('aria-hidden', 'true'); }
-$$('.modal').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) closeModal(m); });
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $$('.modal.open').forEach(closeModal); });
+            if (result.errors) {
+                message = Object.values(result.errors).flat().join(' ');
+            }
 
-/* ---------- add / edit ---------- */
-const form = $('#qForm');
-function clearErrors() { $$('.field', form).forEach(f => f.classList.remove('bad')); }
+            throw new Error(message);
+        }
 
-$('#addBtn').addEventListener('click', () => {
-  form.reset(); clearErrors();
-  $('#qId').value = '';
-  $('#is_active').checked = true;
-  $('#formTitle').textContent = 'Add question';
-  $('#formIcon').className = 'bi bi-plus-circle';
-  openModal($('#formModal'));
-  setTimeout(() => $('#question_text').focus(), 50);
-});
+        return result;
+    }
 
-function openEdit(q) {
-  form.reset(); clearErrors();
-  $('#qId').value = q.id;
-  $('#question_text').value = q.question_text ?? '';
-  $('#type').value = q.type ?? '';
-  $('#frequency').value = q.frequency ?? '';
-  $('#variant').value = q.variant ?? '';
-  $('#order').value = q.order ?? '';
-  $('#is_active').checked = !!q.is_active;
-  $('#formTitle').textContent = 'Edit question';
-  $('#formIcon').className = 'bi bi-pencil-square';
-  openModal($('#formModal'));
-}
+    function notify(message, type = 'ok') {
+        const box = $('notice');
+        box.textContent = message;
+        box.className = 'notice show ' + (type === 'error' ? 'error' : 'ok');
 
-form.addEventListener('submit', async e => {
-  e.preventDefault(); clearErrors();
-  const id = $('#qId').value;
-  const btn = $('#saveBtn'), old = btn.innerHTML;
-  btn.disabled = true; btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin .7s linear infinite"></i> Saving';
-  const payload = {
-    question_text: $('#question_text').value.trim(),
-    type: $('#type').value.trim(),
-    frequency: $('#frequency').value.trim(),
-    variant: $('#variant').value.trim() || null,
-    order: $('#order').value === '' ? null : +$('#order').value,
-    is_active: $('#is_active').checked ? 1 : 0
-  };
-  try {
-    const data = await api(id ? `${BASE}/${id}` : BASE, id ? 'PUT' : 'POST', payload);
-    closeModal($('#formModal'));
-    toast(data.message);
-    load(currentPage);
-  } catch (err) {
-    if (err.status === 422 && err.errors) {
-      Object.entries(err.errors).forEach(([k, msgs]) => {
-        const f = $(`.field[data-field="${k}"]`, form);
-        if (f) { f.classList.add('bad'); $('.err', f).textContent = msgs[0]; }
-      });
-    } else toast(err.message, 'error');
-  } finally { btn.disabled = false; btn.innerHTML = old; }
-});
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-/* ---------- row actions ---------- */
-$('#tableBody').addEventListener('click', async e => {
-  const btn = e.target.closest('[data-action]'); if (!btn) return;
-  const row = btn.closest('tr');
-  const q = JSON.parse(row.dataset.question);
+    function closeModal(id) {
+        $(id).classList.remove('open');
+    }
 
-  if (btn.dataset.action === 'edit') return openEdit(q);
+    function openCreate() {
+        editingId = null;
+        $('questionForm').reset();
+        $('qActive').checked = true;
+        $('qVariant').value = 'null';
+        $('editorTitle').textContent = 'Create question';
+        $('saveQuestion').textContent = 'Save question';
+        $('editorModal').classList.add('open');
+    }
 
-  if (btn.dataset.action === 'toggle') {
-    btn.disabled = true;
-    try {
-      const data = await api(`${BASE}/${q.id}/toggle`, 'PATCH');
-      toast(data.message);
-      load(currentPage);
-    } catch (err) { toast(err.message, 'error'); btn.disabled = false; }
-    return;
-  }
+    function openBulk() {
+        $('bulkForm').reset();
+        $('bulkVariant').value = 'null';
+        $('bulkMode').value = 'append';
+        $('bulkActive').checked = true;
+        $('bulkModal').classList.add('open');
+    }
 
-  if (btn.dataset.action === 'delete') {
-    deleteId = q.id;
-    $('#delText').textContent = q.question_text;
-    openModal($('#delModal'));
-  }
-});
+    function editQuestion(id) {
+        const q = questions.find(item => Number(item.id) === Number(id));
 
-$('#confirmDel').addEventListener('click', async () => {
-  const btn = $('#confirmDel'), old = btn.innerHTML;
-  btn.disabled = true; btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin .7s linear infinite"></i> Removing';
-  try {
-    const data = await api(`${BASE}/${deleteId}`, 'DELETE');
-    closeModal($('#delModal'));
-    const row = $(`tr[data-id="${deleteId}"]`);
-    if (row) row.classList.add('removing');
-    toast(data.message);
-    setTimeout(() => load(currentPage), 400);
-  } catch (err) { toast(err.message, 'error'); }
-  finally { btn.disabled = false; btn.innerHTML = old; }
-});
+        if (!q) {
+            notify('Question not found. Refresh the list.', 'error');
+            return;
+        }
+
+        editingId = id;
+        $('qType').value = q.type;
+        $('qFrequency').value = q.frequency ?? '';
+        $('qVariant').value = q.variant || 'null';
+        $('qOrder').value = q.order ?? '';
+        $('qText').value = q.question_text;
+        $('qActive').checked = Boolean(q.is_active);
+
+        $('editorTitle').textContent = 'Edit question';
+        $('saveQuestion').textContent = 'Save changes';
+        $('editorModal').classList.add('open');
+    }
+
+    function renderQuestions() {
+        const list = $('questionList');
+
+        $('resultCount').textContent = `${questions.length} question(s)`;
+
+        if (!questions.length) {
+            list.innerHTML = `
+                <div class="empty">
+                    <strong>No matching questions</strong>
+                    Try changing the filters or create a new question.
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = questions.map((q, index) => `
+            <article class="question-card ${q.is_active ? '' : 'inactive'}"
+                     style="animation-delay:${Math.min(index * 20, 200)}ms">
+                <div class="question-top">
+                    <span class="number">#${escapeHtml(q.order)}</span>
+                    <span class="tag ${q.is_active ? 'green' : 'red'}">
+                        ${q.is_active ? 'ACTIVE' : 'HIDDEN'}
+                    </span>
+                </div>
+                <div class="question-text">${escapeHtml(q.question_text)}</div>
+                <div class="tags">
+                    <span class="tag orange">${escapeHtml(q.type)}</span>
+                    <span class="tag">Frequency ${escapeHtml(q.frequency ?? '—')}</span>
+                    <span class="tag">${escapeHtml(q.variant || 'null')}</span>
+                </div>
+                <div class="actions">
+                    <button class="button soft small" onclick="editQuestion(${Number(q.id)})">Edit</button>
+                    <button class="button ${q.is_active ? 'light' : 'success'} small"
+                        onclick="toggleQuestion(${Number(q.id)})">
+                        ${q.is_active ? 'Hide' : 'Activate'}
+                    </button>
+                    <button class="button danger small" onclick="deleteQuestion(${Number(q.id)})">Delete</button>
+                </div>
+            </article>
+        `).join('');
+    }
+
+    async function loadQuestions() {
+        const params = new URLSearchParams();
+
+        if ($('search').value.trim()) params.set('search', $('search').value.trim());
+        if ($('filterType').value) params.set('type', $('filterType').value);
+        if ($('filterFrequency').value) params.set('frequency', $('filterFrequency').value);
+        if ($('filterVariant').value) params.set('variant', $('filterVariant').value);
+        if ($('filterActive').value !== '') params.set('is_active', $('filterActive').value);
+
+        try {
+            const result = await api(`${baseUrl}?${params.toString()}`);
+
+            questions = result.questions;
+            $('totalStat').textContent = result.stats.total;
+            $('activeStat').textContent = result.stats.active;
+            $('hiddenStat').textContent = result.stats.hidden;
+
+            renderQuestions();
+        } catch (error) {
+            notify(error.message, 'error');
+        }
+    }
+
+    function scheduleFilter() {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(loadQuestions, 220);
+    }
+
+    function resetFilters() {
+        $('search').value = '';
+        $('filterType').value = '';
+        $('filterFrequency').value = '';
+        $('filterVariant').value = '';
+        $('filterActive').value = '';
+        loadQuestions();
+    }
+
+    function copyVisible() {
+        const text = questions.map(q => q.question_text).join('\n');
+
+        if (!text) {
+            notify('There are no questions to copy.', 'error');
+            return;
+        }
+
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+
+        try {
+            const copied = document.execCommand('copy');
+            notify(copied ? 'Visible questions copied.' : 'Copy was blocked by your browser.',
+                copied ? 'ok' : 'error');
+        } finally {
+            area.remove();
+        }
+    }
+
+    $('questionForm').addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const button = $('saveQuestion');
+        button.disabled = true;
+
+        const data = {
+            type: $('qType').value,
+            frequency: $('qFrequency').value || null,
+            variant: $('qVariant').value,
+            order: $('qOrder').value === '' ? null : Number($('qOrder').value),
+            question_text: $('qText').value.trim(),
+            is_active: $('qActive').checked
+        };
+
+        try {
+            const url = editingId ? `${baseUrl}/${editingId}` : baseUrl;
+            const method = editingId ? 'PUT' : 'POST';
+            const result = await api(url, method, data);
+
+            closeModal('editorModal');
+            notify(result.message);
+            await loadQuestions();
+        } catch (error) {
+            notify(error.message, 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    async function toggleQuestion(id) {
+        try {
+            const result = await api(`${baseUrl}/${id}/toggle`, 'PATCH');
+            notify(result.message);
+            await loadQuestions();
+        } catch (error) {
+            notify(error.message, 'error');
+        }
+    }
+
+    async function deleteQuestion(id) {
+        if (!confirm('Delete this question? This cannot be undone.')) return;
+
+        try {
+            const result = await api(`${baseUrl}/${id}`, 'DELETE');
+            notify(result.message);
+            await loadQuestions();
+        } catch (error) {
+            notify(error.message, 'error');
+        }
+    }
+
+    $('bulkForm').addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const mode = $('bulkMode').value;
+
+        if (mode === 'replace' &&
+            !confirm('Replace all questions in this exact group? This action cannot be undone.')) {
+            return;
+        }
+
+        const button = $('bulkSubmit');
+        button.disabled = true;
+
+        try {
+            const result = await api(`${baseUrl}/bulk`, 'POST', {
+                type: $('bulkType').value,
+                frequency: $('bulkFrequency').value || null,
+                variant: $('bulkVariant').value,
+                mode,
+                questions_text: $('bulkText').value,
+                is_active: $('bulkActive').checked
+            });
+
+            closeModal('bulkModal');
+            notify(result.message);
+            await loadQuestions();
+        } catch (error) {
+            notify(error.message, 'error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    ['filterType', 'filterFrequency', 'filterVariant', 'filterActive'].forEach(id => {
+        $(id).addEventListener('change', loadQuestions);
+    });
+
+    $('search').addEventListener('input', scheduleFilter);
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', event => {
+            if (event.target === modal) modal.classList.remove('open');
+        });
+    });
 </script>
 </body>
 </html>
