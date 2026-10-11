@@ -238,9 +238,9 @@ class PpmRecordsExport implements FromCollection, WithHeadings, WithMapping
 
     public function map($row): array
     {
-        $record = $row['record'];
-        $checklist = $row['checklist'];
-        $answer = $row['answer'];
+        $record = $row['record']?? null;
+        $checklist = $row['checklist']?? null;
+        $answer = $row['answer']?? null;
         $question = $answer?->question;
 
         return [
