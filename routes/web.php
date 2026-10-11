@@ -19,6 +19,7 @@ use App\Http\Controllers\EditRequestController;
 use App\Http\Controllers\AssetScanController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\PpmExportController;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
@@ -139,6 +140,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+    Route::get('/ppm-exports', [PpmExportController::class, 'index'])
+    ->name('admin.ppm-exports.index');
+    Route::get('/ppm-exports/csv', [PpmExportController::class, 'csv'])
+    ->name('admin.ppm-exports.csv');
+    Route::get('/ppm-exports/pdf', [PpmExportController::class, 'pdf'])
+    ->name('admin.ppm-exports.pdf');
+    Route::get('admin/ppm-tickets/{ppmRecord}/pdf', [PpmExportController::class, 'printTicket'])
+    ->name('admin.ppm-tickets.print');
     Schedule::command('ppm:import-folder')->everyMinute()->withoutOverlapping();
     Route::get('/admin/ppm-records/export/{format}', [AdminController::class, 'export'])
     ->name('ppm-records.export');
