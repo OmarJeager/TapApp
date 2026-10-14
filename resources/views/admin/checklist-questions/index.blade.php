@@ -478,15 +478,11 @@
 
             <div class="cq-field" id="filterVariantWrap">
                 <label for="filterVariant">Variant</label>
-                <select name="variant" id="filterVariant" class="cq-select">
-                    <option value="">All variants</option>
-                    <option value="normal" @selected(request('variant') === 'normal')>
-                        Normal
-                    </option>
-                    <option value="HV" @selected(request('variant') === 'HV')>
-                        HV
-                    </option>
-                </select>
+                <select class="control" id="filterVariant">
+    <option value="">All variants</option>
+    <option value="none">No variant</option>
+    <option value="HV">HV</option>
+</select>
             </div>
 
             <div class="cq-field">

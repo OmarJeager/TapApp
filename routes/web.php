@@ -180,6 +180,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::patch('/checklist-questions/{question}/toggle', [ChecklistQuestionController::class, 'toggle'])->name('admin.checklist-questions.toggle');
         Route::delete('/checklist-questions/{question}',       [ChecklistQuestionController::class, 'destroy'])->name('admin.checklist-questions.destroy');
         Route::post('/checklist-questions/bulk', [ChecklistQuestionController::class, 'bulk'])->name('admin.checklist-questions.bulk');
+        Route::get('/checklist-questions/create', [ChecklistQuestionController::class, 'create'])->name('admin.checklist-questions.create');
+        Route::post('/checklist-questions', [ChecklistQuestionController::class, 'store'])->name('admin.checklistquestions.store');
+        Route::get('/checklist-questions/createtype',              [ChecklistQuestionController::class, 'createEquipment'])->name('admin.checklist-questions.create.equipment');
+        Route::post('/checklist-questions/equipment',          [ChecklistQuestionController::class, 'storeEquipment'])->name('admin.checklist-questions.equipment.store');
 
         Route::get('/admin/ppm-weeks', [AdminController::class, 'weeks'])
         ->name('admin.ppm-weeks');
