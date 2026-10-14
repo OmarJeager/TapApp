@@ -15,6 +15,13 @@
             <span class="btn-arrow">→</span>
         </a>
 
+        <!-- PPM Exports -->
+        <a href="{{ route('admin.ppm-exports.index') }}" class="admin-btn">
+            <span class="btn-icon">📥</span>
+            <span class="btn-text">PPM Exports</span>
+            <span class="btn-arrow">→</span>
+        </a>
+
         <!-- View Details -->
         <a href="{{ route('admin.ppm-weeks') }}" class="admin-btn">
             <span class="btn-icon">🔍</span>

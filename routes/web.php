@@ -20,6 +20,7 @@ use App\Http\Controllers\AssetScanController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\PpmExportController;
+use App\Http\Controllers\DynamicChecklistController;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\PpmRecord;
 use Illuminate\Http\Request;
@@ -280,6 +281,14 @@ Route::post('/ppm-records/{ppmRecord}/tst-frequency-4-hv/edit-request', [TstFrea
 
     Route::get('/tickets/variants', [TicketController::class, 'variants'])
         ->name('tickets.variants');
+        Route::get('/ppm-records/{ppmRecord}/checklist', [DynamicChecklistController::class, 'create'])
+    ->name('ppm-checklists.dynamic.create');
+
+Route::post('/ppm-checklists/dynamic', [DynamicChecklistController::class, 'store'])
+    ->name('ppm-checklists.dynamic.store');
+
+Route::post('/ppm-records/{ppmRecord}/checklist/edit-request', [DynamicChecklistController::class, 'requestEdit'])
+    ->name('ppm-checklists.dynamic.edit-request');
 
 });
 
