@@ -174,32 +174,37 @@ class TstFrequencyFourController extends Controller
             ], 201);
         }
 
-        /* ---------- Next TST record, same frequency and same week ---------- */
-        $next = PpmRecord::where('week_due', $currentRecord->week_due)
-            ->where('frequency', $currentRecord->frequency)
-            ->where('asset_id', 'like', 'TST%')
-            ->where('id', '>', $currentRecord->id)
-            ->whereExists(function ($query) {
-                $query->selectRaw('1')
-                    ->from('ppm_checklists')
-                    ->join('ppm_checklist_questions', 'ppm_checklist_questions.ppm_checklist_id', '=', 'ppm_checklists.id')
-                    ->whereColumn('ppm_checklists.ppm_records_id', 'ppm_records.id')
-                    ->whereNull('ppm_checklist_questions.variant');
-            })
-            ->orderBy('id')
-            ->first();
+       /* ---------- Next TST HV record, same week ---------- */
+$next = PpmRecord::where('week_due', $currentRecord->week_due)
+    ->where('asset_id', 'like', 'TST%')
+    ->where('id', '>', $currentRecord->id)
+    // ❌ Exclude assets whose description contains "HV"
+    ->where(function ($q) {
+        $q->where('asset_description', 'not like', '%HV%')
+          ->orWhereNull('asset_description');
+    })
+    // only if active TST / freq 4 / HV questions exist in checklist_questions
+    ->whereExists(function ($q) {
+        $q->select(DB::raw(1))
+            ->from('checklist_questions')
+            ->where('type', 'TST')
+            ->where('frequency', 4)
+            ->where('variant', null)
+            ->where('is_active', true);
+    })
+    ->orderBy('id')
+    ->first();
 
-        if ($next) {
-            return redirect()
-                ->route('ppm-checklists.tst.frequency4', $next)
-                ->with('status', 'Checklist saved. Moving to the next TST.');
-        }
+if ($next) {
+    return redirect()
+        ->route('ppm-checklists.tst.frequency4', $next)
+        ->with('status', 'Checklist saved. Moving to the next TST HV.');
+}
 
         return redirect()
-            ->route('user.index')
-            ->with('status', 'All TST checklists for this week have been completed.');
+          ->route('user.index')
+        ->with('status', 'All TST checklists for this week have been completed.');
     }
-
     /**
      * POST /ppm-records/{ppmRecord}/tst-frequency-4/edit-request
      */
