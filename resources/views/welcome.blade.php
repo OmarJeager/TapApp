@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#070b14">
 
-    <title>TAP APP | Smart Maintenance</title>
+    <title>TAPCORE | Future-Ready Maintenance Intelligence</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -1495,6 +1495,142 @@
                 transform: none;
             }
         }
+
+        /* ============ TAPCORE FUTURE BRAND + GLASS IMPACT ============ */
+        .tapcore-brand {
+            gap: 12px;
+            perspective: 900px;
+            transform-style: preserve-3d;
+        }
+        .brand-emblem {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 53px;
+            height: 53px;
+            flex: 0 0 53px;
+            isolation: isolate;
+            transform-style: preserve-3d;
+            transition: transform .45s cubic-bezier(.2,.8,.2,1), filter .4s;
+        }
+        .brand-emblem::before {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            z-index: -1;
+            border-radius: 18px;
+            background: rgba(255,146,0,.2);
+            filter: blur(14px);
+            opacity: .7;
+            transition: transform .45s, opacity .35s;
+        }
+        .brand-mark {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            filter: drop-shadow(0 7px 12px rgba(255,122,0,.25));
+            transform-origin: center;
+            transition: transform .45s cubic-bezier(.2,.8,.2,1), filter .4s, opacity .25s;
+        }
+        .mark-shell {
+            stroke: rgba(255,255,255,.7);
+            stroke-width: 1.2;
+            vector-effect: non-scaling-stroke;
+        }
+        .brand-wordmark { display:flex; flex-direction:column; gap:3px; line-height:1; }
+        .brand-wordmark strong {
+            color:#f8fbff;
+            font-size:20px;
+            font-weight:950;
+            letter-spacing:1.5px;
+            text-shadow:0 0 24px rgba(255,146,0,.12);
+        }
+        .brand-wordmark strong span {
+            color:var(--orange);
+            background:linear-gradient(100deg,#ff8a00,#ffd18a,#ff8a00);
+            background-size:200% auto;
+            -webkit-background-clip:text;
+            background-clip:text;
+            -webkit-text-fill-color:transparent;
+            animation:brandShimmer 5s linear infinite;
+        }
+        .brand-wordmark small {
+            color:#8190a6;
+            font-size:7px;
+            font-weight:850;
+            letter-spacing:1.55px;
+        }
+        @keyframes brandShimmer { to { background-position:200% center; } }
+        .tapcore-brand:hover .brand-emblem {
+            transform: rotateY(18deg) rotateX(-12deg) translateY(-3px) scale(1.08);
+            filter: drop-shadow(0 12px 17px rgba(255,146,0,.24));
+        }
+        .tapcore-brand:hover .brand-emblem::before { opacity:1; transform:scale(1.35); }
+        .tapcore-brand:hover .brand-mark {
+            animation: glassImpact .72s cubic-bezier(.16,.8,.3,1) both;
+        }
+        @keyframes glassImpact {
+            0% { transform:scale(1) rotate(0); filter:brightness(1); }
+            18% { transform:scale(1.16) rotate(-5deg); filter:brightness(1.8); }
+            38% { transform:scale(.88) rotate(4deg); filter:brightness(1.35) blur(.3px); }
+            58% { transform:scale(1.06) rotate(-2deg); }
+            100% { transform:scale(1) rotate(0); filter:brightness(1); }
+        }
+        .logo-shard {
+            position:absolute;
+            z-index:3;
+            width:11px;
+            height:15px;
+            top:18px;
+            left:21px;
+            opacity:0;
+            pointer-events:none;
+            background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,146,0,.65) 55%,rgba(255,255,255,.1));
+            border:1px solid rgba(255,255,255,.7);
+            clip-path:polygon(50% 0,100% 35%,72% 100%,0 68%);
+            filter:drop-shadow(0 0 5px rgba(255,146,0,.6));
+        }
+        .tapcore-brand:hover .logo-shard { animation: shardBurst .72s ease-out both; }
+        .shard-one { --sx:-29px; --sy:-25px; --sr:-65deg; }
+        .shard-two { --sx:24px; --sy:-29px; --sr:75deg; animation-delay:.015s!important; }
+        .shard-three { --sx:31px; --sy:4px; --sr:110deg; animation-delay:.035s!important; }
+        .shard-four { --sx:18px; --sy:27px; --sr:145deg; animation-delay:.02s!important; }
+        .shard-five { --sx:-25px; --sy:23px; --sr:-100deg; animation-delay:.045s!important; }
+        .shard-six { --sx:-31px; --sy:-2px; --sr:-130deg; animation-delay:.01s!important; }
+        @keyframes shardBurst {
+            0%,12% { opacity:0; transform:translate3d(0,0,0) rotate(0) scale(.2); }
+            25% { opacity:.95; }
+            72% { opacity:.85; transform:translate3d(var(--sx),var(--sy),20px) rotate(var(--sr)) scale(1); }
+            100% { opacity:0; transform:translate3d(calc(var(--sx)*1.25),calc(var(--sy)*1.25),20px) rotate(calc(var(--sr)*1.4)) scale(.45); }
+        }
+        .tapcore-brand:focus-visible { outline:2px solid var(--orange); outline-offset:7px; border-radius:12px; }
+        .dashboard, .feature-card, .stats-card, .frequency-item, .category, .metric {
+            transform-style:preserve-3d;
+            backface-visibility:hidden;
+        }
+        .feature-card::after {
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            opacity:0;
+            background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.07) 45%,transparent 65%);
+            transform:translateX(-120%);
+            transition:opacity .25s;
+        }
+        .feature-card:hover::after { opacity:1; animation:glassSweep .8s ease; }
+        @keyframes glassSweep { to { transform:translateX(120%); } }
+        .section-tag, .eyebrow { backdrop-filter:blur(12px); }
+        .btn:focus-visible, .nav-link:focus-visible, .menu-toggle:focus-visible {
+            outline:2px solid var(--orange);
+            outline-offset:4px;
+        }
+        @media(max-width:560px) {
+            .brand-emblem { width:45px; height:45px; flex-basis:45px; }
+            .brand-wordmark strong { font-size:17px; }
+            .brand-wordmark small { font-size:6px; letter-spacing:1px; }
+        }
+
     </style>
 </head>
 
@@ -1510,8 +1646,31 @@
 
     <!-- NAVIGATION -->
     <header class="navbar" id="navbar">
-        <a href="{{ url('/') }}" class="brand" aria-label="TAP APP home">
-            <img src="{{ asset('pictures/logo.png') }}" alt="TAP APP logo">
+        <a href="{{ url('/') }}" class="brand tapcore-brand" aria-label="TAPCORE home">
+            <span class="brand-emblem" aria-hidden="true">
+                <svg class="brand-mark" viewBox="0 0 64 64" role="img">
+                    <defs>
+                        <linearGradient id="tapcoreGradient" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#ffe0a3"/>
+                            <stop offset="48%" stop-color="#ff9200"/>
+                            <stop offset="100%" stop-color="#ff5b16"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="mark-shell" d="M32 3 57 17.5v29L32 61 7 46.5v-29Z" fill="url(#tapcoreGradient)"/>
+                    <path d="M17 20h30v7H36v20h-8V27H17Z" fill="#101522"/>
+                    <path d="m40 34 8 5-8 8" fill="none" stroke="#fff1d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="logo-shard shard-one"></span>
+                <span class="logo-shard shard-two"></span>
+                <span class="logo-shard shard-three"></span>
+                <span class="logo-shard shard-four"></span>
+                <span class="logo-shard shard-five"></span>
+                <span class="logo-shard shard-six"></span>
+            </span>
+            <span class="brand-wordmark">
+                <strong>TAP<span>CORE</span></strong>
+                <small>MAINTENANCE INTELLIGENCE</small>
+            </span>
         </a>
 
         <button class="menu-toggle"
@@ -1578,7 +1737,7 @@
                 </h1>
 
                 <p class="hero-description">
-                    Take control of preventive maintenance with TAP APP.
+                    Take control of preventive maintenance with TAPCORE.
                     Manage PPM records, digital checklists, equipment
                     tracking and verification in one intelligent,
                     streamlined workspace.
@@ -2029,7 +2188,7 @@
                 <div class="cta-copy">
                     <h2>Ready to manage maintenance smarter?</h2>
                     <p>
-                        Open your TAP APP workspace and continue
+                        Open your TAPCORE workspace and continue
                         managing maintenance records and checklists.
                     </p>
                 </div>
@@ -2044,7 +2203,7 @@
                     @endif
                 @else
                     <a href="{{ route('login') }}" class="btn btn-primary">
-                        Enter TAP APP
+                        Enter TAPCORE
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 @endauth
@@ -2055,7 +2214,7 @@
     <!-- FOOTER -->
     <footer class="footer">
         <div>
-            <strong>TAP APP</strong>
+            <strong>TAPCORE</strong>
             &nbsp; / &nbsp; Maintenance Management
         </div>
 
@@ -2081,7 +2240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navMenu = document.getElementById('navMenu');
 
     // Mobile navigation
-    menuToggle.addEventListener('click', () => {
+    if (menuToggle && navMenu) menuToggle.addEventListener('click', () => {
         const isOpen = navMenu.classList.toggle('open');
 
         menuToggle.setAttribute('aria-expanded', String(isOpen));
@@ -2090,11 +2249,11 @@ document.addEventListener('DOMContentLoaded', () => {
             : '<i class="fa-solid fa-bars"></i>';
     });
 
-    navMenu.querySelectorAll('a').forEach(link => {
+    navMenu?.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             navMenu.classList.remove('open');
-            menuToggle.setAttribute('aria-expanded', 'false');
-            menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+            menuToggle?.setAttribute('aria-expanded', 'false');
+            if (menuToggle) menuToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
         });
     });
 
@@ -2253,6 +2412,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         visual.addEventListener('mouseleave', () => {
             dashboard.style.transform = '';
+        });
+    }
+
+    // Brand glass-impact interaction: replay the shatter effect on every hover.
+    const brand = document.querySelector('.tapcore-brand');
+    if (brand && !reduceMotion) {
+        brand.addEventListener('mouseenter', () => {
+            brand.classList.remove('brand-impact');
+            void brand.offsetWidth;
+            brand.classList.add('brand-impact');
+        });
+        brand.addEventListener('mouseleave', () => brand.classList.remove('brand-impact'));
+    }
+
+    // Subtle 3D pointer response for feature cards on desktop.
+    if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+        document.querySelectorAll('.feature-card, .stats-card').forEach(card => {
+            card.addEventListener('mousemove', event => {
+                if (window.innerWidth < 900) return;
+                const rect = card.getBoundingClientRect();
+                const x = (event.clientX - rect.left) / rect.width - .5;
+                const y = (event.clientY - rect.top) / rect.height - .5;
+                card.style.transform = `translateY(-6px) rotateX(${-y * 3}deg) rotateY(${x * 3}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
         });
     }
 

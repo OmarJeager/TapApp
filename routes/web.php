@@ -259,6 +259,10 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get(
     '/ppm-records/{ppmRecord}/tst-frequency4-hv',[TstFreauencyFourHvController::class, 'frequency4Hv'])
         ->name('ppm-checklists.tst.frequency4hv');
+    Route::post('/ppm-checklists/tst/frequency4/{record}/previous',[TstFrequencyFourController::class, 'previousTstFrequency4'])
+    ->name('ppm-checklists.tst.frequency4.previous');
+    Route::post('/ppm-records/{ppmRecord}/tst-frequency-4/auto-schedule',[TstFrequencyFourController::class, 'autoSchedule'])
+    ->name('ppm-checklists.tst4.auto-schedule');
         Route::post('/tst-frequency-4-hv', [TstFreauencyFourHvController::class, 'store'])
     ->name('ppm-checklists.tst4hv.store');
 

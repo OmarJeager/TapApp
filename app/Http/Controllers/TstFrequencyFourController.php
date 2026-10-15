@@ -205,6 +205,7 @@ if ($next) {
           ->route('user.index')
         ->with('status', 'All TST checklists for this week have been completed.');
     }
+
     /**
      * POST /ppm-records/{ppmRecord}/tst-frequency-4/edit-request
      */
