@@ -10,6 +10,60 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+
+    {{-- Database-backed overview fallbacks. Prefer controller-provided values when available. --}}
+    @php
+        $overviewUsers = isset($totalUsers) ? (int) $totalUsers : \App\Models\User::count();
+        $overviewUsersByRole = isset($usersByRole)
+            ? collect($usersByRole)
+            : \App\Models\User::query()
+                ->selectRaw('role, COUNT(*) as total')
+                ->groupBy('role')
+                ->orderBy('role')
+                ->get()
+                ->keyBy('role');
+
+        $overviewPpmRecords = isset($ppmTotalRecords)
+            ? (int) $ppmTotalRecords
+            : (isset($totalPpm) ? (int) $totalPpm : \App\Models\PpmRecord::count());
+
+        $overviewRecords = \App\Models\PpmRecord::query()
+            ->select(['id', 'asset_id', 'asset_description', 'brief_description'])
+            ->get();
+
+        $overviewUniqueAssets = isset($ppmUniqueAssets)
+            ? (int) $ppmUniqueAssets
+            : $overviewRecords->pluck('asset_id')->filter(fn ($id) => trim((string) $id) !== '')->unique()->count();
+
+        $overviewTypeStats = isset($ppmTypes)
+            ? collect($ppmTypes)
+            : $overviewRecords
+                ->groupBy(function ($record) {
+                    $type = strtolower(trim((string) ($record->asset_prefix ?? '')));
+                    return $type !== '' ? $type : 'generic';
+                })
+                ->map(function ($group, $type) {
+                    return (object) [
+                        'type' => $type,
+                        'label' => strtoupper($type),
+                        'records' => $group->count(),
+                        'asset_ids' => $group->pluck('asset_id')
+                            ->filter(fn ($id) => trim((string) $id) !== '')
+                            ->unique()->count(),
+                    ];
+                })
+                ->sortBy(function ($item) {
+                    $order = ['pnl', 'tst', 'khm', 'cons', 'generic'];
+                    $position = array_search(strtolower((string) $item->type), $order, true);
+                    return $position === false ? count($order) : $position;
+                })
+                ->values();
+
+        $overviewMissingAssetIds = $overviewRecords
+            ->filter(fn ($record) => trim((string) $record->asset_id) === '')
+            ->count();
+    @endphp
+
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
@@ -1631,6 +1685,142 @@
             .brand-wordmark small { font-size:6px; letter-spacing:1px; }
         }
 
+
+
+        /* ============ EXTENDED DATABASE INTELLIGENCE ============ */
+        .intel-overview {
+            position: relative;
+            margin-top: 30px;
+            padding: clamp(20px, 3vw, 32px);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(16,25,41,.88), rgba(8,13,24,.88));
+            box-shadow: 0 24px 70px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.04);
+        }
+        .intel-overview::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -130px;
+            top: -170px;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,146,0,.16), transparent 68%);
+        }
+        .intel-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+            position: relative;
+        }
+        .intel-heading h3 { font-size: clamp(1.2rem, 2vw, 1.65rem); margin: 8px 0; }
+        .intel-heading p { color: var(--muted); font-size: .9rem; max-width: 620px; line-height: 1.7; }
+        .intel-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(67,230,154,.24);
+            color: var(--green);
+            background: rgba(67,230,154,.07);
+            border-radius: 999px;
+            padding: 8px 11px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            white-space: nowrap;
+        }
+        .intel-live::before {
+            content: ""; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--green); box-shadow: 0 0 12px rgba(67,230,154,.8);
+            animation: intelPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes intelPulse { 50% { opacity: .45; transform: scale(.75); } }
+        .intel-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            position: relative;
+        }
+        .intel-kpi {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 17px;
+            border: 1px solid rgba(255,255,255,.075);
+            background: rgba(255,255,255,.025);
+            transition: transform .28s ease, border-color .28s ease, background .28s ease, box-shadow .28s ease;
+            transform-style: preserve-3d;
+        }
+        .intel-kpi:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            border-color: rgba(255,146,0,.38);
+            background: rgba(255,146,0,.055);
+            box-shadow: 0 16px 32px rgba(0,0,0,.2), 0 0 25px rgba(255,146,0,.055);
+        }
+        .intel-kpi-icon {
+            width: 46px; height: 46px; flex: 0 0 46px;
+            display: grid; place-items: center; border-radius: 14px;
+            color: var(--orange2); font-size: 1.12rem;
+            background: linear-gradient(145deg, rgba(255,146,0,.17), rgba(255,146,0,.04));
+            border: 1px solid rgba(255,146,0,.14);
+        }
+        .intel-kpi small { display: block; color: var(--muted); font-size: .74rem; margin-bottom: 5px; }
+        .intel-kpi strong { display: block; font-size: clamp(1.3rem, 2vw, 1.85rem); line-height: 1.15; letter-spacing: -.04em; }
+        .intel-section-label {
+            display: flex; align-items: center; gap: 9px;
+            margin: 28px 0 14px; font-size: .96rem; font-weight: 800;
+        }
+        .intel-section-label i { color: var(--orange); }
+        .intel-types {
+            display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;
+        }
+        .intel-type {
+            position: relative; overflow: hidden; padding: 17px;
+            border-radius: 16px; border: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.025);
+            transition: transform .25s ease, border-color .25s ease;
+        }
+        .intel-type:hover { transform: translateY(-4px); border-color: rgba(255,146,0,.38); }
+        .intel-type::after {
+            content: ""; position: absolute; height: 2px; left: 0; right: 100%; bottom: 0;
+            background: linear-gradient(90deg, var(--orange), var(--orange2)); transition: right .35s ease;
+        }
+        .intel-type:hover::after { right: 0; }
+        .intel-type-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .intel-type-top span { color: var(--muted); font-size: .74rem; font-weight: 800; letter-spacing: .07em; }
+        .intel-type-top i { color: var(--orange2); }
+        .intel-type-number { margin: 14px 0 5px; font-size: 1.75rem; font-weight: 850; letter-spacing: -.04em; }
+        .intel-type-meta { color: var(--muted); font-size: .75rem; line-height: 1.6; }
+        .intel-role-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .intel-role {
+            display: inline-flex; align-items: center; gap: 10px; padding: 10px 13px;
+            border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
+            background: rgba(255,255,255,.025); color: #dce4f1; font-size: .83rem;
+        }
+        .intel-role i { color: var(--orange2); }
+        .intel-role strong { color: #fff; }
+        .intel-footnote { margin-top: 16px; color: var(--muted); font-size: .75rem; line-height: 1.6; }
+        @media (max-width: 1050px) {
+            .intel-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .intel-types { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 620px) {
+            .intel-heading { align-items: flex-start; flex-direction: column; }
+            .intel-kpis { grid-template-columns: 1fr; }
+            .intel-types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .intel-kpi { padding: 15px; }
+        }
+        @media (max-width: 380px) { .intel-types { grid-template-columns: 1fr; } }
+        @media (prefers-reduced-motion: reduce) {
+            .intel-live::before { animation: none; }
+            .intel-kpi, .intel-type, .intel-type::after { transition: none; }
+        }
+
     </style>
 </head>
 
@@ -2181,6 +2371,80 @@
                 </div>
             </div>
         </section>
+
+
+
+        <!-- EXTENDED DATABASE INTELLIGENCE -->
+        <section class="intel-overview reveal" aria-labelledby="intelOverviewTitle">
+            <div class="intel-heading">
+                <div>
+                    <span class="section-tag"><i class="fa-solid fa-microchip"></i> MAINTENANCE INTELLIGENCE</span>
+                    <h3 id="intelOverviewTitle">Your system, <span class="gradient-text">in numbers.</span></h3>
+                    <p>Application-wide statistics across all PPM weeks, plus a live breakdown of equipment IDs and asset categories.</p>
+                </div>
+                <span class="intel-live">DATABASE OVERVIEW</span>
+            </div>
+
+            <div class="intel-kpis">
+                <article class="intel-kpi">
+                    <div class="intel-kpi-icon"><i class="fa-solid fa-users"></i></div>
+                    <div><small>Registered users</small><strong class="count-up" data-count="{{ $overviewUsers }}">0</strong></div>
+                </article>
+                <article class="intel-kpi">
+                    <div class="intel-kpi-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <div><small>All PPM records</small><strong class="count-up" data-count="{{ $overviewPpmRecords }}">0</strong></div>
+                </article>
+                <article class="intel-kpi">
+                    <div class="intel-kpi-icon"><i class="fa-solid fa-barcode"></i></div>
+                    <div><small>Unique asset IDs</small><strong class="count-up" data-count="{{ $overviewUniqueAssets }}">0</strong></div>
+                </article>
+                <article class="intel-kpi">
+                    <div class="intel-kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div><small>Records without asset ID</small><strong class="count-up" data-count="{{ $overviewMissingAssetIds }}">0</strong></div>
+                </article>
+            </div>
+
+            <div class="intel-section-label"><i class="fa-solid fa-industry"></i> Equipment inventory by type</div>
+            <div class="intel-types">
+                @forelse ($overviewTypeStats as $item)
+                    @php
+                        $typeKey = strtolower((string) ($item->type ?? 'generic'));
+                        $typeLabel = $item->label ?? strtoupper($typeKey);
+                        $typeRecords = (int) ($item->records ?? $item->total ?? 0);
+                        $typeAssets = (int) ($item->asset_ids ?? 0);
+                        $typeIcon = match ($typeKey) {
+                            'pnl' => 'fa-bolt',
+                            'tst' => 'fa-gauge-high',
+                            'khm' => 'fa-fan',
+                            'cons' => 'fa-boxes-stacked',
+                            default => 'fa-gears',
+                        };
+                    @endphp
+                    <article class="intel-type">
+                        <div class="intel-type-top"><span>{{ $typeLabel }}</span><i class="fa-solid {{ $typeIcon }}"></i></div>
+                        <div class="intel-type-number count-up" data-count="{{ $typeAssets }}">0</div>
+                        <div class="intel-type-meta">Unique asset IDs<br>{{ number_format($typeRecords) }} PPM records</div>
+                    </article>
+                @empty
+                    <p class="intel-footnote">No PPM asset types are available yet.</p>
+                @endforelse
+            </div>
+
+            <div class="intel-section-label"><i class="fa-solid fa-user-shield"></i> Users by role</div>
+            <div class="intel-role-list">
+                @forelse ($overviewUsersByRole as $role => $roleInfo)
+                    <div class="intel-role">
+                        <i class="fa-solid fa-user-check"></i>
+                        <span>{{ ucfirst((string) ($role ?: 'unassigned')) }}</span>
+                        <strong>{{ number_format((int) ($roleInfo->total ?? 0)) }}</strong>
+                    </div>
+                @empty
+                    <span class="intel-footnote">No registered users were found.</span>
+                @endforelse
+            </div>
+            <p class="intel-footnote"><i class="fa-solid fa-circle-info"></i> User and inventory totals include all weeks. Existing checklist completion figures above remain separate.</p>
+        </section>
+
 
         <!-- CTA -->
         <section class="cta-wrap">
