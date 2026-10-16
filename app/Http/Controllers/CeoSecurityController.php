@@ -7,14 +7,17 @@ use App\Models\UserActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CeoSecurityController extends Controller
 {
-    public function activity(Request $request)
+    /* ------------------------------------------------------------------
+     | Shared query builders
+     |------------------------------------------------------------------ */
+
+    private function activityQuery(Request $request)
     {
-        $query = UserActivityLog::with(['actor:id,name,email', 'target:id,name,email'])
+        return UserActivityLog::with(['actor:id,name,email', 'target:id,name,email'])
             ->when($request->filled('event'), fn ($q) => $q->where('event', $request->string('event')->toString()))
             ->when($request->filled('user'), function ($q) use ($request) {
                 $id = (int) $request->input('user');
@@ -22,16 +25,11 @@ class CeoSecurityController extends Controller
             })
             ->when($request->filled('from'), fn ($q) => $q->whereDate('created_at', '>=', $request->input('from')))
             ->when($request->filled('to'), fn ($q) => $q->whereDate('created_at', '<=', $request->input('to')));
-
-        $logs = $query->latest('created_at')->paginate(30)->withQueryString();
-        $events = UserActivityLog::query()->select('event')->distinct()->orderBy('event')->pluck('event');
-
-        return view('ceo.security.activity', compact('logs', 'events'));
     }
 
-    public function exportUsers(Request $request): StreamedResponse
+    private function userQuery(Request $request)
     {
-        $query = User::query()
+        return User::query()
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->input('search');
                 $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")
@@ -41,36 +39,48 @@ class CeoSecurityController extends Controller
             })
             ->when($request->filled('role'), fn ($q) => $q->where('role', $request->input('role')))
             ->when($request->input('status') === 'active', fn ($q) => $q->where('is_active', true))
-            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false));
+            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->input('status') === 'suspended', fn ($q) => $q->where('suspended_until', '>', now()));
+    }
 
-        UserActivityLog::record('users.csv_exported', 'CEO exported user directory.', null, [
-            'filters' => $request->only(['search', 'role', 'status']),
-        ]);
+    /* ------------------------------------------------------------------
+     | Pages
+     |------------------------------------------------------------------ */
 
-        $filename = 'tapapp-users-' . now()->format('Ymd-His') . '.csv';
+    public function activity(Request $request)
+    {
+        $logs = $this->activityQuery($request)
+            ->latest('created_at')
+            ->paginate(30)
+            ->withQueryString();
 
-        return response()->streamDownload(function () use ($query) {
-            $out = fopen('php://output', 'w');
-            fputcsv($out, ['ID', 'Name', 'Matricule', 'Email', 'Role', 'Active', 'Last IP', 'Last Login', 'Last Seen', 'Created At']);
+        $events = UserActivityLog::query()->select('event')->distinct()->orderBy('event')->pluck('event');
+        $todayCount = UserActivityLog::whereDate('created_at', today())->count();
 
-            $query->orderBy('id')->chunk(500, function ($users) use ($out) {
-                foreach ($users as $user) {
-                    fputcsv($out, [
-                        $user->id, $user->name, $user->matricule, $user->email, $user->role,
-                        $user->is_active ? 'Yes' : 'No', $user->last_ip_address,
-                        $user->last_login_at?->toDateTimeString(),
-                        $user->last_seen_at?->toDateTimeString(),
-                        $user->created_at?->toDateTimeString(),
-                    ]);
-                }
-            });
-            fclose($out);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return view('ceo.security.activity', compact('logs', 'events', 'todayCount'));
+    }
+
+    public function users(Request $request)
+    {
+        $users = $this->userQuery($request)
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
+
+        $roles = User::query()->select('role')->distinct()->orderBy('role')->pluck('role');
+
+        $stats = [
+            'total'     => User::count(),
+            'active'    => User::where('is_active', true)->count(),
+            'inactive'  => User::where('is_active', false)->count(),
+            'suspended' => User::where('suspended_until', '>', now())->count(),
+        ];
+
+        return view('ceo.security.users', compact('users', 'roles', 'stats'));
     }
 
     public function showUser(User $user)
     {
-        $user->loadCount([]);
         $activities = UserActivityLog::where(function ($q) use ($user) {
             $q->where('actor_user_id', $user->id)->orWhere('target_user_id', $user->id);
         })->latest('created_at')->limit(12)->get();
@@ -83,7 +93,7 @@ class CeoSecurityController extends Controller
                 'matricule' => $user->matricule,
                 'role' => $user->role,
                 'is_active' => (bool) $user->is_active,
-                'profile_picture_url' => $user->profile_picture ? asset('storage/'.$user->profile_picture) : null,
+                'profile_picture_url' => $user->profile_picture ? asset('storage/' . $user->profile_picture) : null,
                 'last_ip_address' => $user->last_ip_address,
                 'last_login_at' => $user->last_login_at?->toDateTimeString(),
                 'last_seen_at' => $user->last_seen_at?->toDateTimeString(),
@@ -98,6 +108,10 @@ class CeoSecurityController extends Controller
             ]),
         ]);
     }
+
+    /* ------------------------------------------------------------------
+     | Actions
+     |------------------------------------------------------------------ */
 
     public function forceLogout(User $user)
     {
@@ -127,7 +141,7 @@ class CeoSecurityController extends Controller
                 'session_version' => $user->session_version + 1,
             ])->save();
 
-            UserActivityLog::record('user.suspended', 'Account suspended until '.$validated['suspended_until'], $user->id);
+            UserActivityLog::record('user.suspended', 'Account suspended until ' . $validated['suspended_until'], $user->id);
         });
 
         return back()->with('success', "Suspension applied to {$user->name}.");
@@ -141,17 +155,52 @@ class CeoSecurityController extends Controller
         return back()->with('success', "Suspension removed for {$user->name}.");
     }
 
+    /* ------------------------------------------------------------------
+     | Exports
+     |------------------------------------------------------------------ */
+
+    public function exportUsers(Request $request): StreamedResponse
+    {
+        $query = $this->userQuery($request);
+
+        UserActivityLog::record('users.csv_exported', 'CEO exported user directory.', null, [
+            'filters' => $request->only(['search', 'role', 'status']),
+        ]);
+
+        $filename = 'tapapp-users-' . now()->format('Ymd-His') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['ID', 'Name', 'Matricule', 'Email', 'Role', 'Active', 'Last IP', 'Last Login', 'Last Seen', 'Created At']);
+
+            $query->orderBy('id')->chunk(500, function ($users) use ($out) {
+                foreach ($users as $user) {
+                    fputcsv($out, [
+                        $user->id, $user->name, $user->matricule, $user->email, $user->role,
+                        $user->is_active ? 'Yes' : 'No', $user->last_ip_address,
+                        $user->last_login_at?->toDateTimeString(),
+                        $user->last_seen_at?->toDateTimeString(),
+                        $user->created_at?->toDateTimeString(),
+                    ]);
+                }
+            });
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function exportActivity(Request $request): StreamedResponse
     {
-        $logs = UserActivityLog::with(['actor:id,name', 'target:id,name'])
-            ->when($request->filled('event'), fn ($q) => $q->where('event', $request->input('event')))
-            ->latest('created_at');
+        // chunk() needs a stable order, so use chunkById-friendly ordering on id
+        $logs = $this->activityQuery($request)->orderByDesc('id');
 
-        UserActivityLog::record('activity.csv_exported', 'CEO exported activity log.');
+        UserActivityLog::record('activity.csv_exported', 'CEO exported activity log.', null, [
+            'filters' => $request->only(['event', 'user', 'from', 'to']),
+        ]);
 
         return response()->streamDownload(function () use ($logs) {
             $out = fopen('php://output', 'w');
             fputcsv($out, ['Timestamp', 'Actor', 'Target', 'Event', 'Description', 'IP', 'Method', 'Route']);
+
             $logs->chunk(500, function ($items) use ($out) {
                 foreach ($items as $log) {
                     fputcsv($out, [

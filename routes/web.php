@@ -118,23 +118,20 @@ Route::middleware(['auth', 'role:ceo'])->group(function () {
     */
 
     Route::prefix('ceo/security')
-        ->name('ceo.security.')
-        ->controller(CeoSecurityController::class)
-        ->group(function () {
-            Route::get('/activity', 'activity')->name('activity');
-            Route::get('/users/export', 'exportUsers')->name('users.export');
-            Route::get('/activity/export', 'exportActivity')->name('activity.export');
-            Route::get('/users/{user}', 'showUser')->name('users.show');
+    ->name('ceo.security.')
+    ->controller(CeoSecurityController::class)
+    ->group(function () {
+        Route::get('/activity', 'activity')->name('activity');
 
-            Route::post('/users/{user}/force-logout', 'forceLogout')
-                ->name('users.force-logout');
-
-            Route::post('/users/{user}/suspend', 'suspend')
-                ->name('users.suspend');
-
-            Route::post('/users/{user}/unsuspend', 'unsuspend')
-                ->name('users.unsuspend');
-        });
+        Route::get('/users', 'users')->name('users');                 // <-- ADD THIS
+        Route::get('/users/export', 'exportUsers')->name('users.export');
+        Route::get('/activity/export', 'exportActivity')->name('activity.export');
+        Route::get('/users/{user}', 'showUser')->name('users.show');
+        Route::get('/users', 'users')->name('users'); 
+        Route::post('/users/{user}/force-logout', 'forceLogout')->name('users.force-logout');
+        Route::post('/users/{user}/suspend', 'suspend')->name('users.suspend');
+        Route::post('/users/{user}/unsuspend', 'unsuspend')->name('users.unsuspend');
+    });
 });
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin', function () {
