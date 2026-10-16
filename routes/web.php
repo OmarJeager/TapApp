@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingPageController::class, 'index'])
     ->name('welcome');
+Route::view('/terms', 'legal.terms')->name('terms');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::middleware('auth')->get('/dashboardall', [DashboardController::class, 'index'])->name('dashboardall');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('dashboard.stats');
 Route::get('/dashboard', function () {
@@ -60,10 +62,8 @@ Route::middleware(['auth', 'role:ceo'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/users', [
-            CeoController::class,
-            'index'
-        ])->name('ceo.users.index');
+        Route::get('/users', [CeoController::class,'index'])
+        ->name('ceo.users.index');
 
 
         Route::get('/users/create', [
@@ -214,14 +214,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         // Archive week
          Route::patch('/admin/ppm-weeks/{week}/archive',[AdminController::class, 'archiveWeek'])
          ->name('admin.ppm-weeks.archive');
-
-
         // Reopen week
-        Route::patch('/admin/ppm-weeks/{week}/reopen',[AdminController::class, 'reopenWeek'])
-        ->name('admin.ppm-weeks.reopen');
+    Route::patch('/admin/ppm-weeks/{week}/reopen',[AdminController::class, 'reopenWeek'])->name('admin.ppm-weeks.reopen');
     Route::get('/admin/edit-requests', [EditRequestController::class, 'index'])->name('admin.edit-requests.index');
-Route::post('/admin/edit-requests/{editRequest}/approve', [EditRequestController::class, 'approve'])->name('admin.edit-requests.approve');
-Route::post('/admin/edit-requests/{editRequest}/reject', [EditRequestController::class, 'reject'])->name('admin.edit-requests.reject');
+    Route::post('/admin/edit-requests/{editRequest}/approve', [EditRequestController::class, 'approve'])->name('admin.edit-requests.approve');
+    Route::post('/admin/edit-requests/{editRequest}/reject', [EditRequestController::class, 'reject'])->name('admin.edit-requests.reject');
 });
 
 Route::middleware(['auth', 'role:user'])->group(function () {
@@ -295,5 +292,6 @@ Route::post('/ppm-records/{ppmRecord}/checklist/edit-request', [DynamicChecklist
     ->name('ppm-checklists.dynamic.edit-request');
 
 });
+
 
 require __DIR__.'/auth.php';

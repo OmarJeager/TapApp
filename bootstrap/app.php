@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         'role' => RoleMiddleware::class,
     ]);
     })
+    ->withMiddleware(function (Middleware $middleware) {
+    $middleware->web(append: [
+        \App\Http\Middleware\UpdateLastSeen::class,
+    ]);
+})
      ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('ppm:import-folder')
             ->everyMinute()
@@ -28,3 +33,4 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
+

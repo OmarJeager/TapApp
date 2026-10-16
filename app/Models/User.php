@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 
-#[Fillable(['name', 'matricule', 'email', 'password', 'profile_picture', 'signature', 'role','is_active'])]
+#[Fillable(['name', 'matricule', 'email', 'password', 'profile_picture', 'signature', 'role','is_active','last_ip_address','last_login_at','last_seen_at',])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -29,6 +29,40 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'last_login_at'     => 'datetime',
+            'last_seen_at'      => 'datetime',
         ];
+    }
+    /**
+     * Consider a user "online" if seen within the last 5 minutes.
+     */
+    public const ONLINE_WINDOW_MINUTES = 5;
+
+    public function getIsOnlineAttribute(): bool
+    {
+        if (! $this->last_seen_at) {
+            return false;
+        }
+
+        return $this->last_seen_at
+            ->greaterThan(now()->subMinutes(self::ONLINE_WINDOW_MINUTES));
+    }
+
+    public function getLastSeenHumanAttribute(): string
+    {
+        if (! $this->last_seen_at) {
+            return __('Never connected');
+        }
+
+        return $this->last_seen_at->diffForHumans();
+    }
+
+    public function getLastLoginHumanAttribute(): string
+    {
+        if (! $this->last_login_at) {
+            return __('Never connected');
+        }
+
+        return $this->last_login_at->diffForHumans();
     }
 }

@@ -29,6 +29,19 @@ class AuthenticatedSessionController extends Controller
     $request->session()->regenerate();
 
     $user = $request->user();
+     /*
+        |--------------------------------------------------------------------------
+        | Connection tracking
+        |--------------------------------------------------------------------------
+        | Record the IP address, login time and "last seen" moment
+        | the first time the user signs in.
+        */
+
+        $user->forceFill([
+            'last_ip_address' => $request->ip(),
+            'last_login_at'   => now(),
+            'last_seen_at'    => now(),
+        ])->save();
 
     return match ($user->role) {
 

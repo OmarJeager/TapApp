@@ -22,6 +22,9 @@ return new class extends Migration
             $table->string('matricule')->unique();
             $table->string('signature')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->string('last_ip_address', 45)->nullable();
+            $table->timestamp('last_login_at')->nullable();
+            $table->timestamp('last_seen_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

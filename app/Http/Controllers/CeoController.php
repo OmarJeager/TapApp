@@ -45,7 +45,19 @@ class CeoController extends Controller
 
             });
         }
+        if ($request->filled('status')) {
 
+    $threshold = now()->subMinutes(\App\Models\User::ONLINE_WINDOW_MINUTES);
+
+    if ($request->status === 'online') {
+        $query->where('last_seen_at', '>=', $threshold);
+    } elseif ($request->status === 'offline') {
+        $query->where(function ($q) use ($threshold) {
+            $q->whereNull('last_seen_at')
+              ->orWhere('last_seen_at', '<', $threshold);
+        });
+    }
+}
         /*
         |--------------------------------------------------------------------------
         | Role filter
@@ -75,6 +87,12 @@ class CeoController extends Controller
         */
 
         $totalUsers = User::count();
+        $onlineThreshold = now()->subMinutes(\App\Models\User::ONLINE_WINDOW_MINUTES);
+
+        $onlineCount  = User::where('last_seen_at', '>=', $onlineThreshold)->count();
+        $offlineCount = $totalUsers - $onlineCount;
+
+        $neverConnectedCount = User::whereNull('last_login_at')->count();
 
         $ceoCount = User::where('role', 'ceo')->count();
 
@@ -93,7 +111,10 @@ class CeoController extends Controller
             'superadminCount',
             'adminCount',
             'qualityCount',
-            'userCount'
+            'userCount',
+            'onlineCount',
+            'offlineCount',
+            'neverConnectedCount',
         ));
     }
 
