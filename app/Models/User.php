@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 
-#[Fillable(['name', 'matricule', 'email', 'password', 'profile_picture', 'signature', 'role','is_active','last_ip_address','last_login_at','last_seen_at',])]
+#[Fillable(['name', 'matricule', 'email', 'password', 'profile_picture', 'signature', 'role','is_active','last_ip_address','last_login_at','last_seen_at','suspended_until','suspension_reason','failed_login_attempts','locked_until','session_version'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,6 +31,10 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'last_login_at'     => 'datetime',
             'last_seen_at'      => 'datetime',
+            'suspended_until' => 'datetime',
+            'locked_until' => 'datetime',
+            'failed_login_attempts' => 'integer',
+            'session_version' => 'integer',
         ];
     }
     /**

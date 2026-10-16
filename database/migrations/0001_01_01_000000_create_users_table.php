@@ -22,6 +22,12 @@ return new class extends Migration
             $table->string('matricule')->unique();
             $table->string('signature')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->text('suspension_reason')->nullable();
+            $table->timestamp('suspended_until')->nullable();
+            // Login security
+            $table->unsignedTinyInteger('failed_login_attempts')->default(0);
+            $table->timestamp('locked_until')->nullable();
+            $table->unsignedInteger('session_version')->default(1);
             $table->string('last_ip_address', 45)->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('last_seen_at')->nullable();
