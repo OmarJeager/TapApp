@@ -31,6 +31,9 @@ return new class extends Migration
             $table->string('last_ip_address', 45)->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('last_seen_at')->nullable();
+            $table->timestamp('last_activity_at')->nullable();
+            $table->string('current_session_id')->nullable();
+        
             $table->rememberToken();
             $table->timestamps();
         });

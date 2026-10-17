@@ -127,10 +127,13 @@ Route::middleware(['auth', 'role:ceo'])->group(function () {
         Route::get('/users/export', 'exportUsers')->name('users.export');
         Route::get('/activity/export', 'exportActivity')->name('activity.export');
         Route::get('/users/{user}', 'showUser')->name('users.show');
-        Route::get('/users', 'users')->name('users'); 
+        Route::get('/users', 'users')->name('users');
         Route::post('/users/{user}/force-logout', 'forceLogout')->name('users.force-logout');
         Route::post('/users/{user}/suspend', 'suspend')->name('users.suspend');
         Route::post('/users/{user}/unsuspend', 'unsuspend')->name('users.unsuspend');
+        Route::get('/users/presence',   'presence')->name('users.presence');
+        Route::get('/activity/feed',    'feed')->name('activity.feed');
+        Route::get('/activity/heatmap', 'heatmap')->name('activity.heatmap');
     });
 });
 Route::middleware(['auth', 'role:superadmin'])->group(function () {

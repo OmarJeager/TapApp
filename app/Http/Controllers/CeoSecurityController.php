@@ -11,41 +11,42 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CeoSecurityController extends Controller
 {
-    /* ------------------------------------------------------------------
-     | Shared query builders
-     |------------------------------------------------------------------ */
+    /* ==================================================================
+     |  QUERY BUILDERS
+     |================================================================== */
 
     private function activityQuery(Request $request)
     {
         return UserActivityLog::with(['actor:id,name,email', 'target:id,name,email'])
             ->when($request->filled('event'), fn ($q) => $q->where('event', $request->string('event')->toString()))
+            ->when($request->filled('severity'), fn ($q) => $q->where('severity', $request->input('severity')))
             ->when($request->filled('user'), function ($q) use ($request) {
                 $id = (int) $request->input('user');
                 $q->where(fn ($sub) => $sub->where('actor_user_id', $id)->orWhere('target_user_id', $id));
             })
             ->when($request->filled('from'), fn ($q) => $q->whereDate('created_at', '>=', $request->input('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('created_at', '<=', $request->input('to')));
+            ->when($request->filled('to'),   fn ($q) => $q->whereDate('created_at', '<=', $request->input('to')));
     }
 
     private function userQuery(Request $request)
     {
         return User::query()
             ->when($request->filled('search'), function ($q) use ($request) {
-                $search = $request->input('search');
-                $q->where(fn ($sub) => $sub->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('matricule', 'like', "%{$search}%")
-                    ->orWhere('role', 'like', "%{$search}%"));
+                $s = $request->input('search');
+                $q->where(fn ($sub) => $sub->where('name', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('matricule', 'like', "%{$s}%")
+                    ->orWhere('role', 'like', "%{$s}%"));
             })
-            ->when($request->filled('role'), fn ($q) => $q->where('role', $request->input('role')))
-            ->when($request->input('status') === 'active', fn ($q) => $q->where('is_active', true))
-            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->filled('role'),   fn ($q) => $q->where('role', $request->input('role')))
+            ->when($request->input('status') === 'active',    fn ($q) => $q->where('is_active', true))
+            ->when($request->input('status') === 'inactive',  fn ($q) => $q->where('is_active', false))
             ->when($request->input('status') === 'suspended', fn ($q) => $q->where('suspended_until', '>', now()));
     }
 
-    /* ------------------------------------------------------------------
-     | Pages
-     |------------------------------------------------------------------ */
+    /* ==================================================================
+     |  PAGES
+     |================================================================== */
 
     public function activity(Request $request)
     {
@@ -54,10 +55,16 @@ class CeoSecurityController extends Controller
             ->paginate(30)
             ->withQueryString();
 
-        $events = UserActivityLog::query()->select('event')->distinct()->orderBy('event')->pluck('event');
+        $events     = UserActivityLog::query()->select('event')->distinct()->orderBy('event')->pluck('event');
         $todayCount = UserActivityLog::whereDate('created_at', today())->count();
 
-        return view('ceo.security.activity', compact('logs', 'events', 'todayCount'));
+        $severityCounts = UserActivityLog::query()
+            ->selectRaw('severity, COUNT(*) as total')
+            ->groupBy('severity')
+            ->pluck('total', 'severity')
+            ->all();
+
+        return view('ceo.security.activity', compact('logs', 'events', 'todayCount', 'severityCounts'));
     }
 
     public function users(Request $request)
@@ -74,6 +81,7 @@ class CeoSecurityController extends Controller
             'active'    => User::where('is_active', true)->count(),
             'inactive'  => User::where('is_active', false)->count(),
             'suspended' => User::where('suspended_until', '>', now())->count(),
+            'online'    => User::where('last_seen_at', '>=', now()->subMinutes(5))->count(),
         ];
 
         return view('ceo.security.users', compact('users', 'roles', 'stats'));
@@ -97,6 +105,8 @@ class CeoSecurityController extends Controller
                 'last_ip_address' => $user->last_ip_address,
                 'last_login_at' => $user->last_login_at?->toDateTimeString(),
                 'last_seen_at' => $user->last_seen_at?->toDateTimeString(),
+                'last_activity_at' => $user->last_activity_at?->toDateTimeString(),
+                'session_version' => (int) $user->session_version,
                 'suspension_reason' => $user->suspension_reason,
                 'suspended_until' => $user->suspended_until?->toDateTimeString(),
             ],
@@ -104,14 +114,15 @@ class CeoSecurityController extends Controller
                 'event' => $log->event,
                 'description' => $log->description,
                 'ip_address' => $log->ip_address,
+                'severity' => $log->severity,
                 'created_at' => $log->created_at?->toDateTimeString(),
             ]),
         ]);
     }
 
-    /* ------------------------------------------------------------------
-     | Actions
-     |------------------------------------------------------------------ */
+    /* ==================================================================
+     |  ACTIONS
+     |================================================================== */
 
     public function forceLogout(User $user)
     {
@@ -131,14 +142,14 @@ class CeoSecurityController extends Controller
 
         $validated = $request->validate([
             'suspension_reason' => ['required', 'string', 'min:5', 'max:2000'],
-            'suspended_until' => ['required', 'date', 'after:now'],
+            'suspended_until'   => ['required', 'date', 'after:now'],
         ]);
 
         DB::transaction(function () use ($user, $validated) {
             $user->forceFill([
                 'suspension_reason' => $validated['suspension_reason'],
-                'suspended_until' => $validated['suspended_until'],
-                'session_version' => $user->session_version + 1,
+                'suspended_until'   => $validated['suspended_until'],
+                'session_version'   => $user->session_version + 1,
             ])->save();
 
             UserActivityLog::record('user.suspended', 'Account suspended until ' . $validated['suspended_until'], $user->id);
@@ -155,9 +166,99 @@ class CeoSecurityController extends Controller
         return back()->with('success', "Suspension removed for {$user->name}.");
     }
 
-    /* ------------------------------------------------------------------
-     | Exports
-     |------------------------------------------------------------------ */
+    /* ==================================================================
+     |  PRESENCE / LIVE
+     |================================================================== */
+
+    public function presence(): \Illuminate\Http\JsonResponse
+    {
+        $rows = User::query()
+            ->select(['id', 'name', 'last_seen_at', 'last_activity_at', 'is_active', 'suspended_until'])
+            ->where(function ($q) {
+                $q->where('last_seen_at', '>=', now()->subMinutes(30))
+                  ->orWhere('last_activity_at', '>=', now()->subMinutes(30));
+            })
+            ->orderByDesc('last_seen_at')
+            ->limit(40)
+            ->get()
+            ->mapWithKeys(function (User $u) {
+                $suspended = $u->suspended_until && $u->suspended_until->isFuture();
+                $status = $suspended ? 'suspended' : ($u->is_online ? 'online' : 'away');
+
+                return [$u->id => [
+                    'name'        => $u->name,
+                    'status'      => $status,
+                    'last_seen'   => $u->last_seen_at?->diffForHumans(),
+                    'last_action' => $u->last_activity_at?->diffForHumans(),
+                ]];
+            });
+
+        return response()->json($rows);
+    }
+
+    public function feed(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $afterId = (int) $request->input('after', 0);
+
+        $logs = $this->activityQuery($request)
+            ->where('id', '>', $afterId)
+            ->latest('id')
+            ->limit(20)
+            ->get()
+            ->map(fn (UserActivityLog $log) => [
+                'id'            => $log->id,
+                'event'         => $log->event,
+                'severity'      => $log->severity,
+                'description'   => $log->description,
+                'actor'         => $log->actor?->name ?? $log->actor_name ?? 'System',
+                'target'        => $log->target?->name ?? $log->target_name,
+                'target_id'     => $log->target_user_id,
+                'ip'            => $log->ip_address,
+                'method'        => $log->method,
+                'route'         => $log->route_name,
+                'created_at'    => $log->created_at?->format('d M Y · H:i:s'),
+                'created_human' => $log->created_at?->diffForHumans(),
+            ]);
+
+        return response()->json([
+            'latest_id' => $logs->max('id') ?? $afterId,
+            'logs'      => $logs,
+        ]);
+    }
+
+    public function heatmap(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $from = $request->input('from', now()->subDays(30)->toDateString());
+        $to   = $request->input('to',   now()->toDateString());
+
+        $driver = DB::connection()->getDriverName();
+
+        $dowExpr  = $driver === 'pgsql' ? 'EXTRACT(DOW FROM created_at) + 1' : 'DAYOFWEEK(created_at)';
+        $hourExpr = $driver === 'pgsql' ? 'EXTRACT(HOUR FROM created_at)'    : 'HOUR(created_at)';
+
+        $rows = UserActivityLog::query()
+            ->selectRaw("{$dowExpr} as dow, {$hourExpr} as hour, COUNT(*) as total")
+            ->whereBetween('created_at', [$from.' 00:00:00', $to.' 23:59:59'])
+            ->groupBy('dow', 'hour')
+            ->get();
+
+        $matrix = collect(range(1, 7))->mapWithKeys(fn ($d) => [$d => array_fill(0, 24, 0)])->all();
+
+        foreach ($rows as $r) {
+            $matrix[(int) $r->dow][(int) $r->hour] = (int) $r->total;
+        }
+
+        return response()->json([
+            'from'   => $from,
+            'to'     => $to,
+            'matrix' => $matrix,
+            'max'    => max(array_map('max', $matrix)) ?: 1,
+        ]);
+    }
+
+    /* ==================================================================
+     |  EXPORTS
+     |================================================================== */
 
     public function exportUsers(Request $request): StreamedResponse
     {
@@ -190,21 +291,21 @@ class CeoSecurityController extends Controller
 
     public function exportActivity(Request $request): StreamedResponse
     {
-        // chunk() needs a stable order, so use chunkById-friendly ordering on id
         $logs = $this->activityQuery($request)->orderByDesc('id');
 
         UserActivityLog::record('activity.csv_exported', 'CEO exported activity log.', null, [
-            'filters' => $request->only(['event', 'user', 'from', 'to']),
+            'filters' => $request->only(['event', 'user', 'from', 'to', 'severity']),
         ]);
 
         return response()->streamDownload(function () use ($logs) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Timestamp', 'Actor', 'Target', 'Event', 'Description', 'IP', 'Method', 'Route']);
+            fputcsv($out, ['Timestamp', 'Severity', 'Actor', 'Target', 'Event', 'Description', 'IP', 'Method', 'Route']);
 
             $logs->chunk(500, function ($items) use ($out) {
                 foreach ($items as $log) {
                     fputcsv($out, [
                         $log->created_at?->toDateTimeString(),
+                        $log->severity,
                         $log->actor?->name,
                         $log->target?->name,
                         $log->event,
