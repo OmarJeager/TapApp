@@ -1,4 +1,4 @@
-
+   @include('partials.space-bg')
 <!DOCTYPE html>
 <html lang="en">
 <head>
