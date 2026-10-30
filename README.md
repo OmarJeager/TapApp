@@ -1,59 +1,118 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## 🚀 Deployment on XAMPP Server (Port 8000)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is configured to run on an Apache server (XAMPP) using **port 8000**, without needing `php artisan serve`.
 
-## About Laravel
+### Server Info
+| Item | Value |
+|------|-------|
+| Server IP | `192.188.158.18` |
+| Port | `8000` |
+| Access URL | `http://192.188.158.18:8000` |
+| Stack | XAMPP (Apache + MySQL + PHP) |
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+### 1. Clone / Copy Project to htdocs
+Place the project inside the XAMPP `htdocs` folder:
+```
+C:\xampp\htdocs\your-laravel-app
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependencies & Setup Laravel
+Run these commands in the project root (only needed once on server):
 
-## Contributing
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Edit `.env` and configure your database and app URL:
+```env
+APP_URL=http://192.188.158.18:8000
 
-## Code of Conduct
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Then run migrations:
+```bash
+php artisan migrate --seed
+```
 
-## Security Vulnerabilities
+### 3. Configure Apache to Listen on Port 8000
+Edit `C:\xampp\apache\conf\httpd.conf` and add below the existing `Listen 80` line:
+```apache
+Listen 8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+In the same file, make sure these lines are **uncommented** (remove `#`):
+```apache
+LoadModule rewrite_module modules/mod_rewrite.so
+Include conf/extra/httpd-vhosts.conf
+```
 
-## License
+### 4. Add Virtual Host
+Edit `C:\xampp\apache\conf\extra\httpd-vhosts.conf` and append:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# TapApp" 
+```apache
+<VirtualHost *:8000>
+    DocumentRoot "C:/xampp/htdocs/your-laravel-app/public"
+    ServerName 192.188.158.18
+
+    <Directory "C:/xampp/htdocs/your-laravel-app/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+> ⚠️ **Important:** `DocumentRoot` must point to the **`/public`** folder, not the project root.
+
+### 5. Allow Port 8000 in Windows Firewall
+On the server machine:
+1. Open **Windows Defender Firewall** → **Advanced settings** → **Inbound Rules** → **New Rule**
+2. Choose **Port** → enter `8000` → **Allow the connection**
+3. Name it e.g. `Laravel App 8000`
+
+### 6. Restart Apache
+Open XAMPP Control Panel → **Stop** then **Start** Apache.
+
+### 7. Access the App
+From any machine on the network:
+```
+http://192.188.158.18:8000
+```
+
+---
+
+### 🛠 Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| **403 Forbidden** | Ensure `AllowOverride All` and `Require all granted` are set in the `<Directory>` block. Use forward slashes `/` in paths. |
+| **404 on all routes except home** | Enable `mod_rewrite` in `httpd.conf` (remove the `#`). |
+| **Port already in use** | Change `Listen 8000` to another port (e.g., `8080`) and update vhost + `APP_URL`. |
+| **Cannot access from other PC** | Check Windows Firewall rule for port 8000 is enabled. Verify both machines are on the same network. |
+| **Assets/CSS not loading** | Make sure `APP_URL` in `.env` is `http://192.188.158.18:8000` and run `php artisan config:clear`. |
+
+---
+
+### ⚙️ Post-Deployment Optimization (Optional, for production)
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
+```
+
+To revert during development:
+```bash
+php artisan optimize:clear
+```
