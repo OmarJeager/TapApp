@@ -1,0 +1,44 @@
+1. Place Your Project in XAMPP
+Copy your Laravel project folder to the XAMPP htdocs directory. For this guide, let's assume the path is:
+C:\xampp\htdocs\your-laravel-app
+
+2. Configure Apache to Listen on Port 8000
+Open the main Apache configuration file:
+C:\xampp\apache\conf\httpd.conf
+
+Search for Listen 80 and add a new line right below it to make Apache listen on port 8000 
+Listen 8000
+
+
+
+3. Enable Virtual Hosts and Rewrite Module
+In the same httpd.conf file, ensure these two lines are not commented out (remove the # at the beginning if present) :
+
+apache
+LoadModule rewrite_module modules/mod_rewrite.so
+Include conf/extra/httpd-vhosts.conf
+
+
+
+4. Create the Virtual Host Configuration
+Open the virtual hosts file:
+C:\xampp\apache\conf\extra\httpd-vhosts.conf
+
+Add the following configuration at the bottom. Crucially, the DocumentRoot must point to the public subfolder, not the project root :
+<VirtualHost *:8000>
+    DocumentRoot "C:/xampp/htdocs/your-laravel-app/public"
+    ServerName 192.188.158.18
+    
+    <Directory "C:/xampp/htdocs/your-laravel-app/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+
+ Configure Laravel .env File
+Open your Laravel project's .env file and update the APP_URL to match your access address so that assets and routes generate correctly :
+
+env
+APP_URL=http://192.188.158.18:8000
