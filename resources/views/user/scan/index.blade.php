@@ -20,6 +20,22 @@
     }
     @keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
 
+    .scan-back {
+        display: inline-flex; align-items: center; gap: 8px;
+        align-self: flex-start; margin: -12px auto 24px 0; padding: 9px 14px;
+        border: 1px solid #f3d4b5; border-radius: 10px;
+        background: #fff8f1; color: #c96512; text-decoration: none;
+        font-size: 14px; font-weight: 700;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+        animation: backIn .55s .12s ease both;
+    }
+    .scan-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
+    .scan-back:hover { background: #fff0df; box-shadow: 0 5px 14px rgba(217,118,23,.16); transform: translateX(-2px); }
+    .scan-back:hover svg { transform: translateX(-3px); }
+    .scan-back:active { transform: scale(.97); }
+    .scan-back:focus-visible { outline: 3px solid rgba(242,140,40,.35); outline-offset: 3px; }
+    @keyframes backIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
     /* ---------- Hero icon with pulsing rings ---------- */
     .scan-hero { position: relative; width: 110px; height: 110px; margin: 0 auto 18px; }
     .scan-hero .ring {
@@ -159,6 +175,11 @@
 
 <div class="scan-page">
     <div class="scan-card state-idle" id="scanCard">
+
+        <a href="{{ route('user.dashboard') }}" class="scan-back" aria-label="Back to dashboard">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Dashboard</span>
+        </a>
 
         <div class="scan-hero">
             <span class="ring"></span><span class="ring"></span><span class="ring"></span>
